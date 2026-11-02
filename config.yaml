@@ -1,0 +1,61 @@
+claude:
+  provider: claude_code
+  code_model: opus
+  code_fallback_model: sonnet
+  model: claude-opus-5-5
+  effort: xhigh
+  use_fallbacks: true
+  web_search: true
+  research_depth: quick
+script:
+  target_words_min: 1550
+  target_words_max: 1650
+  wpm_estimate: 180
+beats:
+  min_words: 2
+  max_words: 13
+voice:
+  voice_id: ZoiZ8fuDWInAcwPXaVeq
+  voice_name: Josh
+  model_id: eleven_v4
+  output_format: mp3_44100_128
+  chunk_chars: 4000
+  stability: 0.5
+  similarity_boost: 0.9
+  style: 0
+  trim_pauses: true
+  max_pause_s: 0.45
+prompts:
+  batch_size: 24
+shots:
+  cut_lead_s: 0.08
+  min_shot_s: 0.5
+  tail_s: 0.6
+video:
+  width: 1920
+  height: 1080
+  fps: 30
+  crf: 18
+  background: '#F7F4EC'
+publish:
+  general_tags:
+  - animation
+  - history
+  - education
+  - stick figure animation
+  - history explained
+  - documentary
+  - true story
+shorts:
+  channel_name: NextDoorHistorian
+  max_seconds: 59
+  width: 1080
+  height: 1920
+  image_aspect: 1.5
+  margin: 24
+  text_color: '#1A1A1A'
+  text_size: 46
+social:
+  meta_graph_version: v24.0
+  youtube_privacy: public
+  tiktok_privacy: PUBLIC_TO_EVERYONE
