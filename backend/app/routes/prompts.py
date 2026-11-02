@@ -62,19 +62,24 @@ def generate(project_id: int, body: GenBody) -> dict[str, Any]:
             guide = db.get_style_guide(project_id)
         todo = beats
         written: dict[int, dict[str, str]] = {}
+        known_cast: dict[int, list[dict[str, str]]] = {}
         if body.only_missing:
             existing = db.list_prompts(project_id)
             have = {p["beat_id"] for p in existing}
             todo = [b for b in beats if b["id"] not in have]
             written = {p["idx"]: {"scene": p["scene"], "label": p["label"]} for p in existing}
+            known_cast = {p["idx"]: p["characters"] for p in existing if p["characters"] is not None}
         if not body.only_missing:
             db.clear_batches_done(project_id)  # new prompts mean the Flow batches have to be made again
         if todo:
-            scenes = prompts_mod.write_scenes(c, script, guide, todo, progress=lambda m, f: progress(m, 0.05 + 0.9 * f),
-                                              written=written, opening=_opening(project_id, beats))
+            progress("Deciding who is in each image", 0.04)
+            cast = prompts_mod.cast_beats(c, script, guide, todo, known=known_cast,
+                                          progress=lambda m, f: progress(m, 0.04 + 0.16 * f))
+            scenes = prompts_mod.write_scenes(c, script, guide, todo, progress=lambda m, f: progress(m, 0.2 + 0.75 * f),
+                                              written=written, opening=_opening(project_id, beats), cast=cast)
             by_idx = {b["idx"]: b for b in todo}
             db.upsert_prompts(project_id, [
-                {"beat_id": by_idx[i]["id"], "batch_no": prompts_mod.batch_of(i, batch), **s}
+                {"beat_id": by_idx[i]["id"], "batch_no": prompts_mod.batch_of(i, batch), **s, "characters": cast[i]}
                 for i, s in scenes.items() if i in by_idx
             ])
         files = _export(project_id)
@@ -184,11 +189,18 @@ def regenerate(project_id: int, beat_id: int, body: RegenBody) -> dict[str, Any]
     guide = db.get_style_guide(project_id)
     if not beat or not guide:
         raise HTTPException(400, "Generate prompts first")
-    written = {p["idx"]: {"scene": p["scene"], "label": p["label"]} for p in db.list_prompts(project_id)}
-    res = prompts_mod.regenerate_one(claude(), script, guide, beats, beat["idx"], body.note, written,
-                                     beat["idx"] in _opening(project_id, beats))
+    existing = db.list_prompts(project_id)
+    written = {p["idx"]: {"scene": p["scene"], "label": p["label"]} for p in existing}
+    c = claude()
+    cast = next((p["characters"] for p in existing if p["beat_id"] == beat_id), None)
+    if cast is None:  # written before casting existed: cast this image now, with its neighbours for context
+        near = [b for b in beats if abs(b["idx"] - beat["idx"]) <= 3]
+        cast = prompts_mod.cast_beats(c, script, guide, near)[beat["idx"]]
+    res = prompts_mod.regenerate_one(c, script, guide, beats, beat["idx"], body.note, written,
+                                     beat["idx"] in _opening(project_id, beats), cast)
     batch = load_config()["prompts"]["batch_size"]
-    db.upsert_prompts(project_id, [{"beat_id": beat_id, "batch_no": prompts_mod.batch_of(beat["idx"], batch), **res}])
+    db.upsert_prompts(project_id, [{"beat_id": beat_id, "batch_no": prompts_mod.batch_of(beat["idx"], batch), **res,
+                                    "characters": cast}])
     _export(project_id)
     return {**res, "prompt": prompts_mod.prompt_text(guide["style_prefix"], {**res, "idx": beat["idx"]}, batch)}
 

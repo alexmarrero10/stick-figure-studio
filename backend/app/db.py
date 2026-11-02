@@ -328,10 +328,13 @@ def get_style_guide(project_id: int) -> dict[str, Any] | None:
 def upsert_prompts(project_id: int, prompts: list[dict[str, Any]], edited: bool = False) -> None:
     with tx() as conn:
         conn.executemany(
-            "INSERT INTO image_prompts (beat_id, project_id, batch_no, scene, label, edited) VALUES (?, ?, ?, ?, ?, ?) "
+            "INSERT INTO image_prompts (beat_id, project_id, batch_no, scene, label, edited, characters) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?) "
             "ON CONFLICT(beat_id) DO UPDATE SET batch_no = excluded.batch_no, scene = excluded.scene, "
-            "label = excluded.label, edited = excluded.edited",
-            [(p["beat_id"], project_id, p["batch_no"], p["scene"], p.get("label", ""), int(edited)) for p in prompts],
+            "label = excluded.label, edited = excluded.edited, "
+            "characters = COALESCE(excluded.characters, image_prompts.characters)",  # keep the cast unless given
+            [(p["beat_id"], project_id, p["batch_no"], p["scene"], p.get("label", ""), int(edited),
+              json.dumps(p["characters"]) if p.get("characters") is not None else None) for p in prompts],
         )
         touch_project(conn, project_id)
 
@@ -359,11 +362,14 @@ def clear_batches_done(project_id: int) -> None:
 
 def list_prompts(project_id: int) -> list[dict[str, Any]]:
     with tx() as conn:
-        return _rows(conn.execute(
+        rows = _rows(conn.execute(
             "SELECT p.*, b.idx, b.text AS beat_text, b.word_start, b.word_end FROM image_prompts p "
             "JOIN beats b ON b.id = p.beat_id WHERE p.project_id = ? ORDER BY b.idx",
             (project_id,),
         ).fetchall())
+    for r in rows:
+        r["characters"] = json.loads(r["characters"]) if r["characters"] is not None else None
+    return rows
 
 
 # --- images -----------------------------------------------------------------

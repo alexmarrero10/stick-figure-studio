@@ -3,7 +3,7 @@ claude:
   code_model: opus
   code_fallback_model: sonnet
   model: claude-opus-5-5
-  effort: xhigh
+  effort: high
   use_fallbacks: true
   web_search: true
   research_depth: quick

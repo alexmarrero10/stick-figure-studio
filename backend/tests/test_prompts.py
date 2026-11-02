@@ -35,3 +35,59 @@ def test_characters_have_full_looks_and_story_variants():
     assert "    in hiding, 2003: stick figure, stocky, long scruffy gray-black beard, no hat" in bible
     assert "- Old: stick figure with a red scarf" in bible
     assert "variants" in prompts.STYLE_SYSTEM and 'no "now with a beard"' in prompts.SCENE_SYSTEM
+
+
+SADDAM = {"characters": [
+    {"name": "Saddam Hussein", "look": "stick figure, stocky, thick black mustache, black beret",
+     "variants": [{"when": "in hiding, December 2003", "look": "stick figure, stocky, long scruffy gray-black beard, no hat"}]},
+    {"name": "American soldiers", "look": "stick figure, sandy khaki helmet, black rifle", "variants": []},
+], "props": [], "locations": [], "setting_notes": ""}
+
+
+def test_cast_is_matched_to_the_guide_and_its_variants():
+    cast = prompts.resolve_cast(SADDAM, [{"name": "saddam", "variant": "In hiding, December 2003"},
+                                         {"name": "Saddam Hussein", "variant": ""},  # duplicate, dropped
+                                         {"name": "A random farmer", "variant": ""},  # not in the guide
+                                         {"name": "American soldiers", "variant": "made up"}])
+    assert cast == [{"name": "Saddam Hussein", "variant": "in hiding, December 2003"},
+                    {"name": "American soldiers", "variant": ""}]
+    looks = prompts.cast_looks(SADDAM, cast)
+    assert looks[0] == ("Saddam Hussein", "stick figure, stocky, long scruffy gray-black beard, no hat")
+
+
+class CastFake:
+    """Casts Saddam (in hiding) into every beat; the first scenes leave his look out ("a dusty figure")."""
+
+    def __init__(self, fix_on_retry=True):
+        self.fix_on_retry = fix_on_retry
+        self.asks: list[str] = []
+
+    def json(self, system, messages, schema, max_tokens=32000, effort=None):
+        ask = messages[-1]["content"]
+        self.asks.append(ask)
+        if "beats" in schema["properties"]:
+            idxs = [int(l.split(":")[0]) for l in ask.split("BEATS TO CAST:")[1].strip().splitlines()]
+            return {"beats": [{"idx": i, "cast": [{"name": "Saddam Hussein", "variant": "in hiding, December 2003"}]}
+                              for i in idxs]}
+        retry = len([a for a in self.asks if "BEATS TO ILLUSTRATE" in a]) > 1
+        look = "stick figure, stocky, long scruffy gray-black beard, no hat"
+        text = f"Soldiers stare down at {look}." if retry and self.fix_on_retry else "Soldiers stare down at a dusty figure."
+        return {"scenes": [{"idx": 0, "label": "Dusty figure", "scene": text}]}
+
+
+def test_scene_that_leaves_out_a_characters_look_is_rewritten():
+    fake = CastFake()
+    beats = [{"idx": 0, "text": "According to soldiers who were there,"}]
+    cast = prompts.cast_beats(fake, "script", SADDAM, beats)
+    out = prompts.write_scenes(fake, "script", SADDAM, beats, cast=cast)
+    assert "in this image (copy each look, not the name): Saddam Hussein = stick figure, stocky, long scruffy gray-black beard, no hat" in fake.asks[1]
+    assert "left out Saddam Hussein" in fake.asks[2]
+    assert out[0]["scene"] == "Soldiers stare down at stick figure, stocky, long scruffy gray-black beard, no hat."
+
+
+def test_look_is_added_when_claude_keeps_leaving_it_out():
+    fake = CastFake(fix_on_retry=False)
+    beats = [{"idx": 0, "text": "According to soldiers who were there,"}]
+    out = prompts.write_scenes(fake, "script", SADDAM, beats, cast=prompts.cast_beats(fake, "script", SADDAM, beats))
+    assert out[0]["scene"] == ("Soldiers stare down at a dusty figure. Characters in this image: "
+                               "stick figure, stocky, long scruffy gray-black beard, no hat.")

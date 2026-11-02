@@ -76,10 +76,13 @@ Every image is generated on its own, with no memory of the others, so the words 
 that keeps the video consistent. For each beat, write a scene description (40-150 words) that:
 - Shows literally and clearly what the narration says at that moment, or a simple visual metaphor \
 if it is abstract (e.g. a giant clock looming over a tiny figure for "time was running out").
-- Describes every character in the picture with their full look text from the CHARACTERS list, \
-copied word for word, never by name alone. When the story is at a point covered by one of their \
-variants, use that variant's look instead. Never add, drop or change details on your own (no \
-"now with a beard"): if the look changes, it is because a variant says so.
+- Each beat says who is drawn in it ("in this image:"), with the exact look for that point in the \
+story. Describe every one of them with that look text, copied word for word, and never refer to \
+them vaguely ("a dusty figure", "a man", "the prisoner") instead. Never write a character's name in \
+the scene (the image model may refuse real people or try to draw a real likeness): the look text \
+alone tells the images who is who. Do not draw other characters from \
+the CHARACTERS list in that image; unnamed extras are fine. Never add, drop or change details of a \
+look on your own (no "now with a beard"): if a look changes, it is because a variant says so.
 - Whenever a RECURRING OBJECT or RECURRING PLACE from the lists below appears, describe it with its \
 exact look text, copied word for word. Never paraphrase, shorten or recolor it, and never invent a \
 different look for something on the lists.
@@ -147,6 +150,109 @@ def visual_bible(guide: dict[str, Any]) -> str:
             f"{looks(guide.get('locations') or [])}\n\nWORLD\n{guide.get('setting_notes', '')}")
 
 
+CAST_SYSTEM = """You cast the images of a narrated stick-figure video. Each beat of narration becomes \
+one still image. For every beat, decide which of the CHARACTERS below are drawn in that image, so \
+each of them can be described the same way in every image they are in.
+- Work out who the picture shows at that moment even when the narration does not name them: follow \
+"he", "she", "they", "the man", "a tired figure" back to the character they mean, and include who is \
+physically there (the soldiers pulling someone out AND the person being pulled out).
+- Beats that continue the same moment keep the same people in the picture until the story moves on.
+- For each one, pick the look for that point in the story: "" for their main look, or the exact \
+`when` text of one of their variants.
+- Only list characters from the list, using their names exactly as written. Leave out crowds and \
+unnamed extras (the image can still show them). An image of only a place, an object, a map or an \
+abstract metaphor has an empty cast."""
+
+CAST_SCHEMA = obj({"beats": arr(obj({"idx": INT, "cast": arr(obj({"name": STR, "variant": STR}))}))})
+
+
+def _find(items: list[dict[str, Any]], key: str, value: str) -> dict[str, Any] | None:
+    """Exact match first, then ignoring case, then one name containing the other ("Eric Maddox" for
+    "Eric Maddox (Army interrogator)")."""
+    v = value.strip().casefold()
+    for test in (lambda x: x == v, lambda x: x.startswith(v) or v.startswith(x), lambda x: v in x or x in v):
+        hit = next((it for it in items if v and test(it[key].strip().casefold())), None)
+        if hit:
+            return hit
+    return None
+
+
+def resolve_cast(guide: dict[str, Any], cast: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Keep only characters in the guide, with their canonical name and a variant that exists."""
+    out: list[dict[str, str]] = []
+    for c in cast:
+        ch = _find(guide["characters"], "name", c.get("name", ""))
+        if not ch or any(o["name"] == ch["name"] for o in out):
+            continue
+        v = _find(ch.get("variants") or [], "when", c.get("variant", "")) if c.get("variant") else None
+        out.append({"name": ch["name"], "variant": v["when"] if v else ""})
+    return out
+
+
+def cast_looks(guide: dict[str, Any], cast: list[dict[str, str]] | None) -> list[tuple[str, str]]:
+    """(name, exact look text) for each character drawn in an image."""
+    out = []
+    for c in resolve_cast(guide, cast or []):
+        ch = _find(guide["characters"], "name", c["name"])
+        v = _find(ch.get("variants") or [], "when", c["variant"]) if c["variant"] else None
+        out.append((c["name"], v["look"] if v else character_look(ch)))
+    return out
+
+
+def _norm(text: str) -> str:
+    return " ".join(re.sub(r"[^a-z0-9]+", " ", text.lower()).split())
+
+
+def missing_looks(scene: str, looks: list[tuple[str, str]]) -> list[str]:
+    """Names of characters whose look text is not in the scene word for word."""
+    s = _norm(scene)
+    return [name for name, look in looks if _norm(look) not in s]
+
+
+def with_looks(scene: str, looks: list[tuple[str, str]]) -> str:
+    """Last resort when Claude keeps leaving a look out: add it to the end of the scene."""
+    gone = [look for name, look in looks if name in missing_looks(scene, looks)]
+    return f"{scene.rstrip('.')}. Characters in this image: {'; '.join(gone)}." if gone else scene
+
+
+def _cast_line(looks: list[tuple[str, str]]) -> str:
+    if not looks:
+        return "    in this image: none of the listed characters"
+    return "    in this image (copy each look, not the name): " + "; ".join(f"{name} = {look}" for name, look in looks)
+
+
+def cast_beats(claude: Claude, script: str, guide: dict[str, Any], beats: list[dict[str, Any]],
+               group: int = 80, progress: Callable[[str, float], None] = lambda m, f: None,
+               known: dict[int, list[dict[str, str]]] | None = None) -> dict[int, list[dict[str, str]]]:
+    """Return {beat idx: [{"name", "variant"}]}: who is drawn in each image, decided from the whole
+    story before any prompt is written. Groups go in story order and see the cast of the beats just
+    before them, so a scene that runs across groups keeps its people."""
+    if not guide["characters"]:
+        return {b["idx"]: [] for b in beats}
+    chars = "\n".join(character_lines(c) for c in guide["characters"])
+    system = cached(f"{CAST_SYSTEM}\n\nCHARACTERS\n{chars}\n\nFULL SCRIPT (for context)\n{script}")
+    out: dict[int, list[dict[str, str]]] = dict(known or {})
+    groups = [beats[i:i + group] for i in range(0, len(beats), group)]
+    for n, g in enumerate(groups, 1):
+        prev = sorted(i for i in out if i < g[0]["idx"])[-6:]
+        lines = []
+        if prev:
+            lines += ["Already cast (the images just before these):"] + [
+                f"  {i}: " + (", ".join(c["name"] + (f" ({c['variant']})" if c["variant"] else "") for c in out[i]) or "none")
+                for i in prev]
+        lines += ["BEATS TO CAST:"] + [f"{b['idx']}: {b['text']}" for b in g]
+        want = {b["idx"] for b in g}
+        for _ in range(2):
+            res = claude.json(system, [{"role": "user", "content": "\n".join(lines)}], CAST_SCHEMA, effort="medium")
+            for b in res["beats"]:
+                if b["idx"] in want:
+                    out[b["idx"]] = resolve_cast(guide, b["cast"])
+            if want <= out.keys():
+                break
+        progress(f"Cast group {n} of {len(groups)}", n / len(groups))
+    return {b["idx"]: out.get(b["idx"], []) for b in beats}
+
+
 def _context_system(script: str, guide: dict[str, Any]) -> list[dict[str, Any]]:
     return cached(f"{SCENE_SYSTEM}\n\n{visual_bible(guide)}\n\nFULL SCRIPT (for context)\n{script}")
 
@@ -159,14 +265,18 @@ def _previous(written: dict[int, dict[str, str]], before_idx: int, n: int = CARR
 def write_scenes(claude: Claude, script: str, guide: dict[str, Any], beats: list[dict[str, Any]],
                  group: int = 40, progress: Callable[[str, float], None] = lambda m, f: None,
                  written: dict[int, dict[str, str]] | None = None,
-                 opening: set[int] | None = None) -> dict[int, dict[str, str]]:
+                 opening: set[int] | None = None,
+                 cast: dict[int, list[dict[str, str]]] | None = None) -> dict[int, dict[str, str]]:
     """Return {beat idx: {"scene", "label"}}.
 
     Groups are written in story order, one after another: each request sees the last scenes
     already written (from earlier groups, or from `written`, the project's existing prompts), so the
     images carry on from each other instead of every group starting fresh. `opening` holds the beats
-    of the first minute (also used for the Short), which get extra eye-catching images."""
+    of the first minute (also used for the Short), which get extra eye-catching images. `cast` (from
+    cast_beats) says who is in each image; every scene must carry those characters' looks word for
+    word, and is asked for again (then patched) if it leaves one out."""
     opening = opening or set()
+    looks = {b["idx"]: cast_looks(guide, (cast or {}).get(b["idx"])) for b in beats}
     system = _context_system(script, guide)
     groups = [beats[i:i + group] for i in range(0, len(beats), group)]
     by_idx = {b["idx"]: b for b in beats}
@@ -186,21 +296,32 @@ def write_scenes(claude: Claude, script: str, guide: dict[str, Any], beats: list
         if hook:
             lines += [f"Beats {hook[0]}-{hook[-1]} are OPENING IMAGES (see the rules): make them the most "
                       "eye-catching images of the video."]
-        lines += ["BEATS TO ILLUSTRATE:"] + [f"{b['idx']}: {b['text']}" for b in g]
+        lines += ["BEATS TO ILLUSTRATE:"]
+        for b in g:
+            lines += [f"{b['idx']}: {b['text']}"] + ([_cast_line(looks[b["idx"]])] if cast is not None else [])
         lines += ["Narration just after (do not describe):"] + [f"  {b['idx']}: {b['text']}" for b in after]
         want = {b["idx"] for b in g}
         out: dict[int, dict[str, str]] = {}
+        good: set[int] = set()
         for _ in range(3):
-            missing = sorted(want - out.keys())
-            if not missing:
+            todo = sorted(want - good)
+            if not todo:
                 break
             ask = "\n".join(lines)
             if out:
-                ask += f"\n\nOnly return scenes for these beat indices: {missing}"
+                ask += f"\n\nOnly return scenes for these beat indices: {todo}"
+                fix = [f"  {i}: left out {', '.join(missing_looks(out[i]['scene'], looks[i]))}" for i in todo if i in out]
+                if fix:
+                    ask += ("\nThese scenes did not describe everyone in the image with their exact look text; "
+                            "rewrite them with each look copied word for word:\n" + "\n".join(fix))
             res = claude.json(system, [{"role": "user", "content": ask}], SCENES_SCHEMA, effort="medium")
             for s in res["scenes"]:
                 if s["idx"] in want:
                     out[s["idx"]] = {"scene": s["scene"].strip(), "label": clean_label(s.get("label", ""))}
+                    if not missing_looks(out[s["idx"]]["scene"], looks[s["idx"]]):
+                        good.add(s["idx"])
+        for i in out:
+            out[i]["scene"] = with_looks(out[i]["scene"], looks[i])
         return out
 
     scenes: dict[int, dict[str, str]] = {}
@@ -214,12 +335,15 @@ def write_scenes(claude: Claude, script: str, guide: dict[str, Any], beats: list
 
 def regenerate_one(claude: Claude, script: str, guide: dict[str, Any], beats: list[dict[str, Any]],
                    idx: int, note: str = "", written: dict[int, dict[str, str]] | None = None,
-                   opening: bool = False) -> dict[str, str]:
+                   opening: bool = False, cast: list[dict[str, str]] | None = None) -> dict[str, str]:
     by_idx = {b["idx"]: b for b in beats}
     written = written or {}
+    looks = cast_looks(guide, cast)
     near = [by_idx[i] for i in range(idx - 2, idx + 3) if i in by_idx]
     ask = "\n".join(f"{'>> ' if b['idx'] == idx else '   '}{b['idx']}: {b['text']}" for b in near)
     ask = f"Write a fresh scene for beat {idx} only (marked >>).\n{ask}"
+    if cast is not None:
+        ask += "\n" + _cast_line(looks)
     around = [f"  {i}: {written[i]['scene']}" for i in range(idx - 3, idx + 4) if i != idx and i in written]
     if around:
         ask += "\n\nThe neighbouring images look like this; keep the new one consistent with them:\n" + "\n".join(around)
@@ -230,7 +354,7 @@ def regenerate_one(claude: Claude, script: str, guide: dict[str, Any], beats: li
     res = claude.json(_context_system(script, guide), [{"role": "user", "content": ask}], SCENES_SCHEMA, effort="medium")
     for s in res["scenes"]:
         if s["idx"] == idx:
-            return {"scene": s["scene"].strip(), "label": clean_label(s.get("label", ""))}
+            return {"scene": with_looks(s["scene"].strip(), looks), "label": clean_label(s.get("label", ""))}
     raise ValueError("Claude did not return a scene for that beat")
 
 

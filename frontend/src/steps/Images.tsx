@@ -15,6 +15,7 @@ interface PromptRow {
   prompt: string;
   beat_text: string;
   edited: number;
+  characters: { name: string; variant: string }[] | null;
 }
 
 interface Look {
@@ -438,6 +439,14 @@ export default function ImagesStep({ project, refresh }: StepProps) {
                         <div className="scene small">
                           <span className="title">{r.title}.</span> {r.scene} {r.edited ? <span className="chip">edited</span> : null}
                         </div>
+                        {r.characters && (
+                          <div className="muted small">
+                            In this image:{" "}
+                            {r.characters.length
+                              ? r.characters.map((c) => c.name + (c.variant ? ` (${c.variant})` : "")).join(", ")
+                              : "no main characters"}
+                          </div>
+                        )}
                         <div className="row">
                           <CopyButton text={r.prompt} />
                           <button

@@ -118,8 +118,12 @@ class FakeClaude:
                     "characters": [{"name": "Franklin", "marker": "a plaid tartan scarf"}],
                     "props": [{"name": "Erebus", "look": "a three-masted ship with a black hull and one gold stripe"}],
                     "locations": [{"name": "Tundra", "look": "flat white snowy tundra under a pale gray sky"}]}
+        if "beats" in schema["properties"]:  # the cast step: Franklin is in every image
+            section = ask.split("BEATS TO CAST:")[1]
+            idxs = [int(line.split(":")[0]) for line in section.strip().splitlines() if line.strip()]
+            return {"beats": [{"idx": i, "cast": [{"name": "franklin", "variant": ""}]} for i in idxs]}
         section = ask.split("BEATS TO ILLUSTRATE:")[1].split("Narration just after")[0]
-        idxs = [int(line.split(":")[0]) for line in section.strip().splitlines() if line.strip()]
+        idxs = [int(line.split(":")[0]) for line in section.strip().splitlines() if line.strip() and line[0] != " "]
         return {"scenes": [{"idx": i, "label": f"Scene {i}",
                             "scene": f"Beat {i}: a three-masted ship with a black hull and one gold stripe."} for i in idxs]}
 
@@ -156,6 +160,11 @@ def test_generate_route_stores_props_and_batch_text(client, temp_db, monkeypatch
     assert data["style"]["props"][0]["name"] == "Erebus"
     assert data["style"]["locations"][0]["name"] == "Tundra"
     assert len(data["prompts"]) == 30
+    # Who is in each image was decided first, saved with the prompt, and their look is in the scene.
+    assert fake.calls[1][1].startswith("BEATS TO CAST:")
+    assert all(p["characters"] == [{"name": "Franklin", "variant": ""}] for p in data["prompts"])
+    assert "in this image (copy each look, not the name): Franklin = stick figure with a plaid tartan scarf" in fake.calls[2][1]
+    assert all("stick figure with a plaid tartan scarf" in p["scene"] for p in data["prompts"])
     text2 = data["batch_texts"]["2"]
     assert text2.startswith("INSTRUCTIONS FOR BATCH 2 OF 2")
     assert "continue the same video" in text2
