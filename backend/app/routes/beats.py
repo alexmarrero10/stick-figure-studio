@@ -53,7 +53,7 @@ def build(project_id: int, body: BuildBody) -> dict[str, Any]:
     skipped: list[str] = []
     applied = 0
     if body.review:
-        ops = beat_review.review(claude(), beats)
+        ops = beat_review.review(claude(), beats, bc["min_words"], bc["max_words"], cfg["script"]["wpm_estimate"])
         ranges = [(b["word_start"], b["word_end"]) for b in beats]
         new_ranges, skipped = scenes.apply_ops(ranges, ops, len(script["text"].split()), bc["max_words"])
         applied = len(ops) - len(skipped)

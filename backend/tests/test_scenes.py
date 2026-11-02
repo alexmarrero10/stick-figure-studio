@@ -98,3 +98,17 @@ def test_apply_ops_refuses_merges_that_make_long_beats():
     ranges = [(0, 7), (8, 15)]
     out, skipped = scenes.apply_ops(ranges, [{"op": "merge", "beat": 0}], 16, max_words=8)
     assert out == ranges and skipped
+
+
+def test_beat_review_follows_the_configured_beat_length():
+    from pipeline import beat_review
+
+    class Fake:
+        def json(self, system, messages, schema, effort=None):
+            self.system = system
+            return {"ops": []}
+
+    fake = Fake()
+    beat_review.review(fake, [], min_words=2, max_words=13, wpm=180)
+    assert "about 2-13 words" in fake.system and "longer than 13 words" in fake.system
+    assert "0.5-4 seconds" in fake.system and "{" not in fake.system
