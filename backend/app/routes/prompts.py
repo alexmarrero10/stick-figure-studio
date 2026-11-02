@@ -55,7 +55,7 @@ def generate(project_id: int, body: GenBody) -> dict[str, Any]:
     def work(progress):
         guide = db.get_style_guide(project_id)
         if not guide or body.new_style:
-            progress("Designing the style guide and character markers", 0.02)
+            progress("Designing the style guide and character looks", 0.02)
             g = prompts_mod.make_style_guide(c, script)
             db.save_style_guide(project_id, g["style_prefix"], g["characters"], g.get("setting_notes", ""),
                                 g.get("props", []), g.get("locations", []))
@@ -138,7 +138,7 @@ def set_done(project_id: int, batch_no: int, body: DoneBody) -> dict[str, Any]:
 
 class StyleBody(BaseModel):
     style_prefix: str
-    characters: list[dict[str, str]]
+    characters: list[dict[str, Any]]
     props: list[dict[str, str]] | None = None
     locations: list[dict[str, str]] | None = None
 

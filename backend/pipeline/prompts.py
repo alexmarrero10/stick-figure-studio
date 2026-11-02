@@ -1,7 +1,7 @@
 """Step 4: image prompts for Google Flow, one per beat, written out in batches of 24.
 
 Consistency across a whole video comes from a visual bible (the style guide): characters with a
-fixed marker, plus recurring objects and places, each with one fixed look that every prompt
+full fixed look, plus recurring objects and places, each with one fixed look that every prompt
 repeats word for word. Scenes are written in story order, each group seeing the scenes already
 written before it, so neighbouring images flow into each other.
 """
@@ -28,17 +28,30 @@ look the same every time. Images are generated one at a time, so consistency onl
 describing each recurring thing with exactly the same words in every prompt. From the script, define:
 - palette: 4-6 flat accent colors that suit the story's mood, as plain color names (e.g. "muted red, \
 navy blue, mustard yellow, sage green").
-- characters: every recurring person or group, each with ONE simple, consistent visual marker a \
-stick figure can wear or hold so viewers can tell them apart (e.g. "red scarf", "tiny round glasses \
-and a gray bowler hat", "blue police cap"). Markers must be distinct from each other. Do not use \
-skin color or real likeness. Keep to the 8 most important characters at most.
+- characters: every recurring person or group, at most 8. For each, a `look` of 20-40 words that \
+fully fixes how the stick figure is drawn, starting with "stick figure": build (tall, short, \
+stocky), hair and facial hair, headwear, clothing with its colors, and one item they carry. Spell \
+out every detail so the image model has nothing to invent, e.g. "stick figure, tall and thin, short \
+gray hair, tiny round glasses, a gray bowler hat, a long navy coat with brass buttons, carrying a \
+brown leather briefcase". Each look must be easy to tell apart from the others at a glance. Do not \
+use skin color or real likeness.
+  If the story changes how a character looks (in hiding, in disguise, years older, captured, in \
+uniform), add a `variants` entry for each change: `when` names that part of the story, and `look` \
+is the complete 20-40 word look for it, written in full (not "same as before but…"), keeping \
+whatever stays the same in the same words, e.g. when "in hiding, December 2003": "stick figure, \
+stocky, long scruffy gray-black beard, messy uncombed black hair, no hat, a dirty charcoal \
+undershirt and loose olive trousers". Otherwise leave `variants` empty.
 - props: every object, vehicle or animal that appears in more than one beat (a ship, a car, a \
-map, a dog, a briefcase), at most 12. For each, a `look` of 10-25 words fixing its shape, colors \
-from the palette and one or two distinctive details, e.g. "a three-masted wooden ship with a black \
-hull, one mustard-gold stripe along the side, cream sails and a small red flag at the stern".
-- locations: every place the story returns to, at most 8. For each, a `look` of 10-25 words fixing \
-the background: landscape or room, key fixed objects, colors and light, e.g. "flat white snowy \
-tundra under a pale gray sky, low icy-blue ridges on the horizon, scattered dark rocks".
+map, a dog, a hole in the ground), at most 12. For each, a `look` of 20-40 words fixing its size \
+next to a stick figure, its shape, colors from the palette and two or three distinctive details \
+that stay visible from any angle. For something seen from several sides (a hole seen from above, \
+from the side and from inside; a building seen outside and inside), say what each side looks \
+like, e.g. "a three-masted wooden ship about ten stick figures long, black hull, one mustard-gold \
+stripe along the side, cream sails, a small red flag at the stern".
+- locations: every place the story returns to, at most 8. For each, a `look` of 20-40 words fixing \
+the background: landscape or room, the fixed objects and where they are, colors and light, e.g. \
+"flat white snowy tundra under a pale gray sky, low icy-blue ridges on the horizon, scattered dark \
+rocks, one tall dark rock spire on the left".
 - setting_notes: one or two sentences on the overall world (era, climate, time of day) that apply \
 to every image.
 
@@ -50,7 +63,7 @@ LOOK = obj({"name": STR, "look": STR})
 STYLE_SCHEMA = obj({
     "palette": STR,
     "setting_notes": STR,
-    "characters": arr(obj({"name": STR, "marker": STR})),
+    "characters": arr(obj({"name": STR, "look": STR, "variants": arr(obj({"when": STR, "look": STR}))})),
     "props": arr(LOOK),
     "locations": arr(LOOK),
 })
@@ -60,11 +73,13 @@ video. Each beat of narration gets ONE still image that is on screen while those
 The fixed style text is added automatically; you write only the scene description.
 
 Every image is generated on its own, with no memory of the others, so the words are the only thing \
-that keeps the video consistent. For each beat, write a scene description (25-70 words) that:
+that keeps the video consistent. For each beat, write a scene description (40-150 words) that:
 - Shows literally and clearly what the narration says at that moment, or a simple visual metaphor \
 if it is abstract (e.g. a giant clock looming over a tiny figure for "time was running out").
-- Names characters by their visual marker every time (e.g. "the stick figure with the red scarf"), \
-never by name alone.
+- Describes every character in the picture with their full look text from the CHARACTERS list, \
+copied word for word, never by name alone. When the story is at a point covered by one of their \
+variants, use that variant's look instead. Never add, drop or change details on your own (no \
+"now with a beard"): if the look changes, it is because a variant says so.
 - Whenever a RECURRING OBJECT or RECURRING PLACE from the lists below appears, describe it with its \
 exact look text, copied word for word. Never paraphrase, shorten or recolor it, and never invent a \
 different look for something on the lists.
@@ -112,11 +127,22 @@ def make_style_guide(claude: Claude, script: str) -> dict[str, Any]:
     return g
 
 
+def character_look(c: dict[str, Any]) -> str:
+    # Guides made before full looks only had a short marker.
+    return c.get("look") or f"stick figure with {c.get('marker', '')}"
+
+
+def character_lines(c: dict[str, Any]) -> str:
+    lines = [f"- {c['name']}: {character_look(c)}"]
+    lines += [f"    {v['when']}: {v['look']}" for v in c.get("variants") or []]
+    return "\n".join(lines)
+
+
 def visual_bible(guide: dict[str, Any]) -> str:
     def looks(items: list[dict[str, str]]) -> str:
         return "\n".join(f"- {x['name']}: {x['look']}" for x in items) or "- (none)"
-    chars = "\n".join(f"- {c['name']}: stick figure with {c['marker']}" for c in guide["characters"]) or "- (none)"
-    return (f"CHARACTER MARKERS\n{chars}\n\nRECURRING OBJECTS (use the look text word for word)\n"
+    chars = "\n".join(character_lines(c) for c in guide["characters"]) or "- (none)"
+    return (f"CHARACTERS (use the look text word for word)\n{chars}\n\nRECURRING OBJECTS (use the look text word for word)\n"
             f"{looks(guide.get('props') or [])}\n\nRECURRING PLACES (use the look text word for word)\n"
             f"{looks(guide.get('locations') or [])}\n\nWORLD\n{guide.get('setting_notes', '')}")
 

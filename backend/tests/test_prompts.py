@@ -22,3 +22,16 @@ def test_backgrounds_follow_the_scene_not_a_white_page():
     style = prompts.BASE_STYLE.format(palette="navy blue")
     assert "off-white paper background," not in style and "night scenes are dark" in style
     assert "Always sets the background" in prompts.SCENE_SYSTEM
+
+
+def test_characters_have_full_looks_and_story_variants():
+    guide = {"characters": [
+        {"name": "Saddam", "look": "stick figure, stocky, thick black mustache, olive beret",
+         "variants": [{"when": "in hiding, 2003", "look": "stick figure, stocky, long scruffy gray-black beard, no hat"}]},
+        {"name": "Old", "marker": "a red scarf"},
+    ], "props": [], "locations": [], "setting_notes": ""}
+    bible = prompts.visual_bible(guide)
+    assert "- Saddam: stick figure, stocky, thick black mustache, olive beret" in bible
+    assert "    in hiding, 2003: stick figure, stocky, long scruffy gray-black beard, no hat" in bible
+    assert "- Old: stick figure with a red scarf" in bible
+    assert "variants" in prompts.STYLE_SYSTEM and 'no "now with a beard"' in prompts.SCENE_SYSTEM

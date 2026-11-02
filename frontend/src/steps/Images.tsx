@@ -25,7 +25,7 @@ interface Look {
 interface PromptsResp {
   style: {
     style_prefix: string;
-    characters: { name: string; marker: string }[];
+    characters: { name: string; look?: string; marker?: string; variants?: { when: string; look: string }[] }[];
     props: Look[];
     locations: Look[];
     setting_notes: string;
@@ -283,11 +283,16 @@ export default function ImagesStep({ project, refresh }: StepProps) {
             <strong>Visual bible: style, characters, recurring objects and places</strong>
           </summary>
           <p className="small">{data.style.style_prefix}</p>
-          <h3 className="small">Characters</h3>
+          <h3 className="small">Characters (same words in every prompt)</h3>
           <ul className="small">
             {data.style.characters.map((c) => (
               <li key={c.name}>
-                <strong>{c.name}</strong>: stick figure with {c.marker}
+                <strong>{c.name}</strong>: {c.look || `stick figure with ${c.marker}`}
+                {c.variants?.map((v) => (
+                  <div key={v.when} className="muted">
+                    {v.when}: {v.look}
+                  </div>
+                ))}
               </li>
             ))}
           </ul>
