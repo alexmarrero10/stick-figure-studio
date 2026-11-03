@@ -127,9 +127,13 @@ def test_publish_description_keeps_the_research_sources():
     assert "Sources\n- Navy report: https://navy.mil/r" in meta_["description"]
     assert meta_["tags"] == ["navy", "animation", "history", "education"]
     thumb = meta_["thumbnail_prompts"][0]
-    assert thumb.startswith("A shocked stick figure holds a huge silver fork. Simple bold stick figure thumbnail")
-    assert "plain solid deep navy blue background" in thumb and "paper background" not in thumb
-    assert len(thumb.split()) < 70
+    assert thumb.startswith("A shocked stick figure holds a huge silver fork. Background: deep navy blue. YouTube thumbnail")
+    assert prompts.BODY in thumb  # no style guide yet: the default video style
+    # With a style guide, the thumbnail ends with the video's own style text, like every image prompt.
+    guide = {"style_prefix": "Minimalist stick figure illustration, thin black stick limbs, flat colors (sand beige).",
+             "characters": [], "props": [], "locations": []}
+    meta_ = publish.generate(C(), "T", "w", beats, [], [], [], guide)
+    assert meta_["thumbnail_prompts"][0].endswith(prompts.with_body_rule(guide["style_prefix"]))
 
 
 def test_projects_store_their_format(client, temp_db):

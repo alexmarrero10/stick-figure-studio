@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 from pipeline.claude_client import INT, STR, Claude, arr, obj
-from pipeline.prompts import visual_bible
+from pipeline.prompts import BASE_STYLE, visual_bible, with_body_rule
 
 SYSTEM = """You package true-story YouTube videos for publishing. Write metadata that is accurate \
 (no claims the video doesn't support), curiosity-driven and advertiser-friendly.
@@ -19,12 +19,15 @@ The first chapter MUST start at beat 0. Titles are 2-5 words and must not spoil 
 - thumbnails: 3 thumbnail ideas, each a different angle on the video's biggest mystery or moment \
 (e.g. a shocked face next to the key object; the dangerous or mysterious thing shown huge; a tiny \
 figure dwarfed by something). A thumbnail is seen tiny on a phone, so keep each one SIMPLE:
-  - scene: under 25 words. One stick figure (two at most) with ONE big, exaggerated emotion \
-(shock, terror, disbelief) and ONE large object, both filling the right two thirds of the frame. \
-Nothing else: no crowds, no busy scenery, no small details. Describe recurring characters and \
-objects with their look from the visual bible, if one is given.
-  - background: one plain, solid, bright color that contrasts with the scene (e.g. "bright red", \
-"deep navy blue", "sunny yellow").
+  - scene: One stick figure (two at most) with ONE big, exaggerated emotion (shock, terror, \
+disbelief) and ONE large object, both filling the right two thirds of the frame. Nothing else: no \
+crowds, no small details. Describe every recurring character, object or place from the visual bible \
+with its look text copied word for word (for a character, the look for that point in the story), so \
+the thumbnail matches the video; besides those looks, keep the scene under 25 words. Never write a \
+character's name.
+  - background: a simple, uncluttered version of the place where that moment happens, in the \
+video's colors and light, with strong contrast against the figure (e.g. "dark navy night sky over \
+dark green orange trees"). Never blank or plain white.
   Never ask for text, letters, numbers, signs or speech bubbles; the title is added afterwards."""
 
 SCHEMA = obj({
@@ -35,16 +38,18 @@ SCHEMA = obj({
     "thumbnails": arr(obj({"scene": STR, "background": STR})),
 })
 
-# Thumbnails get their own short style instead of the long one for the video's images.
-THUMB_STYLE = (
-    "Simple bold stick figure thumbnail: thick black outlines, round white head with a huge exaggerated "
-    "expression, flat bright colors, plain solid {background} background, high contrast, big shapes that "
-    "read at a glance, left third of the frame left empty, 16:9. No text, no letters, no numbers."
+# Thumbnails use the video's own style text, so they look like its images, plus what a thumbnail
+# needs to read at a glance on a phone.
+THUMB_FRAMING = (
+    "YouTube thumbnail: a huge exaggerated expression, big bold shapes that read at a glance on a phone, "
+    "high contrast, the left third of the frame kept clear."
 )
 
 
-def thumbnail_prompt(scene: str, background: str) -> str:
-    return f"{scene.strip().rstrip('.')}. {THUMB_STYLE.format(background=background.strip() or 'bright yellow')}"
+def thumbnail_prompt(scene: str, background: str, style_prefix: str | None = None) -> str:
+    style = with_body_rule(style_prefix) if style_prefix else BASE_STYLE.format(palette="bold flat colors")
+    return (f"{scene.strip().rstrip('.')}. Background: {background.strip().rstrip('.') or 'a simple bold backdrop'}. "
+            f"{THUMB_FRAMING} {style}")
 
 
 def merge_tags(specific: list[str], general: list[str], limit: int = 500) -> list[str]:
@@ -104,5 +109,6 @@ def generate(claude: Claude, title: str, script: str, beats: list[dict[str, Any]
         "description": desc,
         "tags": merge_tags(res["tags"], general_tags or []),
         "chapters": chapters,
-        "thumbnail_prompts": [thumbnail_prompt(t["scene"], t["background"]) for t in res["thumbnails"]],
+        "thumbnail_prompts": [thumbnail_prompt(t["scene"], t["background"], guide["style_prefix"] if guide else None)
+                              for t in res["thumbnails"]],
     }
