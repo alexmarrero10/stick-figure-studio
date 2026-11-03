@@ -116,3 +116,64 @@ def test_every_look_gets_a_head_color_and_prompts_follow():
     scene = "At night stick figure, burly, no head scarf, wrists bound sits. Stick figure, burly, a checkered head scarf stands."
     out = prompts.replace_looks(scene, pairs)
     assert out.count("white head and hands") == 2 and "Stick figure, white head and hands, burly, a checkered" in out
+
+
+HOLE = ("from above: a square dark opening in brown dirt, a white slab lid beside it. "
+        "From the side: a narrow shaft two stick figures deep, one small yellow bulb")
+STAGED = {**SADDAM, "props": [{"name": "the spider hole", "look": HOLE}, {"name": "the rope", "look": "a coiled tan rope"}],
+          "locations": [{"name": "orange grove", "look": "rows of dark green orange trees at night"}]}
+
+
+def test_objects_seen_from_several_sides_are_split_into_views():
+    assert prompts.look_views(HOLE) == [
+        ("from above", "a square dark opening in brown dirt, a white slab lid beside it."),
+        ("From the side", "a narrow shaft two stick figures deep, one small yellow bulb")]
+    assert prompts.look_views("a coiled tan rope") == [("", "a coiled tan rope")]
+    t = prompts.resolve_things(STAGED, {"objects": [{"name": "Spider hole", "view": "from the side"},
+                                                    {"name": "a unicorn", "view": ""}], "place": "Orange Grove"})
+    assert t == {"objects": [{"name": "the spider hole", "view": "From the side"}], "place": "orange grove"}
+    assert prompts.thing_looks(STAGED, t) == [
+        ("the spider hole (From the side)", "a narrow shaft two stick figures deep, one small yellow bulb"),
+        ("orange grove", "rows of dark green orange trees at night")]
+
+
+class StageFake:
+    def __init__(self, fix_on_retry=True):
+        self.fix_on_retry = fix_on_retry
+        self.asks: list[str] = []
+
+    def json(self, system, messages, schema, max_tokens=32000, effort=None):
+        ask = messages[-1]["content"]
+        self.asks.append(ask)
+        if "beats" in schema["properties"]:
+            return {"beats": [{"idx": 0, "cast": [], "objects": [{"name": "the rope", "view": ""}],
+                               "place": "orange grove"}]}
+        retry = len(self.asks) > 2
+        text = ("Soldiers lift a coiled tan rope among rows of dark green orange trees at night."
+                if retry and self.fix_on_retry else "Soldiers lift the rope in the grove.")
+        return {"scenes": [{"idx": 0, "label": "Rope", "scene": text}]}
+
+
+def test_scene_that_leaves_out_an_object_or_place_is_rewritten_then_patched():
+    beats = [{"idx": 0, "text": "They pulled him out."}]
+    fake = StageFake()
+    cast, things = prompts.stage_beats(fake, "script", STAGED, beats)
+    assert things[0] == {"objects": [{"name": "the rope", "view": ""}], "place": "orange grove"}
+    out = prompts.write_scenes(fake, "script", STAGED, beats, cast=cast, things=things)
+    assert "recurring objects and place (copy each look, not the name): the rope = a coiled tan rope" in fake.asks[1]
+    assert "left out the rope, orange grove" in fake.asks[2]
+    assert out[0]["scene"].startswith("Soldiers lift a coiled tan rope")
+    fake = StageFake(fix_on_retry=False)
+    out = prompts.write_scenes(fake, "script", STAGED, beats, cast=cast, things=things)
+    assert out[0]["scene"] == ("Soldiers lift the rope in the grove. Also in this image: a coiled tan rope; "
+                               "rows of dark green orange trees at night.")
+
+
+def test_patch_scenes_keeps_the_fix_only_when_every_look_is_there():
+    fake = StageFake()
+    fake.asks = ["", "", ""]  # make the fake answer with the fixed scene
+    row = {"idx": 0, "scene": "Soldiers lift the rope in the grove.", "looks": [],
+           "things": prompts.thing_looks(STAGED, {"objects": [{"name": "the rope", "view": ""}], "place": "orange grove"})}
+    out = prompts.patch_scenes(fake, "script", STAGED, [row])
+    assert out == {0: "Soldiers lift a coiled tan rope among rows of dark green orange trees at night."}
+    assert "missing looks (copy each, not the name): the rope = a coiled tan rope" in fake.asks[-1]

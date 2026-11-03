@@ -16,6 +16,7 @@ interface PromptRow {
   beat_text: string;
   edited: number;
   characters: { name: string; variant: string }[] | null;
+  things: { objects: { name: string; view: string }[]; place: string } | null;
 }
 
 interface Look {
@@ -98,6 +99,24 @@ export default function ImagesStep({ project, refresh }: StepProps) {
     setError(null);
     try {
       await run(() => api.post(`/api/projects/${pid}/prompts/generate`, { only_missing, new_style }));
+      await afterPrompts();
+    } catch (e) {
+      fail(e);
+    }
+  };
+
+  const checkLooks = async () => {
+    setError(null);
+    setNote(null);
+    try {
+      const j = await run(() => api.post(`/api/projects/${pid}/prompts/check-looks`));
+      const r = j.result as { fixed: number; skipped_edited: number; batches: number[] };
+      setNote(
+        (r.fixed
+          ? `Fixed ${r.fixed} prompts that left out a look. Remake batch${r.batches.length > 1 ? "es" : ""} ${r.batches.join(", ")} in Flow to use them.`
+          : "Every prompt already has the looks of its characters, objects and place.") +
+          (r.skipped_edited ? ` ${r.skipped_edited} prompts you edited by hand were left alone.` : ""),
+      );
       await afterPrompts();
     } catch (e) {
       fail(e);
@@ -256,6 +275,16 @@ export default function ImagesStep({ project, refresh }: StepProps) {
           {data.style && (
             <button className="secondary" onClick={() => generate(false, true)} disabled={busy}>
               New style + prompts
+            </button>
+          )}
+          {data.style && data.prompts.length > 0 && (
+            <button
+              className="secondary"
+              onClick={checkLooks}
+              disabled={busy}
+              title="Finds the recurring objects and place in each image and fixes prompts that leave out their look"
+            >
+              Check objects + places
             </button>
           )}
           <button className="secondary" onClick={rescan}>
@@ -445,6 +474,14 @@ export default function ImagesStep({ project, refresh }: StepProps) {
                             {r.characters.length
                               ? r.characters.map((c) => c.name + (c.variant ? ` (${c.variant})` : "")).join(", ")
                               : "no main characters"}
+                          </div>
+                        )}
+                        {r.things && (r.things.objects.length > 0 || r.things.place) && (
+                          <div className="muted small">
+                            {r.things.objects.length > 0 &&
+                              "Objects: " + r.things.objects.map((o) => o.name + (o.view ? ` (${o.view})` : "")).join(", ")}
+                            {r.things.objects.length > 0 && r.things.place && " · "}
+                            {r.things.place && `Place: ${r.things.place}`}
                           </div>
                         )}
                         <div className="row">

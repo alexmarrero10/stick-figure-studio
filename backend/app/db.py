@@ -328,13 +328,15 @@ def get_style_guide(project_id: int) -> dict[str, Any] | None:
 def upsert_prompts(project_id: int, prompts: list[dict[str, Any]], edited: bool = False) -> None:
     with tx() as conn:
         conn.executemany(
-            "INSERT INTO image_prompts (beat_id, project_id, batch_no, scene, label, edited, characters) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?) "
+            "INSERT INTO image_prompts (beat_id, project_id, batch_no, scene, label, edited, characters, things) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
             "ON CONFLICT(beat_id) DO UPDATE SET batch_no = excluded.batch_no, scene = excluded.scene, "
             "label = excluded.label, edited = excluded.edited, "
-            "characters = COALESCE(excluded.characters, image_prompts.characters)",  # keep the cast unless given
+            "characters = COALESCE(excluded.characters, image_prompts.characters), "  # keep the cast unless given
+            "things = COALESCE(excluded.things, image_prompts.things)",
             [(p["beat_id"], project_id, p["batch_no"], p["scene"], p.get("label", ""), int(edited),
-              json.dumps(p["characters"]) if p.get("characters") is not None else None) for p in prompts],
+              json.dumps(p["characters"]) if p.get("characters") is not None else None,
+              json.dumps(p["things"]) if p.get("things") is not None else None) for p in prompts],
         )
         touch_project(conn, project_id)
 
@@ -345,6 +347,15 @@ def set_scenes(project_id: int, scenes: dict[int, str]) -> None:
         conn.executemany("UPDATE image_prompts SET scene = ? WHERE beat_id = ? AND project_id = ?",
                          [(scene, beat_id, project_id) for beat_id, scene in scenes.items()])
         touch_project(conn, project_id)
+
+
+def set_staging(project_id: int, staging: dict[int, tuple[list[dict[str, str]] | None, dict[str, Any]]]) -> None:
+    """Store {beat id: (cast, things)}; a cast of None keeps the stored one."""
+    with tx() as conn:
+        conn.executemany(
+            "UPDATE image_prompts SET characters = COALESCE(?, characters), things = ? WHERE beat_id = ? AND project_id = ?",
+            [(json.dumps(c) if c is not None else None, json.dumps(t), beat_id, project_id)
+             for beat_id, (c, t) in staging.items()])
 
 
 def done_batches(project_id: int) -> list[int]:
@@ -377,6 +388,7 @@ def list_prompts(project_id: int) -> list[dict[str, Any]]:
         ).fetchall())
     for r in rows:
         r["characters"] = json.loads(r["characters"]) if r["characters"] is not None else None
+        r["things"] = json.loads(r["things"]) if r["things"] is not None else None
     return rows
 
 

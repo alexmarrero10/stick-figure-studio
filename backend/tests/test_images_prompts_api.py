@@ -169,8 +169,45 @@ def test_generate_route_stores_props_and_batch_text(client, temp_db, monkeypatch
     assert text2.startswith("INSTRUCTIONS FOR BATCH 2 OF 2")
     assert "continue the same video" in text2
     assert "\n\n1 - Scene 24. Beat 24: a three-masted ship" in text2
-    assert text2.count("\n\n") == 6  # header + 6 prompts
+    assert text2.count("\n\n") == 7  # header + 6 prompts + naming reminder
+    assert text2.rstrip().endswith("never with names of your own.")
 
+
+
+class PlaceFake(FakeClaude):
+    """Like FakeClaude, but the staging step also puts every image on the tundra."""
+
+    def json(self, system, messages, schema, max_tokens=32000, effort=None):
+        res = super().json(system, messages, schema, max_tokens, effort)
+        for b in res.get("beats", []):
+            b["place"] = "tundra"
+        return res
+
+
+def _wait(client, job):
+    for _ in range(100):
+        job = client.get(f"/api/jobs/{job['id']}").json()
+        if job["status"] != "running":
+            break
+        time.sleep(0.05)
+    assert job["status"] == "done", job
+    return job
+
+
+def test_check_looks_adds_missing_places_and_skips_hand_edited_prompts(client, temp_db, monkeypatch):
+    pid = project_with_beats(temp_db, 30)
+    monkeypatch.setattr("app.routes.prompts.claude", lambda: FakeClaude())
+    _wait(client, client.post(f"/api/projects/{pid}/prompts/generate", json={}).json())
+    first = client.get(f"/api/projects/{pid}/prompts").json()["prompts"][0]
+    client.put(f"/api/projects/{pid}/prompts/{first['beat_id']}", json={"scene": "My own scene."})
+    monkeypatch.setattr("app.routes.prompts.claude", lambda: PlaceFake())
+    job = _wait(client, client.post(f"/api/projects/{pid}/prompts/check-looks").json())
+    assert job["result"]["fixed"] == 29 and job["result"]["skipped_edited"] == 1 and job["result"]["batches"] == [1, 2]
+    rows = client.get(f"/api/projects/{pid}/prompts").json()["prompts"]
+    assert rows[0]["scene"] == "My own scene."
+    assert all(r["things"] == {"objects": [], "place": "Tundra"} for r in rows)
+    assert all("flat white snowy tundra under a pale gray sky" in r["scene"] for r in rows[1:])
+    assert all(r["characters"] == [{"name": "Franklin", "variant": ""}] for r in rows)
 
 def test_page_is_never_cached(client):
     from app import main
