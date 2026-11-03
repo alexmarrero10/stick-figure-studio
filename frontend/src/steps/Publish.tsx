@@ -9,6 +9,7 @@ interface Meta {
   tags: string[];
   chapters: { time: string; title: string }[];
   thumbnail_prompts: string[];
+  custom_thumbnails: { request: string; prompt: string }[];
 }
 
 const CHECKLIST = [
@@ -26,6 +27,29 @@ export default function PublishStep({ project, refresh }: StepProps) {
   const [meta, setMeta] = useState<Meta | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [idea, setIdea] = useState("");
+  const [asking, setAsking] = useState(false);
+
+  const askThumbnail = async () => {
+    setAsking(true);
+    setError(null);
+    try {
+      setMeta(await api.post<Meta>(`/api/projects/${pid}/publish/thumbnails`, { request: idea }));
+      setIdea("");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setAsking(false);
+    }
+  };
+
+  const removeThumbnail = async (n: number) => {
+    try {
+      setMeta(await api.del<Meta>(`/api/projects/${pid}/publish/thumbnails/${n}`));
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
 
   useEffect(() => {
     api.get<Meta | null>(`/api/projects/${pid}/publish`).then(setMeta).catch(() => {});
@@ -84,6 +108,7 @@ export default function PublishStep({ project, refresh }: StepProps) {
           </div>
           <div className="panel">
             <h3>Thumbnail prompts</h3>
+            <p className="muted small">Suggested by Claude:</p>
             <ul className="copy-list">
               {meta.thumbnail_prompts.map((t) => (
                 <li key={t}>
@@ -91,6 +116,39 @@ export default function PublishStep({ project, refresh }: StepProps) {
                 </li>
               ))}
             </ul>
+            <h4>Ask Claude</h4>
+            <p className="muted small">
+              Describe the thumbnail you have in mind and Claude writes the image prompt, in the video's style and with
+              its characters' looks.
+            </p>
+            <textarea
+              rows={3}
+              value={idea}
+              onChange={(e) => setIdea(e.target.value)}
+              placeholder="e.g. Saddam peeking out of the hole with a soldier's flashlight shining right on his face"
+            />
+            <div className="row">
+              <button onClick={askThumbnail} disabled={asking || !idea.trim()}>
+                {asking ? "Writing…" : "Write the prompt"}
+              </button>
+            </div>
+            {meta.custom_thumbnails.length > 0 && (
+              <ul className="copy-list">
+                {meta.custom_thumbnails.map((t, n) => (
+                  <li key={n}>
+                    <span className="small">
+                      <span className="muted">Your idea: {t.request}</span>
+                      <br />
+                      {t.prompt}
+                    </span>{" "}
+                    <CopyButton text={t.prompt} />
+                    <button className="link danger small" onClick={() => removeThumbnail(n)}>
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
             <p className="muted small">Add the title text to the thumbnail yourself, since image models garble lettering.</p>
           </div>
         </>

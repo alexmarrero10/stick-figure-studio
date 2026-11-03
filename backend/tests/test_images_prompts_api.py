@@ -220,3 +220,34 @@ def test_page_is_never_cached(client):
 def test_prompt_rules_forbid_text_bubbles_and_camera_moves():
     assert "no look may contain writing" in prompts.STYLE_SYSTEM
     assert "speech bubbles" in prompts.SCENE_SYSTEM and "never camera movement" in prompts.SCENE_SYSTEM
+
+
+class ThumbFake:
+    def __init__(self):
+        self.asks: list[str] = []
+
+    def json(self, system, messages, schema, max_tokens=32000, effort=None):
+        self.asks.append(messages[-1]["content"])
+        if "titles" in schema["properties"]:
+            return {"titles": ["The Hole"], "description": "Hook.", "tags": [], "chapters": [],
+                    "thumbnails": [{"scene": "A shocked stick figure.", "background": "dark night"}]}
+        return {"scene": "A stick figure peeks out of a hole, a flashlight on his face", "background": "dark navy night"}
+
+
+def test_ask_claude_for_a_thumbnail_keeps_the_suggested_ones(client, temp_db, monkeypatch):
+    pid = project_with_beats(temp_db, 3)
+    temp_db.save_style_guide(pid, "Stick figure style, thin black stick limbs, flat colors.", [])
+    fake = ThumbFake()
+    monkeypatch.setattr("app.routes.assemble.claude", lambda: fake)
+    assert client.post(f"/api/projects/{pid}/publish/thumbnails", json={"request": "x"}).status_code == 400  # no pack yet
+    client.post(f"/api/projects/{pid}/publish")
+    meta = client.post(f"/api/projects/{pid}/publish/thumbnails", json={"request": "Him peeking out of the hole"}).json()
+    assert len(meta["thumbnail_prompts"]) == 1
+    [custom] = meta["custom_thumbnails"]
+    assert custom["request"] == "Him peeking out of the hole"
+    assert custom["prompt"].startswith("A stick figure peeks out of a hole, a flashlight on his face. Background: dark navy night.")
+    assert custom["prompt"].endswith(prompts.with_body_rule("Stick figure style, thin black stick limbs, flat colors."))
+    assert "THE CREATOR'S IDEA FOR THE THUMBNAIL\nHim peeking out of the hole" in fake.asks[-1]
+    # Regenerating the pack keeps the owner's own thumbnails; removing one drops it.
+    assert len(client.post(f"/api/projects/{pid}/publish").json()["custom_thumbnails"]) == 1
+    assert client.delete(f"/api/projects/{pid}/publish/thumbnails/0").json()["custom_thumbnails"] == []

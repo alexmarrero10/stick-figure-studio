@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from app import db, jobs
 from app.config import load_config
@@ -102,6 +103,7 @@ def make_publish(project_id: int) -> dict[str, Any]:
                             research["sources"] if research else [],
                             load_config().get("publish", {}).get("general_tags", []),
                             db.get_style_guide(project_id))
+    meta["custom_thumbnails"] = (db.get_publish_meta(project_id) or {}).get("custom_thumbnails", [])
     db.save_publish_meta(project_id, meta)
     return meta
 
@@ -109,4 +111,37 @@ def make_publish(project_id: int) -> dict[str, Any]:
 @router.get("/publish")
 def get_publish(project_id: int) -> dict[str, Any] | None:
     project_or_404(project_id)
-    return db.get_publish_meta(project_id)
+    meta = db.get_publish_meta(project_id)
+    return {"custom_thumbnails": [], **meta} if meta else None
+
+
+class ThumbAsk(BaseModel):
+    request: str
+
+
+@router.post("/publish/thumbnails")
+def ask_thumbnail(project_id: int, body: ThumbAsk) -> dict[str, Any]:
+    """Claude writes a thumbnail prompt from the owner's own idea; it is kept next to the suggested ones."""
+    p = project_or_404(project_id)
+    meta = db.get_publish_meta(project_id)
+    script = db.current_script(project_id)
+    if not meta or not script:
+        raise HTTPException(400, "Generate the publishing pack first")
+    if not body.request.strip():
+        raise HTTPException(400, "Describe the thumbnail you want")
+    title = meta["titles"][0] if meta.get("titles") else p["title"]
+    prompt = publish.ask_thumbnail(claude(), body.request, title, script["text"], db.get_style_guide(project_id))
+    meta["custom_thumbnails"] = [*meta.get("custom_thumbnails", []), {"request": body.request.strip(), "prompt": prompt}]
+    db.save_publish_meta(project_id, meta)
+    return meta
+
+
+@router.delete("/publish/thumbnails/{n}")
+def remove_thumbnail(project_id: int, n: int) -> dict[str, Any]:
+    project_or_404(project_id)
+    meta = db.get_publish_meta(project_id)
+    if not meta or not 0 <= n < len(meta.get("custom_thumbnails", [])):
+        raise HTTPException(404, "Thumbnail not found")
+    meta["custom_thumbnails"].pop(n)
+    db.save_publish_meta(project_id, meta)
+    return meta
