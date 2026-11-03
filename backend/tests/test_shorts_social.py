@@ -527,3 +527,10 @@ def test_short_cuts_at_the_longest_length_when_no_sentence_ends_in_the_window():
     one = _words([("Hello.", 0), ("Then", 52), ("silence.", 53)])
     fake = CutFake(pick=0)
     assert shorts.choose_cut(fake, one, 50, 70) == pytest.approx(53.7) and not fake.asks  # one choice: no need to ask
+
+
+def test_script_and_research_cover_who_what_when_where_and_why():
+    assert "THE BASICS A NEWCOMER NEEDS (who, what, when, where and why)" in script.SCRIPT_SYSTEM
+    assert "what he had done that made him wanted" in script.SCRIPT_SYSTEM
+    assert "## Why it mattered" in script.RESEARCH_SECTIONS["story"]
+    assert "- Why it mattered" in script.RESEARCH_SECTIONS["list"]

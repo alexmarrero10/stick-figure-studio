@@ -48,6 +48,9 @@ actually read does not go in the brief.""",
 RESEARCH_SECTIONS = {
     "story": """FORMAT: one true story, told start to finish.
 ## Summary (3-4 sentences)
+## Why it mattered (the background a newcomer needs: who the main people were, what they had done or \
+were trying to do, what was at stake and why anyone cared; e.g. for a manhunt, what the hunted person \
+had done that made them wanted)
 ## Timeline (dated bullet points, in order)
 ## People (name, role, one memorable concrete detail each)
 ## Key facts and numbers (the specific details that make the story vivid: amounts, distances, objects, places)
@@ -66,6 +69,7 @@ RESEARCH_SECTIONS = {
 ## Entries (3-5 cases; research each one on its own with its own sources. For each entry:
 ### N. Name of the case (date, place)
 - What happened (4-8 bullets in order)
+- Why it mattered (who was involved, what was at stake and why anyone cared)
 - People involved (roles, one concrete detail each)
 - The strongest evidence and the official or best-supported explanation
 - What remains unexplained or disputed)
@@ -196,6 +200,22 @@ and save a short punchy line for the biggest moments only.
 - Stakes: make clear what each person stands to win or lose, in human terms.
 - Payoff: the ending must resolve the opening question and land an insight, irony or consequence.
 - Close with at most two short sentences that tease another story or invite a subscribe. Nothing longer.
+
+THE BASICS A NEWCOMER NEEDS (who, what, when, where and why)
+- Assume the viewer knows nothing about the subject. Soon after the opening, make sure they know \
+who the main people are, what happened, when and where, and above all WHY it mattered: why people \
+acted as they did, what was at stake and why anyone cared.
+- Use common sense about what a curious viewer would ask. A story about hunting a man must say who \
+he was and what he had done that made him wanted (the crimes, wars or abuses, and who was hurt). A \
+rescue must say how the people got trapped. A discovery must say why it had been lost and why \
+finding it mattered.
+- Spend the time on what the viewer needs to understand the story, not on side details. A \
+background section answers "why should I care about this person or event?", so give the facts that \
+explain the story (what someone did, the power they held, the conflict they were in) before or \
+instead of trivia such as a childhood, family tree or logistics, unless those drive the story.
+- Keep context proportional: a few clear sentences woven into the story, not a history lecture.
+- Before you finish, reread the script as someone who has never heard of the subject. Wherever they \
+would ask "wait, who is that?" or "why does that matter?", answer it.
 
 SIMPLE, CAPTIVATING LANGUAGE
 - Write so a 13-year-old can follow every sentence the first time they hear it. Use everyday words; \
