@@ -23,8 +23,7 @@ SYSTEM = f"""You package true-story YouTube videos for publishing. Write metadat
 
 - titles: 5 options under 70 characters. Curiosity without lying. Vary the angle.
 - description: 2 short hook paragraphs (the first 150 characters show in search, so lead with the \
-mystery), then a one-line note that the video is narrated with an AI voice and illustrated with \
-stick-figure art. Do NOT include chapters or sources; they are appended automatically.
+mystery). Do NOT include chapters or sources; they are appended automatically.
 - tags: 12-20 search phrases.
 - chapters: 5-8 chapters. Each starts at a beat index where the story clearly moves to a new part. \
 The first chapter MUST start at beat 0. Titles are 2-5 words and must not spoil the ending.
