@@ -14,8 +14,9 @@ from typing import Any, Callable
 from pipeline.claude_client import INT, STR, Claude, arr, cached, obj
 
 BASE_STYLE = (
-    "Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white "
-    "heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick limbs, "
+    "Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round heads "
+    "(white unless a character's look gives a skin tone) with simple expressive faces (dot eyes, "
+    "eyebrows, line mouth) drawn the same way for everyone, thin black stick limbs, "
     "flat colors for props, clothing and backgrounds ({palette}). The background fills the whole frame "
     "and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show "
     "the room, never a blank white or paper background. Uncluttered composition with one clear focal point, "
@@ -33,8 +34,13 @@ fully fixes how the stick figure is drawn, starting with "stick figure": build (
 stocky), hair and facial hair, headwear, clothing with its colors, and one item they carry. Spell \
 out every detail so the image model has nothing to invent, e.g. "stick figure, tall and thin, short \
 gray hair, tiny round glasses, a gray bowler hat, a long navy coat with brass buttons, carrying a \
-brown leather briefcase". Each look must be easy to tell apart from the others at a glance. Do not \
-use skin color or real likeness.
+brown leather briefcase". Each look must be easy to tell apart from the others at a glance. Never \
+aim for a real likeness.
+  Heads are white by default. Only when race or ethnicity is part of the history being told (civil \
+rights, apartheid, colonialism, slavery, segregation), give a skin tone as a plain color right after \
+"stick figure", e.g. "stick figure, medium brown head and hands, …", and use the same words in all of \
+that character's variants. A skin tone only changes the fill color: never describe or change facial \
+features or body shape to show ethnicity, and describe hair like anyone else's. Otherwise do not mention skin at all.
   If the story changes how a character looks (in hiding, in disguise, years older, captured, in \
 uniform), add a `variants` entry for each change: `when` names that part of the story, and `look` \
 is the complete 20-40 word look for it, written in full (not "same as before but…"), keeping \
@@ -81,7 +87,9 @@ story. Describe every one of them with that look text, copied word for word, and
 them vaguely ("a dusty figure", "a man", "the prisoner") instead. Never write a character's name in \
 the scene (the image model may refuse real people or try to draw a real likeness): the look text \
 alone tells the images who is who. Do not draw other characters from \
-the CHARACTERS list in that image; unnamed extras are fine. Never add, drop or change details of a \
+the CHARACTERS list in that image; unnamed extras are fine. Extras have white heads, unless the \
+CHARACTERS give skin tones: then a crowd may mix plain skin-tone fill colors where the story calls \
+for it, with every face drawn the same simple way. Never add, drop or change details of a \
 look on your own (no "now with a beard"): if a look changes, it is because a variant says so.
 - Whenever a RECURRING OBJECT or RECURRING PLACE from the lists below appears, describe it with its \
 exact look text, copied word for word. Never paraphrase, shorten or recolor it, and never invent a \
