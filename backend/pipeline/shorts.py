@@ -1,12 +1,13 @@
 """Vertical Shorts (YouTube Shorts, Instagram and Facebook Reels, TikTok) cut from the start of a video.
 
-The Short reuses the main video's shots and voice for the first `max_seconds` (59 by default) and
-stops dead there. Each 16:9 picture is trimmed a little at the sides, scaled to the phone's width and
+The Short reuses the main video's shots and voice from the start up to the cliffhanger sentence
+that ends between `min_seconds` and `max_seconds` (50-70 by default), and stops right there. Each 16:9 picture is trimmed a little at the sides, scaled to the phone's width and
 centred on the paper-coloured background; the channel name sits just under it, on the left.
 """
 from __future__ import annotations
 
 import hashlib
+import re
 import shutil
 from pathlib import Path
 from typing import Any, Callable
@@ -15,7 +16,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from pipeline import ffmpeg
 from pipeline.assemble import _hex_to_rgb, encode
-from pipeline.claude_client import STR, Claude, arr, obj
+from pipeline.claude_client import INT, STR, Claude, arr, obj
 
 PLATFORMS = ("youtube", "instagram", "facebook", "tiktok")
 
@@ -33,6 +34,54 @@ def opening_beats(beats: list[dict[str, Any]], words: list[dict[str, Any]], seco
         if start < seconds:
             out.add(b["idx"])
     return out
+
+
+_SENTENCE_END = re.compile(r"[.!?][\"'”’)\]]*$")
+
+CUT_SYSTEM = """You choose where a Short ends. The Short is the opening of a narrated history video, \
+posted on its own as a YouTube Short, Reel and TikTok; it stops right after the sentence you pick, \
+and must make viewers want the full video. Pick the sentence that lands the strongest cliffhanger: a \
+reveal that is just starting, or a question left hanging. Never pick one that answers the question \
+the opening raised, and avoid ending in the middle of an explanation. Only the sentences marked as \
+possible endings can be picked; between equally good ones, prefer the earlier."""
+
+CUT_SCHEMA = obj({"sentence": INT})
+
+
+def sentences(words: list[dict[str, Any]], until: float) -> list[dict[str, Any]]:
+    """The narration's sentences that start before `until` seconds, with the time each one ends."""
+    out: list[dict[str, Any]] = []
+    cur: list[dict[str, Any]] = []
+    for n, w in enumerate(words):
+        if not cur and w["start"] >= until:
+            break
+        cur.append(w)
+        if _SENTENCE_END.search(w["text"]) or n == len(words) - 1:
+            nxt = words[n + 1]["start"] if n + 1 < len(words) else w["end"] + 0.4
+            out.append({"text": " ".join(x["text"] for x in cur), "end": min(w["end"] + 0.4, max(w["end"], nxt))})
+            cur = []
+    return out
+
+
+def cut_key(words: list[dict[str, Any]], max_s: float) -> str:
+    """Changes whenever the narration of the Short's window changes (a new voice-over)."""
+    return hashlib.md5(repr([(w["text"], w["start"]) for w in words if w["start"] < max_s + 15]).encode()).hexdigest()
+
+
+def choose_cut(claude: Claude, words: list[dict[str, Any]], min_s: float = 50, max_s: float = 70) -> float:
+    """Seconds where the Short ends: just after the cliffhanger sentence that ends between min_s and
+    max_s. With no sentence ending in that window, it cuts at max_s."""
+    sents = sentences(words, max_s)
+    picks = [n for n, s in enumerate(sents) if min_s <= s["end"] <= max_s]
+    if not picks:
+        return float(max_s)
+    if len(picks) == 1:
+        return sents[picks[0]]["end"]
+    lines = [f"{n}{' (possible ending)' if n in picks else ''} [{s['end']:.0f}s]: {s['text']}" for n, s in enumerate(sents)]
+    res = claude.json(CUT_SYSTEM, [{"role": "user", "content": "SENTENCES\n" + "\n".join(lines)}], CUT_SCHEMA,
+                      effort="low")
+    n = res.get("sentence")
+    return sents[n if n in picks else picks[0]]["end"]
 
 
 def cut_shots(shots: list[dict[str, Any]], fps: int, seconds: float) -> list[dict[str, Any]]:
@@ -98,10 +147,11 @@ def render_frame(image: str | None, cfg: dict[str, Any], bg: str, channel: str, 
 
 def render(shots: list[dict[str, Any]], audio: Path, out: Path, video_cfg: dict[str, Any],
            short_cfg: dict[str, Any], work_dir: Path,
-           progress: Callable[[str, float], None] = lambda m, f: None) -> dict[str, Any]:
-    """Render the Short. `shots` are the main video's shots; only the first max_seconds are used."""
+           progress: Callable[[str, float], None] = lambda m, f: None, seconds: float | None = None) -> dict[str, Any]:
+    """Render the Short. `shots` are the main video's shots; only the first `seconds` (from
+    choose_cut, else max_seconds) are used."""
     fps = video_cfg.get("fps", 30)
-    seconds = float(short_cfg.get("max_seconds", 59))
+    seconds = float(seconds or short_cfg.get("max_seconds", 70))
     shots = cut_shots(shots, fps, seconds)
     if not shots:
         raise ValueError("The video has no shots yet. Assemble it first.")

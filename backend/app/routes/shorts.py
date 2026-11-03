@@ -23,11 +23,31 @@ router = APIRouter(prefix="/api/projects/{project_id}/short", tags=["shorts"])
 
 def _cfg() -> dict[str, Any]:
     cfg = load_config()
-    return {**{"max_seconds": 59, "channel_name": ""}, **cfg.get("shorts", {})}
+    return {**{"min_seconds": 50, "max_seconds": 70, "channel_name": ""}, **cfg.get("shorts", {})}
 
 
 def _file(p: dict[str, Any]) -> Path:
     return output_dir(p["slug"]) / "short.mp4"
+
+
+def stored_cut(project_id: int) -> float | None:
+    """Where the Short ends, if it was chosen for the current voice-over."""
+    short, cfg = db.get_short(project_id), _cfg()
+    words = db.list_words(project_id)
+    if words and short["cut_s"] is not None and short["cut_key"] == shorts.cut_key(words, float(cfg["max_seconds"])):
+        return short["cut_s"]
+    return None
+
+
+def _cut(project_id: int) -> float:
+    """Where the Short ends: chosen once per voice-over (at the best cliffhanger in the window), then kept."""
+    cut = stored_cut(project_id)
+    if cut is None:
+        cfg = _cfg()
+        words = db.list_words(project_id)
+        cut = shorts.choose_cut(claude(), words, float(cfg["min_seconds"]), float(cfg["max_seconds"]))
+        db.save_short(project_id, cut_s=cut, cut_key=shorts.cut_key(words, float(cfg["max_seconds"])))
+    return cut
 
 
 def _opening_text(project_id: int, seconds: float) -> str:
@@ -48,8 +68,10 @@ def get_short(project_id: int) -> dict[str, Any]:
         "posts": db.list_social_posts(project_id),
         "connected": {pl: social.connected(pl) for pl in shorts.PLATFORMS},
         "channel_name": cfg["channel_name"],
+        "min_seconds": cfg["min_seconds"],
         "max_seconds": cfg["max_seconds"],
-        "opening_text": _opening_text(project_id, float(cfg["max_seconds"])),
+        "cut_seconds": stored_cut(project_id),
+        "opening_text": _opening_text(project_id, stored_cut(project_id) or float(cfg["max_seconds"])),
         "previews": {pl: shorts.platform_text(short, pl) for pl in shorts.PLATFORMS},
         "full_titles": meta["titles"] if meta else [],
     }
@@ -80,9 +102,9 @@ def edit_short(project_id: int, body: ShortEdit) -> dict[str, Any]:
 @router.post("/text")
 def write_text(project_id: int) -> dict[str, Any]:
     p = project_or_404(project_id)
-    opening = _opening_text(project_id, float(_cfg()["max_seconds"]))
-    if not opening:
+    if not db.list_words(project_id):
         raise HTTPException(400, "Record the voice-over first")
+    opening = _opening_text(project_id, _cut(project_id))
     meta = db.get_publish_meta(project_id)
     res = shorts.write_text(claude(), meta["titles"][0] if meta else p["title"], opening)
     db.save_short(project_id, title=res["title"], caption=res["caption"], hashtags=res["hashtags"])
@@ -101,8 +123,10 @@ def render(project_id: int) -> dict[str, Any]:
     out = _file(p)
 
     def work(progress):
+        progress("Finding the cliffhanger to end on", 0.0)
+        cut = _cut(project_id)
         res = shorts.render(plan["shots"], Path(voice["audio_path"]), out, cfg["video"], scfg,
-                            output_dir(p["slug"]) / "_short_work", progress)
+                            output_dir(p["slug"]) / "_short_work", progress, seconds=cut)
         db.save_short(project_id, rendered_at=time.strftime("%Y-%m-%d %H:%M:%S"), duration_s=res["duration"])
         return res
 

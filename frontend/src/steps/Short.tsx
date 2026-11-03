@@ -36,7 +36,9 @@ interface ShortResp {
   posts: Post[];
   connected: Record<Platform, boolean>;
   channel_name: string;
+  min_seconds: number;
   max_seconds: number;
+  cut_seconds: number | null;
   opening_text: string;
   previews: Record<Platform, { title: string; text: string }>;
 }
@@ -168,9 +170,11 @@ export default function ShortStep({ project, refresh }: StepProps) {
         <div className="panel">
           <h2>Short form video</h2>
           <p className="muted small">
-            The first {data.max_seconds} seconds of the video, made vertical for phones (1080×1920). Each picture is
-            trimmed slightly at the sides and fills the width, with your channel name under it on the left. The video
-            stops abruptly at {data.max_seconds} seconds, so the cliffhanger sends viewers to the full video.
+            The opening of the video, made vertical for phones (1080×1920). Each picture is trimmed slightly at the
+            sides and fills the width, with your channel name under it on the left. It stops right after the best
+            cliffhanger sentence between {data.min_seconds} and {data.max_seconds} seconds
+            {data.cut_seconds ? ` (here, at ${Math.round(data.cut_seconds)} seconds)` : ""}, so viewers go to the full
+            video for the rest.
           </p>
           <p>
             Channel name under the pictures:{" "}

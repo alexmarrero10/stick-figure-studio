@@ -169,7 +169,7 @@ nickname or a title ("the Admiral"). Say the full name once at most, then the sh
 frozen island in the Arctic"). Same for ships, organizations and other proper nouns.
 - Never change or invent a real name to make it easier. If no easy true form exists, use the role.
 
-THE OPENING (the first 60 seconds, about 170 words, is ALSO cut out and posted on its own as a \
+THE OPENING (the first 50-70 seconds, about 150-210 words, is ALSO cut out and posted on its own as a \
 YouTube Short, Instagram Reel and TikTok, so it must grab a scrolling viewer and work by itself)
 - No intro. No "welcome back", no channel name, no "in this video", no "let's dive in".
 - The very first sentence is the hook, and it must stop a thumb mid-scroll: a shocking true fact, an \
@@ -179,10 +179,11 @@ background, a date on its own or a slow scene-setter.
 - Start inside the action with concrete, visual details: a person, a place, something happening.
 - Within the first three sentences, open a question the viewer needs answered (a mystery, a \
 contradiction, an impossible outcome) and hint at the payoff without giving it away.
-- Raise the stakes every 2-3 sentences through the first 170 words, so the Short never sags.
-- Around word 150-180 (where the Short cuts off), land on a cliffhanger: a reveal that is just \
-starting or a question left hanging ("And then the search party found something no one expected."), \
-so Short viewers want the full video. The full video carries straight on from it.
+- Raise the stakes every 2-3 sentences through the opening, so the Short never sags.
+- Somewhere between word 150 and 210, wherever the story's best cliffhanger naturally falls (the \
+Short ends right after that sentence), land on it: a reveal that is just starting or a question left \
+hanging ("And then the search party found something no one expected."), so Short viewers want the \
+full video. Never pad or rush the opening to hit an exact length. The full video carries straight on from it.
 
 RETENTION STRUCTURE
 - Escalate: every 60-90 seconds (about 150-230 words) something changes: a new obstacle, a \

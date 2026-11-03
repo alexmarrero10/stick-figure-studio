@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from app import db, jobs
 from app.config import load_config
 from app.deps import claude, project_or_404
+from app.routes.shorts import stored_cut
 from app.storage import prompts_dir
 from pipeline import prompts as prompts_mod
 from pipeline import shorts
@@ -25,10 +26,11 @@ def _beats_and_script(project_id: int) -> tuple[list[dict[str, Any]], str]:
 
 
 def _opening(project_id: int, beats: list[dict[str, Any]]) -> set[int]:
-    """Beats in the first minute, which is also cut into the Short."""
+    """Beats in the opening, which is also cut into the Short: up to where the Short ends once that is
+    chosen, otherwise the longest the Short may run."""
     cfg = load_config()
-    return shorts.opening_beats(beats, db.list_words(project_id), cfg.get("shorts", {}).get("max_seconds", 59),
-                                cfg["script"].get("wpm_estimate", 180))
+    seconds = stored_cut(project_id) or cfg.get("shorts", {}).get("max_seconds", 70)
+    return shorts.opening_beats(beats, db.list_words(project_id), seconds, cfg["script"].get("wpm_estimate", 180))
 
 
 def _export(project_id: int) -> list[str]:

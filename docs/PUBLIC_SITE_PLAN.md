@@ -103,7 +103,7 @@ Backend:
       `output/thumbnail.jpg`, regenerated when the video is newer than the thumbnail. Allow uploading a
       custom thumbnail image instead.
 - [ ] Per-project site fields: `youtube_url` for the full video and an optional `summary` override.
-      New migration (`008_...sql`; 007 is taken by prompt objects and places). Editable on the Publish step.
+      New migration (`009_...sql`; 007 and 008 are taken). Editable on the Publish step.
 - [ ] Simple local search for now: case-insensitive match over title, description and tags, so the
       search box works before Phase 2. Phase 2 replaces it behind the same endpoint (`GET /api/gallery?q=`).
 

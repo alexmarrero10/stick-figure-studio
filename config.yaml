@@ -48,7 +48,8 @@ publish:
   - true story
 shorts:
   channel_name: NextDoorHistorian
-  max_seconds: 59
+  min_seconds: 50
+  max_seconds: 70
   width: 1080
   height: 1920
   image_aspect: 1.5

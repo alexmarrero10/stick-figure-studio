@@ -491,3 +491,35 @@ def test_running_jobs_can_be_found_again_after_leaving_the_page(temp_db):
         assert c.get("/api/jobs", params={"project_id": 9999}).json() == []
     finally:
         release.set()
+
+
+def _words(text_at: list[tuple[str, float]]) -> list[dict]:
+    """One word per (text, start) with a 0.3 s duration."""
+    return [{"idx": n, "text": t, "start": s, "end": s + 0.3} for n, (t, s) in enumerate(text_at)]
+
+
+class CutFake:
+    def __init__(self, pick):
+        self.pick, self.asks = pick, []
+
+    def json(self, system, messages, schema, max_tokens=32000, effort=None):
+        self.asks.append(messages[-1]["content"])
+        return {"sentence": self.pick}
+
+
+def test_short_ends_on_the_cliffhanger_sentence_claude_picks_between_50_and_70_seconds():
+    words = _words([("It", 0), ("began.", 1), ("Soldiers", 48), ("waited.", 49), ("Then", 55), ("silence.", 56),
+                    ("Someone", 62), ("screamed.", 63), ("Answer", 71), ("given.", 72)])
+    fake = CutFake(pick=2)
+    assert shorts.choose_cut(fake, words, 50, 70) == pytest.approx(56.7)
+    assert "2 (possible ending) [57s]: Then silence." in fake.asks[0]
+    assert "(possible ending) [50s]" not in fake.asks[0] and "Answer given" not in fake.asks[0]
+    assert shorts.choose_cut(CutFake(pick=1), words, 50, 70) == pytest.approx(56.7)  # not a possible ending
+
+
+def test_short_cuts_at_the_longest_length_when_no_sentence_ends_in_the_window():
+    words = _words([("A", 0), ("very", 40), ("long", 60), ("sentence.", 75)])
+    assert shorts.choose_cut(CutFake(pick=0), words, 50, 70) == 70.0
+    one = _words([("Hello.", 0), ("Then", 52), ("silence.", 53)])
+    fake = CutFake(pick=0)
+    assert shorts.choose_cut(fake, one, 50, 70) == pytest.approx(53.7) and not fake.asks  # one choice: no need to ask

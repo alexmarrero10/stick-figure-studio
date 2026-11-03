@@ -465,13 +465,13 @@ def get_short(project_id: int) -> dict[str, Any]:
         r = _row(conn.execute("SELECT * FROM shorts WHERE project_id = ?", (project_id,)).fetchone())
     if not r:
         return {"project_id": project_id, "title": "", "caption": "", "hashtags": [], "youtube_url": "",
-                "rendered_at": None, "duration_s": None}
+                "rendered_at": None, "duration_s": None, "cut_s": None, "cut_key": None}
     r["hashtags"] = json.loads(r["hashtags"])
     return r
 
 
 def save_short(project_id: int, **fields: Any) -> dict[str, Any]:
-    """Update some of title, caption, hashtags, youtube_url, rendered_at, duration_s."""
+    """Update some of title, caption, hashtags, youtube_url, rendered_at, duration_s, cut_s, cut_key."""
     if "hashtags" in fields:
         fields["hashtags"] = json.dumps(fields["hashtags"])
     with tx() as conn:
