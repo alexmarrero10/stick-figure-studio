@@ -112,10 +112,25 @@ def add_labels(project_id: int) -> dict[str, Any]:
     return jobs.start("prompts", project_id, work)
 
 
+def _save_characters(project_id: int, old: list[dict[str, Any]], new: list[dict[str, Any]], style_prefix: str,
+                     props: list[dict[str, str]] | None = None, locations: list[dict[str, str]] | None = None) -> None:
+    """Saves the character looks and swaps any changed look into the prompts that copied it."""
+    new = prompts_mod.add_head_colors(new)
+    db.save_style_guide(project_id, style_prefix, new, None, props, locations)
+    pairs = prompts_mod.changed_looks(old, new)
+    if pairs:
+        db.set_scenes(project_id, {p["beat_id"]: s for p in db.list_prompts(project_id)
+                                   if (s := prompts_mod.replace_looks(p["scene"], pairs)) != p["scene"]})
+
+
 @router.get("")
 def list_prompts(project_id: int) -> dict[str, Any]:
     project_or_404(project_id)
     guide = db.get_style_guide(project_id)
+    if guide and prompts_mod.add_head_colors(guide["characters"]) != guide["characters"]:
+        # made before every look stated its head color: add it to the guide and the prompts
+        _save_characters(project_id, guide["characters"], guide["characters"], guide["style_prefix"])
+        guide = db.get_style_guide(project_id)
     if guide:
         guide["style_prefix"] = prompts_mod.with_body_rule(guide["style_prefix"])
     items = db.list_prompts(project_id)
@@ -153,7 +168,9 @@ class StyleBody(BaseModel):
 @router.put("/style")
 def put_style(project_id: int, body: StyleBody) -> dict[str, Any]:
     project_or_404(project_id)
-    db.save_style_guide(project_id, body.style_prefix, body.characters, None, body.props, body.locations)
+    old = db.get_style_guide(project_id)
+    _save_characters(project_id, old["characters"] if old else [], body.characters, body.style_prefix,
+                     body.props, body.locations)
     _export(project_id)
     return db.get_style_guide(project_id)
 

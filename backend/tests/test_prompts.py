@@ -33,7 +33,7 @@ def test_characters_have_full_looks_and_story_variants():
     bible = prompts.visual_bible(guide)
     assert "- Saddam: stick figure, stocky, thick black mustache, olive beret" in bible
     assert "    in hiding, 2003: stick figure, stocky, long scruffy gray-black beard, no hat" in bible
-    assert "- Old: stick figure with a red scarf" in bible
+    assert "- Old: stick figure, white head and hands, with a red scarf" in bible
     assert "variants" in prompts.STYLE_SYSTEM and 'no "now with a beard"' in prompts.SCENE_SYSTEM
 
 
@@ -99,3 +99,20 @@ def test_old_style_guides_get_the_arms_and_hands_rule():
     assert prompts.BODY in text and prompts.OLD_LIMBS not in text
     assert prompts.with_body_rule(prompts.with_body_rule(old)) == prompts.with_body_rule(old)
     assert prompts.BODY in prompts.BASE_STYLE
+
+
+def test_every_look_gets_a_head_color_and_prompts_follow():
+    assert prompts.with_head_color("stick figure, stocky, black beard") == \
+        "stick figure, white head and hands, stocky, black beard"
+    assert prompts.with_head_color("stick figures, medium build") == "stick figures, white heads and hands, medium build"
+    assert prompts.with_head_color("stick figure with a red scarf") == "stick figure, white head and hands, with a red scarf"
+    kept = "stick figure, medium brown head and hands, a red scarf"
+    assert prompts.with_head_color(kept) == kept
+    old = [{"name": "Guard", "look": "stick figure, burly, a checkered head scarf",
+            "variants": [{"when": "captured", "look": "stick figure, burly, no head scarf, wrists bound"}]}]
+    new = prompts.add_head_colors(old)
+    assert prompts.add_head_colors(new) == new
+    pairs = prompts.changed_looks(old, new)
+    scene = "At night stick figure, burly, no head scarf, wrists bound sits. Stick figure, burly, a checkered head scarf stands."
+    out = prompts.replace_looks(scene, pairs)
+    assert out.count("white head and hands") == 2 and "Stick figure, white head and hands, burly, a checkered" in out

@@ -37,17 +37,19 @@ describing each recurring thing with exactly the same words in every prompt. Fro
 - palette: 4-6 flat accent colors that suit the story's mood, as plain color names (e.g. "muted red, \
 navy blue, mustard yellow, sage green").
 - characters: every recurring person or group, at most 8. For each, a `look` of 20-40 words that \
-fully fixes how the stick figure is drawn, starting with "stick figure": build (tall, short, \
-stocky), hair and facial hair, headwear, clothing with its colors and whether its sleeves are long or short, and one item they carry. Spell \
-out every detail so the image model has nothing to invent, e.g. "stick figure, tall and thin, short \
-gray hair, tiny round glasses, a gray bowler hat, a long navy coat with brass buttons, carrying a \
-brown leather briefcase". Each look must be easy to tell apart from the others at a glance. Never \
-aim for a real likeness.
-  Heads are white by default. Only when race or ethnicity is part of the history being told (civil \
-rights, apartheid, colonialism, slavery, segregation), give a skin tone as a plain color right after \
-"stick figure", e.g. "stick figure, medium brown head and hands, …", and use the same words in all of \
-that character's variants. A skin tone only changes the fill color: never describe or change facial \
-features or body shape to show ethnicity, and describe hair like anyone else's. Otherwise do not mention skin at all.
+fully fixes how the stick figure is drawn, starting with "stick figure" and its head color: build \
+(tall, short, stocky), hair and facial hair, headwear, clothing with its colors and whether its \
+sleeves are long or short, and one item they carry. Spell out every detail so the image model has \
+nothing to invent, e.g. "stick figure, white head and hands, tall and thin, short gray hair, tiny \
+round glasses, a gray bowler hat, a long navy coat with brass buttons, carrying a brown leather \
+briefcase". Each look must be easy to tell apart from the others at a glance. Never aim for a real \
+likeness.
+  Every look states its head color, the same words in all of that character's variants, so the \
+image model never picks one itself: "white head and hands" by default. Only when race or ethnicity \
+is part of the history being told (civil rights, apartheid, colonialism, slavery, segregation), use \
+a plain skin tone in place of white, e.g. "stick figure, medium brown head and hands, …". A skin \
+tone only changes the fill color: never describe or change facial features or body shape to show \
+ethnicity, and describe hair like anyone else's.
   If the story changes how a character looks (in hiding, in disguise, years older, captured, in \
 uniform), add a `variants` entry for each change: `when` names that part of the story, and `look` \
 is the complete 20-40 word look for it, written in full (not "same as before but…"), keeping \
@@ -142,12 +144,62 @@ CARRY_OVER = 8
 def make_style_guide(claude: Claude, script: str) -> dict[str, Any]:
     g = claude.json(STYLE_SYSTEM, [{"role": "user", "content": f"SCRIPT\n{script}"}], STYLE_SCHEMA, effort="medium")
     g["style_prefix"] = BASE_STYLE.format(palette=g["palette"])
+    g["characters"] = add_head_colors(g["characters"])
     return g
 
 
 def character_look(c: dict[str, Any]) -> str:
     # Guides made before full looks only had a short marker.
-    return c.get("look") or f"stick figure with {c.get('marker', '')}"
+    return c.get("look") or with_head_color(f"stick figure with {c.get('marker', '')}")
+
+
+_LEAD = re.compile(r"(stick figures?)\b[,\s]*", re.I)
+
+
+def with_head_color(look: str) -> str:
+    """Puts "white head and hands" after "stick figure" in a look that gives no head color, so the
+    image model never chooses one itself (it otherwise drifts between white and light brown)."""
+    m = _LEAD.match(look or "")
+    if not m or re.search(r"\bheads? and hands\b", look, re.I):
+        return look
+    tone = "white heads and hands" if m.group(1).lower().endswith("s") else "white head and hands"
+    return f"{m.group(1)}, {tone}, {look[m.end():]}"
+
+
+def add_head_colors(characters: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    out = []
+    for c in characters:
+        c = {**c}
+        if c.get("look"):
+            c["look"] = with_head_color(c["look"])
+        if c.get("variants"):
+            c["variants"] = [{**v, "look": with_head_color(v["look"])} for v in c["variants"]]
+        out.append(c)
+    return out
+
+
+def changed_looks(old: list[dict[str, Any]], new: list[dict[str, Any]]) -> list[tuple[str, str]]:
+    """(old look, new look) for every character look or variant that differs between two guides,
+    matched by name and `when`, longest first so a look that contains another is replaced whole."""
+    pairs = []
+    for o in old:
+        n = _find(new, "name", o["name"])
+        if not n:
+            continue
+        if o.get("look") and n.get("look") and o["look"] != n["look"]:
+            pairs.append((o["look"], n["look"]))
+        for ov in o.get("variants") or []:
+            nv = _find(n.get("variants") or [], "when", ov["when"])
+            if nv and ov.get("look") and nv.get("look") and ov["look"] != nv["look"]:
+                pairs.append((ov["look"], nv["look"]))
+    return sorted(pairs, key=lambda p: -len(p[0]))
+
+
+def replace_looks(scene: str, pairs: list[tuple[str, str]]) -> str:
+    """Scenes copy each look word for word, so a changed look can be swapped in place."""
+    for old, new in pairs:  # a look that starts a sentence is capitalised ("Stick figures, ...")
+        scene = re.sub(re.escape(old), lambda m: m.group(0)[0] + new[1:], scene, flags=re.I)
+    return scene
 
 
 def character_lines(c: dict[str, Any]) -> str:

@@ -339,6 +339,14 @@ def upsert_prompts(project_id: int, prompts: list[dict[str, Any]], edited: bool 
         touch_project(conn, project_id)
 
 
+def set_scenes(project_id: int, scenes: dict[int, str]) -> None:
+    """Change scene text by beat id, leaving labels, casts and edited flags as they are."""
+    with tx() as conn:
+        conn.executemany("UPDATE image_prompts SET scene = ? WHERE beat_id = ? AND project_id = ?",
+                         [(scene, beat_id, project_id) for beat_id, scene in scenes.items()])
+        touch_project(conn, project_id)
+
+
 def done_batches(project_id: int) -> list[int]:
     with tx() as conn:
         rows = conn.execute("SELECT batch_no FROM prompt_batches WHERE project_id = ? AND done = 1 ORDER BY batch_no",

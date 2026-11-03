@@ -163,8 +163,8 @@ def test_generate_route_stores_props_and_batch_text(client, temp_db, monkeypatch
     # Who is in each image was decided first, saved with the prompt, and their look is in the scene.
     assert fake.calls[1][1].startswith("BEATS TO CAST:")
     assert all(p["characters"] == [{"name": "Franklin", "variant": ""}] for p in data["prompts"])
-    assert "in this image (copy each look, not the name): Franklin = stick figure with a plaid tartan scarf" in fake.calls[2][1]
-    assert all("stick figure with a plaid tartan scarf" in p["scene"] for p in data["prompts"])
+    assert "in this image (copy each look, not the name): Franklin = stick figure, white head and hands, with a plaid tartan scarf" in fake.calls[2][1]
+    assert all("stick figure, white head and hands, with a plaid tartan scarf" in p["scene"] for p in data["prompts"])
     text2 = data["batch_texts"]["2"]
     assert text2.startswith("INSTRUCTIONS FOR BATCH 2 OF 2")
     assert "continue the same video" in text2
