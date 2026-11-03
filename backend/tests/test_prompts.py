@@ -91,3 +91,11 @@ def test_look_is_added_when_claude_keeps_leaving_it_out():
     out = prompts.write_scenes(fake, "script", SADDAM, beats, cast=prompts.cast_beats(fake, "script", SADDAM, beats))
     assert out[0]["scene"] == ("Soldiers stare down at a dusty figure. Characters in this image: "
                                "stick figure, stocky, long scruffy gray-black beard, no hat.")
+
+
+def test_old_style_guides_get_the_arms_and_hands_rule():
+    old = "round white heads, thin black stick limbs, flat colors"
+    text = prompts.full_prompt(old, "a man waves")
+    assert prompts.BODY in text and prompts.OLD_LIMBS not in text
+    assert prompts.with_body_rule(prompts.with_body_rule(old)) == prompts.with_body_rule(old)
+    assert prompts.BODY in prompts.BASE_STYLE

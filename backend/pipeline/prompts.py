@@ -13,10 +13,17 @@ from typing import Any, Callable
 
 from pipeline.claude_client import INT, STR, Claude, arr, cached, obj
 
+OLD_LIMBS = "thin black stick limbs"
+BODY = (
+    "thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, "
+    "with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands "
+    "that are always the same color as the head, never black, unless a character's look gives gloves or mittens"
+)
+
 BASE_STYLE = (
     "Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round heads "
     "(white unless a character's look gives a skin tone) with simple expressive faces (dot eyes, "
-    "eyebrows, line mouth) drawn the same way for everyone, thin black stick limbs, "
+    "eyebrows, line mouth) drawn the same way for everyone, " + BODY + ", "
     "flat colors for props, clothing and backgrounds ({palette}). The background fills the whole frame "
     "and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show "
     "the room, never a blank white or paper background. Uncluttered composition with one clear focal point, "
@@ -31,7 +38,7 @@ describing each recurring thing with exactly the same words in every prompt. Fro
 navy blue, mustard yellow, sage green").
 - characters: every recurring person or group, at most 8. For each, a `look` of 20-40 words that \
 fully fixes how the stick figure is drawn, starting with "stick figure": build (tall, short, \
-stocky), hair and facial hair, headwear, clothing with its colors, and one item they carry. Spell \
+stocky), hair and facial hair, headwear, clothing with its colors and whether its sleeves are long or short, and one item they carry. Spell \
 out every detail so the image model has nothing to invent, e.g. "stick figure, tall and thin, short \
 gray hair, tiny round glasses, a gray bowler hat, a long navy coat with brass buttons, carrying a \
 brown leather briefcase". Each look must be easy to tell apart from the others at a glance. Never \
@@ -418,8 +425,15 @@ def image_title(number: int, label: str, scene: str) -> str:
     return f"{number} - {clean_label(label) or fallback_label(scene)}"
 
 
+def with_body_rule(style_prefix: str) -> str:
+    """Style guides made before the arms-and-hands rule get it in place of their old limbs phrase."""
+    if BODY in style_prefix:
+        return style_prefix
+    return style_prefix.replace(OLD_LIMBS, BODY, 1)
+
+
 def full_prompt(style_prefix: str, scene: str, title: str = "") -> str:
-    body = f"{scene.rstrip('.')}. {style_prefix}"
+    body = f"{scene.rstrip('.')}. {with_body_rule(style_prefix)}"
     return f"{title}. {body}" if title else body
 
 

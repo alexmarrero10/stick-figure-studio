@@ -116,6 +116,8 @@ def add_labels(project_id: int) -> dict[str, Any]:
 def list_prompts(project_id: int) -> dict[str, Any]:
     project_or_404(project_id)
     guide = db.get_style_guide(project_id)
+    if guide:
+        guide["style_prefix"] = prompts_mod.with_body_rule(guide["style_prefix"])
     items = db.list_prompts(project_id)
     batch = load_config()["prompts"]["batch_size"]
     for it in items:
