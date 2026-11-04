@@ -14,9 +14,14 @@ export default function BeatsStep({ project, refresh }: StepProps) {
   const [editing, setEditing] = useState<number | null>(null);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
+  const [undoSteps, setUndoSteps] = useState(0);
+
+  const loadUndo = () =>
+    api.get<{ steps: number }>(`/api/projects/${pid}/beats/undo`).then((r) => setUndoSteps(r.steps)).catch(() => {});
 
   useEffect(() => {
     api.get<Beat[]>(`/api/projects/${pid}/beats`).then(setBeats).catch((e) => setError(e.message));
+    loadUndo();
   }, [pid]);
 
   const build = async () => {
@@ -30,6 +35,7 @@ export default function BeatsStep({ project, refresh }: StepProps) {
       );
       setBeats(res.beats);
       setInfo(review ? `Claude adjusted ${res.review_applied} beat boundaries.` : null);
+      setUndoSteps(0);
       refresh();
     } catch (e) {
       setError((e as Error).message);
@@ -42,11 +48,38 @@ export default function BeatsStep({ project, refresh }: StepProps) {
     setError(null);
     try {
       setBeats(await api.post<Beat[]>(`/api/projects/${pid}/beats/ops`, { ops: [o] }));
+      setInfo(null);
       refresh();
     } catch (e) {
       setError((e as Error).message);
     }
+    loadUndo();
   };
+
+  const undo = async () => {
+    setError(null);
+    try {
+      setBeats(await api.post<Beat[]>(`/api/projects/${pid}/beats/undo`));
+      setInfo("Undid the last split or merge.");
+      refresh();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+    loadUndo();
+  };
+
+  // Ctrl+Z / Cmd+Z undoes too, unless you're typing in a box.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "z" && tag !== "TEXTAREA" && tag !== "INPUT" && undoSteps > 0) {
+        e.preventDefault();
+        undo();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [undoSteps, pid]);
 
   const startEdit = (b: Beat) => {
     setEditing(b.idx);
@@ -63,6 +96,7 @@ export default function BeatsStep({ project, refresh }: StepProps) {
     try {
       setBeats(await api.put<Beat[]>(`/api/projects/${pid}/beats/${b.idx}/text`, { text: draft }));
       setEditing(null);
+      setUndoSteps(0); // the script changed, so earlier splits and merges can't be undone
       refresh();
     } catch (e) {
       setError((e as Error).message);
@@ -91,6 +125,14 @@ export default function BeatsStep({ project, refresh }: StepProps) {
           </label>
           <button onClick={build} disabled={busy || !s.script}>
             {busy ? "Building…" : beats.length ? "Rebuild beats" : "Build beats"}
+          </button>
+          <button
+            className="secondary"
+            onClick={undo}
+            disabled={undoSteps === 0}
+            title={undoSteps ? `Undo the last split or merge (Ctrl+Z). ${undoSteps} step${undoSteps === 1 ? "" : "s"} available.` : "Nothing to undo"}
+          >
+            ↶ Undo{undoSteps > 0 ? ` (${undoSteps})` : ""}
           </button>
           {beats.length > 0 && (
             <a className="button" href={`#/p/${pid}/voice`}>

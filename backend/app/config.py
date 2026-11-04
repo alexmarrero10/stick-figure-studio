@@ -36,6 +36,12 @@ def save_config(cfg: dict[str, Any]) -> None:
     _cache = copy.deepcopy(cfg)
 
 
+def read_config_file() -> dict[str, Any]:
+    """What is actually on disk, skipping the cache (to confirm a save stuck)."""
+    with open(CONFIG_PATH, encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
+
+
 def get_key(name: str) -> str | None:
     return os.environ.get(name) or None
 

@@ -87,12 +87,12 @@ function ProjectView({ id, step }: { id: number; step: string }) {
   if (!project) return <p className="muted">Loading…</p>;
   const s = project.status;
   // Yellow until every beat has its picture, green once all are in.
-  const imagesWarn = s.prompts_missing > 0 || s.images < s.beats;
+  const imagesWarn = s.prompts_missing > 0 || !s.images_complete;
   const badge: Record<string, string> = {
     script: s.script ? `${s.script_words} words` : "",
     beats: s.beats ? (s.beats_stale ? "stale" : `${s.beats}`) : "",
     voice: s.voice ? (s.voice_stale ? "stale" : "done") : "",
-    images: s.prompts && s.prompts_missing ? `${s.prompts_missing} prompts missing` : s.prompts || s.images ? `${s.images}/${s.beats}` : "",
+    images: s.prompts && s.prompts_missing ? `${s.prompts_missing} prompts missing` : s.prompts || s.images ? `${s.images_filled}/${s.beats}` : "",
     assemble: s.shots ? "done" : "",
     publish: s.publish ? "done" : "",
     short: s.short_posts ? `on ${s.short_posts} apps` : s.short ? "made" : "",

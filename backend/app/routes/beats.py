@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -59,6 +59,7 @@ def build(project_id: int, body: BuildBody) -> dict[str, Any]:
         applied = len(ops) - len(skipped)
         beats = scenes.beats_from_ranges(script["text"], new_ranges, cfg["script"]["wpm_estimate"])
     db.replace_beats(project_id, script["id"], beats)
+    db.clear_beat_undo(project_id)
     return {"beats": get_beats(project_id), "review_applied": applied, "review_skipped": skipped}
 
 
@@ -83,22 +84,28 @@ def edit_text(project_id: int, idx: int, body: TextBody) -> list[dict[str, Any]]
         raise HTTPException(400, str(e)) from e
     if new_script == script["text"]:
         return get_beats(project_id)
-    prompts = {pr["idx"]: pr for pr in db.list_prompts(project_id)}
+    # The edited beat's picture may no longer fit, so only the other beats keep their prompts.
+    prompts = {pr["idx"]: pr for pr in db.list_prompts(project_id) if pr["idx"] != idx}
     v = db.save_script(project_id, new_script, "manual", f"Edited beat #{idx}")
     write_script_mirror(p["slug"], new_script)
     cfg = load_config()
     db.replace_beats(project_id, v["id"], scenes.beats_from_ranges(new_script, new_ranges, cfg["script"]["wpm_estimate"]))
-    # The edited beat's picture may no longer fit, so only the other beats keep their prompts.
-    batch = cfg["prompts"]["batch_size"]
+    db.clear_beat_undo(project_id)  # the script changed, so earlier splits can't be undone
+    _restore_prompts(project_id, prompts, lambda b: b["idx"])
+    return get_beats(project_id)
+
+
+def _restore_prompts(project_id: int, saved: dict[Any, dict[str, Any]], key: Callable[[dict[str, Any]], Any]) -> None:
+    """Put saved prompts back on the beats they belong to (matched by `key(beat)`), keeping each
+    one's title, cast, objects and edited flag."""
+    batch = load_config()["prompts"]["batch_size"]
+    rows = [(b, saved[key(b)]) for b in db.list_beats(project_id) if key(b) in saved]
     for edited in (False, True):
-        kept = [
-            {"beat_id": b["id"], "batch_no": b["idx"] // batch + 1, "scene": prompts[b["idx"]]["scene"]}
-            for b in db.list_beats(project_id)
-            if b["idx"] != idx and b["idx"] in prompts and bool(prompts[b["idx"]]["edited"]) == edited
-        ]
+        kept = [{"beat_id": b["id"], "batch_no": b["idx"] // batch + 1, "scene": pr["scene"],
+                 "label": pr.get("label", ""), "characters": pr.get("characters"), "things": pr.get("things")}
+                for b, pr in rows if bool(pr.get("edited")) == edited]
         if kept:
             db.upsert_prompts(project_id, kept, edited=edited)
-    return get_beats(project_id)
 
 
 class OpsBody(BaseModel):
@@ -119,14 +126,38 @@ def ops(project_id: int, body: OpsBody) -> list[dict[str, Any]]:
     if skipped:
         raise HTTPException(400, "; ".join(skipped))
     prompts = {(p["word_start"], p["word_end"]): p for p in db.list_prompts(project_id)}
+    db.push_beat_undo(project_id, {"script_version_id": script["id"], "ranges": ranges,
+                                   "prompts": [{**_saved_prompt(p), "range": list(k)} for k, p in prompts.items()]})
     db.replace_beats(project_id, script["id"], scenes.beats_from_ranges(script["text"], new_ranges))
     # Keep prompts for beats whose word range didn't change.
-    kept = []
-    batch = load_config()["prompts"]["batch_size"]
-    for b in db.list_beats(project_id):
-        old = prompts.get((b["word_start"], b["word_end"]))
-        if old:
-            kept.append({"beat_id": b["id"], "batch_no": b["idx"] // batch + 1, "scene": old["scene"]})
-    if kept:
-        db.upsert_prompts(project_id, kept)
+    _restore_prompts(project_id, prompts, lambda b: (b["word_start"], b["word_end"]))
+    return get_beats(project_id)
+
+
+def _saved_prompt(p: dict[str, Any]) -> dict[str, Any]:
+    return {k: p[k] for k in ("scene", "label", "edited", "characters", "things")}
+
+
+@router.get("/undo")
+def undo_steps(project_id: int) -> dict[str, int]:
+    project_or_404(project_id)
+    return {"steps": db.beat_undo_steps(project_id)}
+
+
+@router.post("/undo")
+def undo(project_id: int) -> list[dict[str, Any]]:
+    """Undo the latest split or merge: the beats and their image prompts go back to how they were."""
+    project_or_404(project_id)
+    snap = db.pop_beat_undo(project_id)
+    beats = db.list_beats(project_id)
+    if not snap:
+        raise HTTPException(400, "Nothing to undo")
+    if not beats or beats[0]["script_version_id"] != snap["script_version_id"]:
+        db.clear_beat_undo(project_id)
+        raise HTTPException(400, "The beats were rebuilt since then, so that change can't be undone")
+    script = db.get_script_version(snap["script_version_id"])
+    db.replace_beats(project_id, script["id"],
+                     scenes.beats_from_ranges(script["text"], [tuple(r) for r in snap["ranges"]]))
+    _restore_prompts(project_id, {tuple(p["range"]): p for p in snap["prompts"]},
+                     lambda b: (b["word_start"], b["word_end"]))
     return get_beats(project_id)

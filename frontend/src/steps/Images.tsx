@@ -69,8 +69,11 @@ export default function ImagesStep({ project, refresh }: StepProps) {
   const [labelDraft, setLabelDraft] = useState("");
   const [warnings, setWarnings] = useState<string[]>([]);
   const [note, setNote] = useState<string | null>(null);
-  const [drag, setDrag] = useState<number | null>(null);
+  const [drag, setDrag] = useState<string | null>(null); // path of the image being dragged
+  const [over, setOver] = useState<number | null>(null); // slot it's hovering over
   const [uploading, setUploading] = useState(false);
+  const pickRef = useRef<HTMLInputElement>(null);
+  const [pickSlot, setPickSlot] = useState<number | null>(null); // empty slot the file picker fills
   const [error, setError] = useState<string | null>(null);
   const { run, job, busy } = useJob({
     project: pid,
@@ -95,7 +98,7 @@ export default function ImagesStep({ project, refresh }: StepProps) {
   };
 
   const generate = async (only_missing: boolean, new_style = false) => {
-    if (!only_missing && data?.prompts.length && !window.confirm("Rewrite every prompt? Your edits and batch checkmarks are cleared.")) return;
+    if (!only_missing && data?.prompts.length && !window.confirm("Rewrite every prompt? Prompts you edited by hand are rewritten too.")) return;
     setError(null);
     try {
       await run(() => api.post(`/api/projects/${pid}/prompts/generate`, { only_missing, new_style }));
@@ -209,29 +212,46 @@ export default function ImagesStep({ project, refresh }: StepProps) {
   };
 
   const batch = batches.find((b) => b.batch_no === active);
-  // One entry per slot (null = empty), then the extras.
-  const layout: (string | null)[] = batch
-    ? [...batch.slots.map((s) => s.image?.path ?? null), ...batch.extra.map((i) => i.path)]
-    : [];
 
-  const move = async (from: number, to: number) => {
-    if (!batch || from === to) return;
-    const paths = [...layout];
-    if (paths[to] === null) {
-      // Dropped on an empty slot: just move it there.
-      paths[to] = paths[from];
-      paths[from] = null;
-    } else {
-      const [p] = paths.splice(from, 1);
-      paths.splice(to, 0, p);
-    }
-    while (paths.length > batch.slots.length && paths[paths.length - 1] === null) paths.pop();
+  // Drop an image on a slot: an image already there swaps places with it.
+  const move = async (path: string, to: number) => {
+    if (batch?.slots[to]?.image?.path === path) return;
     try {
-      const r = await api.put<ImagesResp>(`/api/projects/${pid}/images/${active}/order`, { paths });
+      const r = await api.post<ImagesResp>(`/api/projects/${pid}/images/${active}/move`, { path, to });
       setBatches(r.batches);
+      refresh();
     } catch (e) {
       fail(e);
     }
+  };
+
+  // Put one picked (or dropped) file into an empty slot.
+  const uploadToSlot = async (slot: number, file: File) => {
+    if (!/\.(png|jpe?g|webp)$/i.test(file.name)) {
+      setError("Pick a PNG, JPG or WebP image.");
+      return;
+    }
+    setError(null);
+    setNote(null);
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const r = await api.post<{ images: ImagesResp; warnings: string[] }>(
+        `/api/projects/${pid}/images/${active}/slot/${slot}`,
+        fd,
+      );
+      setBatches(r.images.batches);
+      setWarnings(r.warnings || []);
+      setNote(`Added ${file.name} to slot ${slot + 1}.`);
+      refresh();
+    } catch (e) {
+      fail(e);
+    }
+  };
+
+  const pickFor = (slot: number) => {
+    setPickSlot(slot);
+    pickRef.current?.click();
   };
 
   const remove = async (img: Img) => {
@@ -434,6 +454,19 @@ export default function ImagesStep({ project, refresh }: StepProps) {
             </div>
           ))}
 
+          <input
+            ref={pickRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            hidden
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f && pickSlot !== null) uploadToSlot(pickSlot, f);
+              e.target.value = "";
+              setPickSlot(null);
+            }}
+          />
+          <p className="muted small">Drag a picture onto another slot to swap them. Click an empty slot to add one.</p>
           <ol className="pair-list">
             {(batch?.slots ?? rows.map((r) => ({ beat_idx: r.idx, beat_text: r.beat_text, image: null }))).map((slot, k) => {
               const r = byIdx.get(slot.beat_idx);
@@ -504,15 +537,33 @@ export default function ImagesStep({ project, refresh }: StepProps) {
                     )}
                   </div>
                   <div
-                    className={`slot ${slot.image ? "" : "empty"}`}
+                    className={`slot ${slot.image ? "" : "empty"} ${over === k ? "drop-target" : ""} ${
+                      drag && drag === slot.image?.path ? "dragging" : ""
+                    }`}
                     draggable={!!slot.image}
-                    onDragStart={() => setDrag(k)}
-                    onDragOver={(e) => e.preventDefault()}
+                    title={slot.image ? "Drag onto another slot to swap" : "Click to pick an image for this slot"}
+                    onClick={() => !slot.image && batch && pickFor(k)}
+                    onDragStart={(e) => {
+                      if (!slot.image) return;
+                      e.dataTransfer.effectAllowed = "move";
+                      setDrag(slot.image.path);
+                    }}
+                    onDragEnd={() => {
+                      setDrag(null);
+                      setOver(null);
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      if (over !== k) setOver(k);
+                    }}
+                    onDragLeave={() => setOver((o) => (o === k ? null : o))}
                     onDrop={(e) => {
-                      if (drag === null || e.dataTransfer.files.length) return;
                       e.preventDefault();
                       e.stopPropagation();
-                      move(drag, k);
+                      setOver(null);
+                      const file = e.dataTransfer.files[0];
+                      if (file && !slot.image && batch) uploadToSlot(k, file);
+                      else if (drag) move(drag, k);
                       setDrag(null);
                     }}
                   >
@@ -529,7 +580,7 @@ export default function ImagesStep({ project, refresh }: StepProps) {
                         </div>
                       </>
                     ) : (
-                      <div className="placeholder">No image</div>
+                      <div className="placeholder">No image · click to add</div>
                     )}
                   </div>
                 </li>
@@ -543,8 +594,17 @@ export default function ImagesStep({ project, refresh }: StepProps) {
                 slot or remove it.
               </div>
               <div className="image-grid">
-                {batch.extra.map((img, j) => (
-                  <div key={img.path} className="slot extra" draggable onDragStart={() => setDrag(batch.slots.length + j)}>
+                {batch.extra.map((img) => (
+                  <div
+                    key={img.path}
+                    className={`slot extra ${drag === img.path ? "dragging" : ""}`}
+                    draggable
+                    onDragStart={() => setDrag(img.path)}
+                    onDragEnd={() => {
+                      setDrag(null);
+                      setOver(null);
+                    }}
+                  >
                     <img src={img.url} alt={img.name} />
                     <div className="row between small">
                       <span className="muted" title={img.name}>

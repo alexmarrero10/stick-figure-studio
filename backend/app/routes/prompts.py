@@ -73,8 +73,6 @@ def generate(project_id: int, body: GenBody) -> dict[str, Any]:
             written = {p["idx"]: {"scene": p["scene"], "label": p["label"]} for p in existing}
             known_cast = {p["idx"]: p["characters"] for p in existing if p["characters"] is not None}
             known_things = {p["idx"]: p["things"] for p in existing if p["things"] is not None}
-        if not body.only_missing:
-            db.clear_batches_done(project_id)  # new prompts mean the Flow batches have to be made again
         if todo:
             progress("Deciding who and what is in each image", 0.04)
             cast, things = prompts_mod.stage_beats(c, script, guide, todo, known=known_cast, known_things=known_things,

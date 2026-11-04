@@ -150,6 +150,25 @@ def label_number(name: str) -> int | None:
     return int(m.group(1)) if m and int(m.group(1)) > 0 else None
 
 
+def numbered(name: str, number: int | None) -> str:
+    """The file name with its slot number replaced ("12_-_Vault.jpg" -> "3 - Vault.jpg"), or with no
+    number at all for None. The number is what places an image, so renaming moves it for good."""
+    m = LABEL_NUMBER.match(name)
+    rest = (name[m.end():] if m else name).lstrip(" -_.)") or "image" + Path(name).suffix
+    return f"{number} - {rest}" if number else rest
+
+
+def rename_free(path: Path, name: str) -> Path:
+    """Rename `path` to `name` in the same folder, adding " (2)", " (3)"... if that name is taken."""
+    stem, suffix = Path(name).stem, Path(name).suffix
+    target = path.with_name(name)
+    n = 2
+    while target.exists() and target.resolve() != path.resolve():
+        target = path.with_name(f"{stem} ({n}){suffix}")
+        n += 1
+    return path.rename(target)
+
+
 def natural_key(name: str) -> list[Any]:
     return [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", name)]
 

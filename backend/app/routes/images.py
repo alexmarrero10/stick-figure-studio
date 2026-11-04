@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import zipfile
 from pathlib import Path
 from typing import Any
@@ -157,6 +158,63 @@ def delete_image(project_id: int, batch_no: int, body: DeleteBody) -> dict[str, 
     if target.parent != folder:
         raise HTTPException(400, "Not in this batch")
     target.unlink(missing_ok=True)
+    _scan(project_id, batch_no)
+    return list_images(project_id)
+
+
+@router.post("/{batch_no}/slot/{position}")
+async def upload_to_slot(project_id: int, batch_no: int, position: int, file: UploadFile = File(...)) -> dict[str, Any]:
+    """Put one picked image into an empty slot (0-based). It is saved as "<number> - <title>" so it
+    stays in that slot whenever the batch is read again."""
+    p = project_or_404(project_id)
+    slots = _slots(project_id, batch_no)
+    if not 0 <= position < slots:
+        raise HTTPException(400, "No such slot")
+    suffix = Path(file.filename or "").suffix.lower()
+    if suffix not in images_mod.IMAGE_EXTS:
+        raise HTTPException(400, "Pick a PNG, JPG or WebP image")
+    if any(im["batch_no"] == batch_no and im["position"] == position for im in db.list_images(project_id)):
+        raise HTTPException(400, "That slot already has an image. Remove it first.")
+    batch = load_config()["prompts"]["batch_size"]
+    idx = (batch_no - 1) * batch + position
+    label = next((pr["label"] for pr in db.list_prompts(project_id) if pr["idx"] == idx), "")
+    label = re.sub(r'[\\/:*?"<>|]+', "", label).strip(" .")[:80] or "image"  # safe as a Windows file name
+    folder = batch_images_dir(p["slug"], batch_no)
+    folder.mkdir(parents=True, exist_ok=True)
+    tmp = folder / f".upload{suffix}"
+    tmp.write_bytes(await file.read())
+    images_mod.rename_free(tmp, f"{position + 1} - {label}{suffix}")
+    warnings = _scan(project_id, batch_no)
+    return {"images": list_images(project_id), "warnings": warnings}
+
+
+class MoveBody(BaseModel):
+    path: str
+    to: int  # 0-based slot
+
+
+@router.post("/{batch_no}/move")
+def move_image(project_id: int, batch_no: int, body: MoveBody) -> dict[str, Any]:
+    """Drag an image onto a slot. A picture already there swaps places with it (or, when an extra was
+    dragged in, loses its number: it fills the first empty slot, or becomes an extra when there is
+    none). Files are renamed to their new slot numbers, so the order sticks."""
+    p = project_or_404(project_id)
+    slots = _slots(project_id, batch_no)
+    folder = batch_images_dir(p["slug"], batch_no).resolve()
+    imgs = {Path(im["path"]).resolve(): im for im in db.list_images(project_id) if im["batch_no"] == batch_no}
+    src = Path(body.path).resolve()
+    if src.parent != folder or src not in imgs:
+        raise HTTPException(400, "Not in this batch")
+    if not 0 <= body.to < slots:
+        raise HTTPException(400, "No such slot")
+    from_pos = imgs[src]["position"]
+    other = next((path for path, im in imgs.items() if im["position"] == body.to and path != src), None)
+    # Park the moving file under a temporary name first so the two renames can't collide.
+    src = images_mod.rename_free(src, f".moving{src.suffix}")
+    if other is not None:
+        back = from_pos + 1 if from_pos < slots else None
+        images_mod.rename_free(other, images_mod.numbered(other.name, back))
+    images_mod.rename_free(src, images_mod.numbered(Path(body.path).name, body.to + 1))
     _scan(project_id, batch_no)
     return list_images(project_id)
 

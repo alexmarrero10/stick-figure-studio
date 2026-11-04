@@ -1,6 +1,7 @@
 """Step 2: research brief, script generation and chat-based revisions."""
 from __future__ import annotations
 
+import difflib
 import re
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor
@@ -382,6 +383,48 @@ def revise(claude: Claude, script: str, history: list[dict[str, Any]], instructi
     result = claude.json(cached(REVISE_SYSTEM), messages, REVISE_SCHEMA, effort="medium")
     result["edits"] = [check_edit(script, {**e, "replace": to_ascii(e["replace"])}) for e in result["edits"]]
     return result
+
+
+GRAMMAR_SYSTEM = """You proofread the narration script of a YouTube video. The channel owner has \
+edited parts of it by hand. Fix only real mistakes: grammar, spelling, punctuation, typos, missing or \
+doubled words, and sentences broken by an edit. Look hardest at the EDITED PASSAGES; elsewhere, fix \
+only clear errors.
+- Never change the wording, style, tone, facts or length beyond what a fix needs, and leave correct \
+sentences alone, even if you would phrase them differently.
+- Keep the script's rules: plain ASCII, numbers written the way they are spoken, no em dashes, \
+semicolons, ellipses or parentheses.
+Reply with:
+- reply: one or two sentences saying what you fixed, or that the script is already clean.
+- edits: minimal find/replace edits. `find` must be copied EXACTLY from the script (same punctuation \
+and spacing) and be long enough to appear only once, usually the sentence with the mistake. `replace` \
+is the corrected text. No edits when nothing is wrong."""
+
+_SENTENCE = re.compile(r"[^.!?\n]+[.!?]*[\"')\]]*")
+
+
+def edited_passages(before: str, after: str) -> list[str]:
+    """Sentences of `after` that are new or changed compared with `before`."""
+    a = [s.strip() for s in _SENTENCE.findall(before) if s.strip()]
+    b = [s.strip() for s in _SENTENCE.findall(after) if s.strip()]
+    out: list[str] = []
+    for op, _, _, j1, j2 in difflib.SequenceMatcher(a=a, b=b, autojunk=False).get_opcodes():
+        if op in ("replace", "insert"):
+            out += b[j1:j2]
+    return out
+
+
+def check_grammar(claude: Claude, script: str, before: str | None) -> dict[str, Any]:
+    """Proofread the script, focusing on what changed since `before` (the last version Claude wrote)."""
+    passages = edited_passages(before, script) if before else []
+    msg = f"SCRIPT\n<script>\n{script}\n</script>"
+    if passages:
+        msg += "\n\nEDITED PASSAGES (typed by the owner)\n" + "\n".join(f"- {p}" for p in passages)
+    elif before is not None:
+        msg += "\n\nThe owner made no edits since Claude last wrote it; only fix clear errors."
+    result = claude.json(GRAMMAR_SYSTEM, [{"role": "user", "content": msg}], REVISE_SCHEMA, effort="medium")
+    result["edits"] = [check_edit(script, {**e, "replace": to_ascii(e["replace"])}) for e in result["edits"]
+                       if e["find"] != e["replace"]]
+    return {**result, "passages": len(passages)}
 
 
 def check_edit(script: str, edit: dict[str, Any]) -> dict[str, Any]:

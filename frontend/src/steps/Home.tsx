@@ -144,7 +144,11 @@ function ProjectCard({ p, children }: { p: Project; children: React.ReactNode })
         <Chip on={p.status.script} label={p.status.script ? `${p.status.script_words} words` : "No script"} />
         <Chip on={p.status.voice && !p.status.voice_stale} label="Voice" />
         <Chip on={p.status.prompts > 0} label="Prompts" />
-        <Chip on={p.status.images > 0} label={`Images ${p.status.images}/${p.status.beats || "?"}`} />
+        <Chip
+          on={p.status.images_complete}
+          part={!p.status.images_complete}
+          label={`Images ${p.status.images_filled}/${p.status.beats || "?"}`}
+        />
         <Chip on={p.status.shots > 0} label="Assembled" />
         <Chip on={p.status.short_posts > 0} label={p.status.short_posts ? `Short on ${p.status.short_posts} apps` : "Short"} />
       </div>
@@ -156,6 +160,7 @@ function ProjectCard({ p, children }: { p: Project; children: React.ReactNode })
   );
 }
 
-function Chip({ on, label }: { on: boolean; label: string }) {
-  return <span className={`chip ${on ? "on" : ""}`}>{label}</span>;
+// on = done (green), part = blank or partly done (yellow), neither = grey.
+function Chip({ on, part, label }: { on: boolean; part?: boolean; label: string }) {
+  return <span className={`chip ${on ? "on" : part ? "part" : ""}`}>{label}</span>;
 }

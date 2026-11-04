@@ -170,6 +170,25 @@ def chat(project_id: int, body: ChatBody) -> dict[str, Any]:
     return msg
 
 
+@router.post("/script/grammar")
+def grammar(project_id: int) -> dict[str, Any]:
+    """Proofread the script, focusing on the passages typed by hand since Claude last wrote it.
+    The fixes come back as pending edits in the chat, like any other suggestion."""
+    project_or_404(project_id)
+    cur = db.current_script(project_id)
+    if not cur:
+        raise HTTPException(400, "Generate or write a script first")
+    last_ai = next((v for v in db.list_script_versions(project_id) if v["source"] != "manual"), None)
+    before = db.get_script_version(last_ai["id"])["text"] if last_ai else None
+    result = script_mod.check_grammar(claude(), cur["text"], before)
+    db.add_revision_message(project_id, "user", "Check grammar")
+    msg = db.add_revision_message(project_id, "assistant", result["reply"], result["edits"])
+    msg["edits"] = result["edits"]
+    msg["script_version_id"] = cur["id"]
+    msg["passages"] = result["passages"]
+    return msg
+
+
 class ApplyBody(BaseModel):
     edits: list[dict[str, Any]]
     instruction: str | None = None

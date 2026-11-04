@@ -185,7 +185,8 @@ TikTok cut from the first minute of a narrated stick-figure history video. The c
 a cliffhanger, so the text must make viewers want to watch the full video on YouTube. Be accurate: \
 promise nothing the video doesn't deliver.
 
-- title: under 70 characters, curiosity-driven, no hashtags, no emojis.
+- title: a short, direct question ending in "?" (under 60 characters, about 4-9 words), \
+curiosity-driven, no hashtags, no emojis.
 - caption: 1-2 short sentences (under 200 characters) that tease the mystery and say the full story \
 is on YouTube. No hashtags, no links (the link is added automatically).
 - hashtags: 5-8 hashtags without the # sign, mixing broad ones (history, animation) with ones about \

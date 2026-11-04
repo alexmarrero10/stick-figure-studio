@@ -23,9 +23,45 @@ const FIELDS: {
     ],
     help: "Claude Code uses your Pro/Max login and counts against its usage limits",
   },
-  { section: "claude", key: "code_model", label: "Claude Code model", help: "opus or sonnet" },
-  { section: "claude", key: "model", label: "API model", help: "Only used with the API provider" },
-  { section: "claude", key: "effort", label: "Claude effort", help: "low, medium, high, xhigh or max" },
+  {
+    section: "claude",
+    key: "code_model",
+    label: "Claude Code model",
+    type: "select",
+    options: [
+      { value: "fable", label: "Fable (most capable, uses the most of your limits)" },
+      { value: "opus", label: "Opus (recommended)" },
+      { value: "sonnet", label: "Sonnet (faster, lighter on limits)" },
+      { value: "haiku", label: "Haiku (fastest, simplest tasks)" },
+    ],
+  },
+  {
+    section: "claude",
+    key: "model",
+    label: "API model",
+    type: "select",
+    options: [
+      { value: "claude-fable-5-1", label: "Fable 5.1" },
+      { value: "claude-opus-5-5", label: "Opus 5.5 (recommended)" },
+      { value: "claude-sonnet-5-5", label: "Sonnet 5.5" },
+      { value: "claude-haiku-5-5", label: "Haiku 5.5" },
+    ],
+    help: "Only used with the API provider",
+  },
+  {
+    section: "claude",
+    key: "effort",
+    label: "Claude effort",
+    type: "select",
+    options: [
+      { value: "low", label: "Low" },
+      { value: "medium", label: "Medium" },
+      { value: "high", label: "High (recommended)" },
+      { value: "xhigh", label: "Extra high" },
+      { value: "max", label: "Max (slowest)" },
+    ],
+    help: "How hard Claude thinks. Higher is better but slower and uses more of your limits",
+  },
   { section: "claude", key: "web_search", label: "Web search during research", type: "bool" },
   {
     section: "claude",
@@ -103,8 +139,10 @@ const FIELDS: {
 export default function SettingsPage() {
   const [s, setS] = useState<Settings | null>(null);
   const [keys, setKeys] = useState({ ANTHROPIC_API_KEY: "", ELEVENLABS_API_KEY: "" });
-  const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Result of the last save, shown next to the button that made it.
+  const [saved, setSaved] = useState<Record<string, { ok: boolean; text: string }>>({});
+  const [saving, setSaving] = useState<string | null>(null);
 
   useEffect(() => {
     api.get<Settings>("/api/settings").then(setS).catch((e) => setError(e.message));
@@ -115,8 +153,10 @@ export default function SettingsPage() {
   const setField = (section: string, key: string, value: unknown) =>
     setS({ ...s, config: { ...s.config, [section]: { ...s.config[section], [key]: value } } });
 
+  const report = (where: string, ok: boolean, text: string) => setSaved((r) => ({ ...r, [where]: { ok, text } }));
+
   const saveConfig = async () => {
-    setError(null);
+    setSaving("config");
     try {
       const cfg: Record<string, Record<string, unknown>> = JSON.parse(JSON.stringify(s.config));
       for (const f of FIELDS) {
@@ -133,25 +173,40 @@ export default function SettingsPage() {
           cfg[f.section][f.key] = v.split(",").map((t) => t.trim()).filter(Boolean);
         }
       }
-      await api.put("/api/settings/config", cfg);
-      setMsg("Settings saved.");
+      const stored = await api.put<Settings["config"]>("/api/settings/config", cfg);
+      setS({ ...s, config: stored });
+      report("config", true, `Settings saved at ${new Date().toLocaleTimeString()}.`);
     } catch (e) {
-      setError((e as Error).message);
+      report("config", false, `Not saved: ${(e as Error).message}`);
+    } finally {
+      setSaving(null);
     }
   };
 
   const saveKey = async (name: keyof typeof keys) => {
-    if (!keys[name].trim()) return;
-    await api.put("/api/settings/key", { name, value: keys[name] });
-    setKeys({ ...keys, [name]: "" });
-    setS(await api.get<Settings>("/api/settings"));
-    setMsg(`${name} saved to .env`);
+    if (!keys[name].trim()) {
+      report(name, false, "Paste a key first.");
+      return;
+    }
+    setSaving(name);
+    try {
+      await api.put("/api/settings/key", { name, value: keys[name] });
+      setKeys({ ...keys, [name]: "" });
+      setS(await api.get<Settings>("/api/settings"));
+      report(name, true, "Saved to .env.");
+    } catch (e) {
+      report(name, false, `Not saved: ${(e as Error).message}`);
+    } finally {
+      setSaving(null);
+    }
   };
+
+  const status = (where: string) =>
+    saved[where] && <span className={`save-status ${saved[where].ok ? "good" : "bad"}`}>{saved[where].text}</span>;
 
   return (
     <div className="settings">
       <h1>Settings</h1>
-      {msg && <div className="ok">{msg}</div>}
       <ErrorBox error={error} />
       <div className="panel">
         <h2>API keys</h2>
@@ -170,7 +225,10 @@ export default function SettingsPage() {
                 placeholder="Paste a new key"
               />
             </label>
-            <button onClick={() => saveKey(name)}>Save</button>
+            <button onClick={() => saveKey(name)} disabled={saving === name}>
+              {saving === name ? "Saving…" : "Save"}
+            </button>
+            {status(name)}
           </div>
         ))}
       </div>
@@ -186,6 +244,10 @@ export default function SettingsPage() {
                   <>
                     {f.label}
                     <select value={String(v ?? "")} onChange={(e) => setField(f.section, f.key, e.target.value)}>
+                      {/* Keep a value set by hand in config.yaml visible even if it isn't a listed choice. */}
+                      {v != null && v !== "" && !f.options!.some((o) => o.value === String(v)) && (
+                        <option value={String(v)}>{String(v)}</option>
+                      )}
                       {f.options!.map((o) => (
                         <option key={o.value} value={o.value}>
                           {o.label}
@@ -212,7 +274,12 @@ export default function SettingsPage() {
             );
           })}
         </div>
-        <button onClick={saveConfig}>Save settings</button>
+        <div className="row">
+          <button onClick={saveConfig} disabled={saving === "config"}>
+            {saving === "config" ? "Saving…" : "Save settings"}
+          </button>
+          {status("config")}
+        </div>
       </div>
     </div>
   );

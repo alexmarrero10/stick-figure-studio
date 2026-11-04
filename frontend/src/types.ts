@@ -31,6 +31,8 @@ export interface Status {
   prompts: number;
   prompts_missing: number;
   images: number;
+  images_filled: number; // slots with a picture (extras not counted)
+  images_complete: boolean;
   shots: number;
   publish: boolean;
   short: boolean;

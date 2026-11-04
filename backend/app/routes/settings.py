@@ -5,7 +5,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from app.config import get_key, load_config, save_config, set_api_key
+from app.config import get_key, load_config, read_config_file, save_config, set_api_key
 from pipeline import claude_code, ffmpeg
 from pipeline.voice import VoiceError, list_voices, resolve_voice
 
@@ -31,14 +31,39 @@ def get_settings() -> dict[str, Any]:
     return {"config": load_config(), "keys": {k: _mask(get_key(k)) for k in KEY_NAMES}}
 
 
+# The dropdown choices on the Settings page. A value outside these is refused, so a typo can't
+# quietly break every Claude call.
+EFFORTS = ("low", "medium", "high", "xhigh", "max")
+CODE_MODELS = ("fable", "opus", "sonnet", "haiku")
+API_MODELS = ("claude-fable-5-1", "claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5")
+CHOICES = {("claude", "effort"): EFFORTS, ("claude", "code_model"): CODE_MODELS,
+           ("claude", "code_fallback_model"): CODE_MODELS, ("claude", "model"): API_MODELS}
+
+
+@router.get("/choices")
+def choices() -> dict[str, Any]:
+    return {"effort": EFFORTS, "code_model": CODE_MODELS, "model": API_MODELS}
+
+
 @router.put("/config")
 def put_config(cfg: dict[str, Any]) -> dict[str, Any]:
     current = load_config()
     for section, values in cfg.items():
+        if not isinstance(values, dict):
+            continue
+        for key, v in values.items():
+            allowed = CHOICES.get((section, key))
+            if allowed and v not in allowed:
+                raise HTTPException(400, f"{section}.{key} must be one of {', '.join(allowed)} (got {v!r})")
+    for section, values in cfg.items():
         if section in current and isinstance(values, dict):
             current[section].update(values)
     save_config(current)
-    return current
+    saved = read_config_file()
+    if any(saved.get(s, {}).get(k) != v for s, vals in cfg.items() if s in current and isinstance(vals, dict)
+           for k, v in vals.items()):
+        raise HTTPException(500, "The settings file didn't keep the new values. Check that config.yaml is writable.")
+    return saved
 
 
 class KeyBody(BaseModel):

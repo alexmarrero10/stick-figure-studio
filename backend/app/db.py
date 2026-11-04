@@ -11,7 +11,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
-from app.config import DB_PATH
+from app.config import DB_PATH, load_config
 
 MIGRATIONS_DIR = Path(__file__).parent / "migrations"
 
@@ -255,6 +255,37 @@ def replace_beats(project_id: int, script_version_id: int, beats: list[dict[str,
         touch_project(conn, project_id)
 
 
+BEAT_UNDO_STEPS = 20
+
+
+def push_beat_undo(project_id: int, snapshot: dict[str, Any]) -> None:
+    """Save the state before a split or merge, keeping only the latest BEAT_UNDO_STEPS."""
+    with tx() as conn:
+        conn.execute("INSERT INTO beat_undo (project_id, snapshot) VALUES (?, ?)", (project_id, json.dumps(snapshot)))
+        conn.execute("DELETE FROM beat_undo WHERE project_id = ? AND id NOT IN (SELECT id FROM beat_undo "
+                     "WHERE project_id = ? ORDER BY id DESC LIMIT ?)", (project_id, project_id, BEAT_UNDO_STEPS))
+
+
+def pop_beat_undo(project_id: int) -> dict[str, Any] | None:
+    with tx() as conn:
+        r = conn.execute("SELECT id, snapshot FROM beat_undo WHERE project_id = ? ORDER BY id DESC LIMIT 1",
+                         (project_id,)).fetchone()
+        if not r:
+            return None
+        conn.execute("DELETE FROM beat_undo WHERE id = ?", (r["id"],))
+    return json.loads(r["snapshot"])
+
+
+def beat_undo_steps(project_id: int) -> int:
+    with tx() as conn:
+        return conn.execute("SELECT COUNT(*) FROM beat_undo WHERE project_id = ?", (project_id,)).fetchone()[0]
+
+
+def clear_beat_undo(project_id: int) -> None:
+    with tx() as conn:
+        conn.execute("DELETE FROM beat_undo WHERE project_id = ?", (project_id,))
+
+
 def list_beats(project_id: int) -> list[dict[str, Any]]:
     with tx() as conn:
         return _rows(conn.execute("SELECT * FROM beats WHERE project_id = ? ORDER BY idx", (project_id,)).fetchall())
@@ -372,11 +403,6 @@ def set_batch_done(project_id: int, batch_no: int, done: bool) -> None:
             "ON CONFLICT(project_id, batch_no) DO UPDATE SET done = excluded.done",
             (project_id, batch_no, int(done)),
         )
-
-
-def clear_batches_done(project_id: int) -> None:
-    with tx() as conn:
-        conn.execute("DELETE FROM prompt_batches WHERE project_id = ?", (project_id,))
 
 
 def list_prompts(project_id: int) -> list[dict[str, Any]]:
@@ -510,6 +536,11 @@ def project_status(project_id: int) -> dict[str, Any]:
     with tx() as conn:
         n_prompts = conn.execute("SELECT COUNT(*) FROM image_prompts WHERE project_id = ?", (project_id,)).fetchone()[0]
         n_images = conn.execute("SELECT COUNT(*) FROM images WHERE project_id = ?", (project_id,)).fetchone()[0]
+        # Slots with a picture: extras (past a batch's last slot or past the last beat) don't count.
+        size = load_config()["prompts"]["batch_size"]
+        n_filled = conn.execute(
+            "SELECT COUNT(DISTINCT (batch_no - 1) * ? + position) FROM images WHERE project_id = ? AND position < ? "
+            "AND (batch_no - 1) * ? + position < ?", (size, project_id, size, size, len(beats))).fetchone()[0]
         n_shots = conn.execute("SELECT COUNT(*) FROM shots WHERE project_id = ?", (project_id,)).fetchone()[0]
         has_research = conn.execute("SELECT 1 FROM research_briefs WHERE project_id = ?", (project_id,)).fetchone()
     sid = script["id"] if script else None
@@ -525,6 +556,8 @@ def project_status(project_id: int) -> dict[str, Any]:
         "prompts": n_prompts,
         "prompts_missing": max(0, len(beats) - n_prompts),
         "images": n_images,
+        "images_filled": n_filled,
+        "images_complete": bool(beats) and n_filled >= len(beats),
         "shots": n_shots,
         "publish": get_publish_meta(project_id) is not None,
         "short": get_short(project_id)["rendered_at"] is not None,

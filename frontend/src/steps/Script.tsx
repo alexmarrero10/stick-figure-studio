@@ -4,6 +4,7 @@ import { StepProps } from "../App";
 import { findTells } from "../aiTells";
 import { ErrorBox, JobProgress, useJob } from "../components";
 import { ChatMessage, Edit, FORMAT_LABELS, ScriptVersion, VideoFormat } from "../types";
+import { locateText } from "../textarea";
 
 const FORMAT_HELP: Record<VideoFormat, string> = {
   story: "One true story, followed from start to finish.",
@@ -41,6 +42,9 @@ export default function ScriptStep({ project, refresh }: StepProps) {
   const [WPM, setWpm] = useState(180);
   const [TARGET, setTarget] = useState([1550, 1650]);
   const [suggest, setSuggest] = useState<{ text: string } | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [grammarAsk, setGrammarAsk] = useState(0); // bumped to make the chat run a grammar check
+  const scriptRef = useRef<HTMLTextAreaElement>(null);
   const { run, job, busy } = useJob({ project: pid, kind: "research", done: () => afterResearch(), failed: (m) => setError(m) });
 
   const load = async () => {
@@ -162,6 +166,18 @@ export default function ScriptStep({ project, refresh }: StepProps) {
     refresh();
   };
 
+  const checkGrammar = async () => {
+    if (text !== saved) await save();
+    setChatOpen(true);
+    setGrammarAsk((n) => n + 1);
+  };
+
+  // Scroll the script to a passage and select it, e.g. when a suggested edit is clicked.
+  const locate = (find: string) => {
+    const ta = scriptRef.current;
+    if (!ta || !locateText(ta, find)) setError("That text isn't in the script any more.");
+  };
+
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
   const runtime = (words / WPM) * 60;
   const lengthClass = words < TARGET[0] * 0.9 ? "warn" : words > TARGET[1] * 1.1 ? "warn" : "good";
@@ -169,7 +185,7 @@ export default function ScriptStep({ project, refresh }: StepProps) {
   const tellList = tells.map((t) => `"${t.label}"${t.count > 1 ? ` (${t.count}x)` : ""}`).join(", ");
 
   return (
-    <div className="script-step">
+    <div className={`script-step ${chatOpen ? "drawer-open" : ""}`}>
       <ErrorBox error={error} onClose={() => setError(null)} />
 
       <div className="panel">
@@ -206,6 +222,14 @@ export default function ScriptStep({ project, refresh }: StepProps) {
           type before researching.
         </p>
         <JobProgress job={job} />
+        <label>
+          Notes for Claude when writing the script
+          <input
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Optional: tone, angle, things to include or leave out"
+          />
+        </label>
         {research && briefOpen && (
           <>
             <textarea className="brief" rows={16} value={brief} onChange={(e) => setBrief(e.target.value)} />
@@ -242,12 +266,6 @@ export default function ScriptStep({ project, refresh }: StepProps) {
             </div>
           </div>
           <div className="row">
-            <input
-              className="grow"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Optional notes for Claude (tone, angle, things to include)"
-            />
             <button onClick={generate} disabled={!research || streaming}>
               {streaming ? "Writing…" : text ? "Rewrite script" : "Write script"}
             </button>
@@ -256,8 +274,20 @@ export default function ScriptStep({ project, refresh }: StepProps) {
                 Stop
               </button>
             )}
+            <button
+              className="secondary"
+              onClick={checkGrammar}
+              disabled={!text.trim() || streaming}
+              title="Fix grammar, spelling and punctuation, mostly in the parts you changed by hand"
+            >
+              Check grammar
+            </button>
+            <button className="secondary" onClick={() => setChatOpen(!chatOpen)}>
+              {chatOpen ? "Close Ask Claude" : "Ask Claude to change it"}
+            </button>
           </div>
           <textarea
+            ref={scriptRef}
             className="script-text"
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -269,13 +299,14 @@ export default function ScriptStep({ project, refresh }: StepProps) {
               <span>Sounds machine-written: {tellList}.</span>{" "}
               <button
                 className="link"
-                onClick={() =>
+                onClick={() => {
+                  setChatOpen(true);
                   setSuggest({
                     text:
                       `Rewrite only the sentences that use these phrases or patterns so they sound like a real person ` +
                       `telling the story: ${tellList}. Keep the facts, the meaning and the length the same.`,
-                  })
-                }
+                  });
+                }}
               >
                 Ask Claude to fix them
               </button>
@@ -304,22 +335,44 @@ export default function ScriptStep({ project, refresh }: StepProps) {
             </div>
           </div>
         </div>
-        <Chat pid={pid} suggest={suggest} disabled={!saved || streaming || text !== saved} onApplied={(t) => { setText(t); setSaved(t); refresh(); api.get<VersionRow[]>(`/api/projects/${pid}/script/versions`).then(setVersions); }} />
       </div>
+      <Chat
+        pid={pid}
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        suggest={suggest}
+        grammarAsk={grammarAsk}
+        onLocate={locate}
+        disabled={!saved || streaming || text !== saved}
+        onApplied={(t) => {
+          setText(t);
+          setSaved(t);
+          refresh();
+          api.get<VersionRow[]>(`/api/projects/${pid}/script/versions`).then(setVersions);
+        }}
+      />
     </div>
   );
 }
 
 function Chat({
   pid,
+  open,
+  onClose,
   disabled,
   onApplied,
+  onLocate,
   suggest,
+  grammarAsk,
 }: {
   pid: number;
+  open: boolean;
+  onClose: () => void;
   disabled: boolean;
   onApplied: (text: string) => void;
+  onLocate: (find: string) => void;
   suggest: { text: string } | null; // a request to put in the box, e.g. from "Ask Claude to fix them"
+  grammarAsk: number;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -338,24 +391,32 @@ function Chat({
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [messages, pending]);
 
-  const send = async () => {
-    if (!input.trim()) return;
-    const instruction = input;
+  const ask = async (instruction: string, url: string, body: unknown) => {
     setBusy(true);
     setError(null);
     setMessages((m) => [...m, { id: -Date.now(), role: "user", content: instruction, edits: null }]);
-    setInput("");
     try {
-      const reply = await api.post<ChatMessage>(`/api/projects/${pid}/script/chat`, { message: instruction });
+      const reply = await api.post<ChatMessage>(url, body);
       setMessages((m) => [...m, reply]);
       const edits = reply.edits || [];
-      if (edits.length) setPending({ msgId: reply.id, edits, chosen: edits.map((e) => e.ok), instruction });
+      setPending(edits.length ? { msgId: reply.id, edits, chosen: edits.map((e) => e.ok), instruction } : null);
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setBusy(false);
     }
   };
+
+  const send = () => {
+    if (!input.trim()) return;
+    const instruction = input;
+    setInput("");
+    ask(instruction, `/api/projects/${pid}/script/chat`, { message: instruction });
+  };
+
+  useEffect(() => {
+    if (grammarAsk) ask("Check grammar", `/api/projects/${pid}/script/grammar`, {});
+  }, [grammarAsk]);
 
   const apply = async () => {
     if (!pending) return;
@@ -370,8 +431,13 @@ function Chat({
   };
 
   return (
-    <div className="panel chat">
-      <h2>Ask Claude to change the script</h2>
+    <aside className={`panel chat drawer ${open ? "open" : ""}`} aria-hidden={!open}>
+      <div className="row between">
+        <h2>Ask Claude to change the script</h2>
+        <button className="link" onClick={onClose}>
+          Close ✕
+        </button>
+      </div>
       <div className="messages">
         {messages.length === 0 && (
           <p className="muted small">
@@ -384,24 +450,34 @@ function Chat({
             {m.content}
           </div>
         ))}
+        {busy && <p className="muted small">Claude is thinking…</p>}
         {pending && (
           <div className="edits">
+            <p className="muted small">Click a change to see where it is in the script.</p>
             {pending.edits.map((e, i) => (
-              <label key={i} className={`edit ${e.ok ? "" : "bad"}`}>
+              <div key={i} className={`edit ${e.ok ? "" : "bad"}`}>
                 <input
                   type="checkbox"
+                  aria-label="Use this change"
                   disabled={!e.ok}
                   checked={pending.chosen[i]}
                   onChange={(ev) =>
                     setPending({ ...pending, chosen: pending.chosen.map((c, k) => (k === i ? ev.target.checked : c)) })
                   }
                 />
-                <div>
+                <div
+                  className="locate"
+                  role="button"
+                  tabIndex={0}
+                  title="Show in the script"
+                  onClick={() => onLocate(e.find)}
+                  onKeyDown={(ev) => ev.key === "Enter" && onLocate(e.find)}
+                >
                   <del>{e.find}</del>
                   <ins>{e.replace || "(deleted)"}</ins>
                   <small className="muted">{e.ok ? e.reason : `Can't apply: ${e.error}`}</small>
                 </div>
-              </label>
+              </div>
             ))}
             <div className="row">
               <button onClick={apply} disabled={!pending.chosen.some(Boolean)}>
@@ -416,10 +492,9 @@ function Chat({
         <div ref={endRef} />
       </div>
       <ErrorBox error={error} onClose={() => setError(null)} />
-      <div className="row">
+      <div className="chat-input">
         <textarea
-          className="grow"
-          rows={2}
+          rows={6}
           value={input}
           disabled={disabled || busy}
           onChange={(e) => setInput(e.target.value)}
@@ -431,10 +506,13 @@ function Chat({
           }}
           placeholder={disabled ? "Save the script first" : "Type a change and press Enter"}
         />
-        <button onClick={send} disabled={disabled || busy || !input.trim()}>
-          {busy ? "…" : "Send"}
-        </button>
+        <div className="row between">
+          <span className="muted small">Enter sends, Shift+Enter adds a line</span>
+          <button onClick={send} disabled={disabled || busy || !input.trim()}>
+            {busy ? "…" : "Send"}
+          </button>
+        </div>
       </div>
-    </div>
+    </aside>
   );
 }

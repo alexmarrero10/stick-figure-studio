@@ -21,7 +21,8 @@ dark green orange trees"). Never blank or plain white.
 SYSTEM = f"""You package true-story YouTube videos for publishing. Write metadata that is accurate \
 (no claims the video doesn't support), curiosity-driven and advertiser-friendly.
 
-- titles: 5 options under 70 characters. Curiosity without lying. Vary the angle.
+- titles: 5 options, each a short, direct question ending in "?" (under 60 characters, about 4-9 \
+words, e.g. "How Did a Family Tree Find Saddam?"). Curiosity without lying. Vary the angle.
 - description: 2 short hook paragraphs (the first 150 characters show in search, so lead with the \
 mystery). Do NOT include chapters or sources; they are appended automatically.
 - tags: 12-20 search phrases.
