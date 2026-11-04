@@ -101,6 +101,20 @@ const FIELDS: {
   { section: "video", key: "fps", label: "Frame rate", type: "number" },
   { section: "video", key: "crf", label: "MP4 quality (CRF, lower = better)", type: "number" },
   {
+    section: "video",
+    key: "zoom_min_seconds",
+    label: "Zoom in on shots longer than (s)",
+    type: "number",
+    help: "Long shots slowly zoom in so the picture doesn't feel frozen",
+  },
+  {
+    section: "video",
+    key: "zoom_per_second",
+    label: "Zoom speed (per second)",
+    type: "number",
+    help: "0.015 = 1.5% closer each second, up to 12%. 0 turns zoom off",
+  },
+  {
     section: "publish",
     key: "general_tags",
     label: "General tags added to every video",

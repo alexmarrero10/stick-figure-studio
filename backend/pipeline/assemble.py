@@ -51,6 +51,16 @@ def render_frame(image: str | None, scale: float, size: tuple[int, int], bg: str
     canvas.save(dst)
 
 
+def zoom_for(n_frames: int, fps: int, cfg: dict[str, Any]) -> float:
+    """How far a shot slowly zooms in (0.06 = ends 6% closer). Only long shots move: a still that
+    sits on screen for many seconds feels frozen, while short ones already change often enough."""
+    per_s = float(cfg.get("zoom_per_second", 0.015) or 0)
+    seconds = n_frames / fps
+    if per_s <= 0 or seconds < float(cfg.get("zoom_min_seconds", 4)):
+        return 0.0
+    return min(per_s * seconds, 0.12)
+
+
 def render(shots: list[dict[str, Any]], audio: Path, out: Path, cfg: dict[str, Any],
            work_dir: Path, beat_text: dict[int, str] | None = None,
            progress: Callable[[str, float], None] = lambda m, f: None) -> dict[str, Any]:
@@ -80,8 +90,10 @@ def render(shots: list[dict[str, Any]], audio: Path, out: Path, cfg: dict[str, A
     stills = []
     for s in shots:
         label = "" if s["image"] else f"beat {s['beat_ids'][0]}: {(beat_text or {}).get(s['beat_ids'][0], '')}"
-        stills.append((frame_for[(s["image"], s["scale"], label)], s["end_frame"] - s["start_frame"]))
-    encode(stills, audio, out, fps, crf, work_dir, progress)
+        n_frames = s["end_frame"] - s["start_frame"]
+        zoom = zoom_for(n_frames, fps, cfg) if s["image"] else 0.0
+        stills.append((frame_for[(s["image"], s["scale"], label)], n_frames, zoom))
+    encode(stills, audio, out, fps, crf, work_dir, progress, size=size)
     video_dur = ffmpeg.duration(out)
     expected = shots[-1]["end_frame"] / fps if shots else 0
     progress("Done", 1.0)
@@ -89,21 +101,34 @@ def render(shots: list[dict[str, Any]], audio: Path, out: Path, cfg: dict[str, A
             "frames_dir": str(frames_dir)}
 
 
-def encode(stills: list[tuple[Path, int]], audio: Path, out: Path, fps: int, crf: str, work_dir: Path,
-           progress: Callable[[str, float], None] = lambda m, f: None, max_s: float | None = None) -> None:
-    """stills: (frame image, number of frames) in order. Each becomes a segment of exactly that many
-    frames; the segments are joined without re-encoding and the voice is added. With max_s, the audio
-    is cut there too (the video is expected to be cut to the same length by the caller)."""
+def zoom_filter(n_frames: int, zoom: float, size: tuple[int, int], fps: int) -> str:
+    """A slow, centered zoom-in from 1.0 to 1 + zoom over the shot. The frame is upscaled 2x first so
+    zoompan's whole-pixel steps land on half pixels of the output and the motion doesn't wobble."""
+    w, h = size
+    return (f"scale={w * 2}:{h * 2}:flags=lanczos,"
+            f"zoompan=z='1+{zoom:.4f}*on/{max(1, n_frames - 1)}':x='iw/2-iw/zoom/2':y='ih/2-ih/zoom/2'"
+            f":d=1:s={w}x{h}:fps={fps}")
+
+
+def encode(stills: list[tuple], audio: Path, out: Path, fps: int, crf: str, work_dir: Path,
+           progress: Callable[[str, float], None] = lambda m, f: None, max_s: float | None = None,
+           size: tuple[int, int] | None = None) -> None:
+    """stills: (frame image, number of frames[, zoom]) in order. Each becomes a segment of exactly that
+    many frames, zooming in slowly when zoom > 0 (needs size); the segments are joined without
+    re-encoding and the voice is added. With max_s, the audio is cut there too (the video is expected
+    to be cut to the same length by the caller)."""
     segs_dir = work_dir / "segments"
     segs_dir.mkdir(parents=True, exist_ok=True)
     seg_paths: list[Path] = []
     jobs = []
-    for i, (frame, n_frames) in enumerate(stills):
+    for i, (frame, n_frames, *rest) in enumerate(stills):
+        zoom = rest[0] if rest and size else 0.0
         seg = segs_dir / f"seg_{i:04d}.mp4"
         seg_paths.append(seg)
+        look = ["-vf", zoom_filter(n_frames, zoom, size, fps)] if zoom else ["-tune", "stillimage"]
         jobs.append([
             "-loop", "1", "-framerate", str(fps), "-i", str(frame), "-frames:v", str(n_frames),
-            "-c:v", "libx264", "-preset", "veryfast", "-tune", "stillimage", "-crf", crf,
+            "-c:v", "libx264", "-preset", "veryfast", *look, "-crf", crf,
             "-pix_fmt", "yuv420p", "-r", str(fps), "-video_track_timescale", str(fps * 1000), str(seg),
         ])
     done = 0

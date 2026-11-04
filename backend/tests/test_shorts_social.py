@@ -534,3 +534,13 @@ def test_script_and_research_cover_who_what_when_where_and_why():
     assert "what he had done that made him wanted" in script.SCRIPT_SYSTEM
     assert "## Why it mattered" in script.RESEARCH_SECTIONS["story"]
     assert "- Why it mattered" in script.RESEARCH_SECTIONS["list"]
+
+
+def test_script_prompt_follows_the_channel_style():
+    s = script.SCRIPT_SYSTEM
+    assert "CHANNEL STYLE" in s
+    for idea in ("Put the viewer inside it", "Then vs now", "Name the belief, then break it", "Plant callbacks",
+                 "So here's the full", "question for them to answer in the comments"):
+        assert idea in s, idea
+    assert "invite a subscribe" not in s  # the ending is a bookend or a question now, not a subscribe plea
+    assert "CHANNEL STYLE" in script.REVISE_SYSTEM  # revisions keep the same style

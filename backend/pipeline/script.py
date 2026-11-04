@@ -178,7 +178,8 @@ THE OPENING (the first 50-70 seconds, about 150-210 words, is ALSO cut out and p
 YouTube Short, Instagram Reel and TikTok, so it must grab a scrolling viewer and work by itself)
 - No intro. No "welcome back", no channel name, no "in this video", no "let's dive in".
 - The very first sentence is the hook, and it must stop a thumb mid-scroll: a shocking true fact, an \
-impossible-sounding outcome or a vivid moment of danger, said in under 15 words \
+impossible-sounding outcome, a vivid moment of danger or the viewer dropped into a scene ("Right \
+now, you are warm." / "Imagine you haven't eaten in two days."), said in under 15 words \
 ("In 1845, 129 men sailed into the Arctic, and not one of them came back."). Never open with \
 background, a date on its own or a slow scene-setter.
 - Start inside the action with concrete, visual details: a person, a place, something happening.
@@ -200,7 +201,44 @@ viewer forward ("But that wasn't the strangest part." / "And that's when everyth
 and save a short punchy line for the biggest moments only.
 - Stakes: make clear what each person stands to win or lose, in human terms.
 - Payoff: the ending must resolve the opening question and land an insight, irony or consequence.
-- Close with at most two short sentences that tease another story or invite a subscribe. Nothing longer.
+- No subscribe requests and no "thanks for watching". The last line is the bookend line or the \
+question for the comments described under CHANNEL STYLE.
+
+CHANNEL STYLE (modeled on the top channels in this niche; follow it closely)
+- Put the viewer inside it. Talk to one viewer as "you". Open the video, and later scenes, by \
+dropping them into the moment in the present tense ("Imagine you wake up inside a stone tower in \
+the middle of the sea." / "You've been walking for three days and the water ran out yesterday."), \
+with small physical details they can feel: breath you can see, ice on a cup, rain you can't escape.
+- Then vs now. Contrast the past with the viewer's own ordinary life ("Today, when it rains, you \
+make coffee and open Netflix. For him, that same rain could kill him in three different ways."). \
+Translate key numbers into the viewer's life ("seventeen hours a week, which you'd pass by \
+Wednesday afternoon").
+- Name the belief, then break it. Say what most people assume or what the old official story was, \
+and promise that the evidence says otherwise. When explaining a "why", knock down the obvious \
+guesses one by one ("The first guess most people make is... Except someone already tested that.").
+- Give the video a shape the viewer can track. When the material allows, announce a simple frame \
+early ("Winter came at them from four directions at once.") and take the pieces one at a time, \
+each solved problem handing off to the next one ("So now you're warm. But the sun is going down, \
+and you have a second problem.").
+- Evidence as mini-stories. Bring in proof as a scene: who looked, when, what they did and what \
+they found, with one concrete number or object ("In 1963, an anthropologist walked into the \
+Kalahari with a notebook and a stopwatch..."). Then answer the doubt a smart viewer would raise \
+("Maybe that was one lucky group. Fair doubt. So they checked three more.").
+- Plant callbacks. Flag a detail you will return to ("Hold on to that fire. It comes back." / "We'll \
+come back to that one second.") and pay each one off later. Reveal the answer to the opening scene \
+late, not early.
+- Bring the viewer in. Two or three times in the video, ask them something directly: a guess \
+("So which skeleton is which? Take a guess."), a choice ("Honestly, which would you have chosen?") \
+or a "you're probably thinking..." that you then answer.
+- Be honest about uncertainty, out loud. Say "this is a theory, not a proven fact" or "we can't \
+prove it, but the logic holds", and call out famous details that turn out to be invented. It \
+builds trust.
+- A dry, human aside now and then (the toilet was a bucket and a great deal of ocean), never jokey \
+during tragedy.
+- Land it. Near the end, sum up the whole video in one short paragraph ("So here's the full \
+picture."). Then go back to the opening scene and show it again with everything the viewer now \
+knows ("So go back to that doorway one more time."). Finish on one resonant line about the viewer's \
+own life, or one direct question for them to answer in the comments ("Would you take the job?").
 
 THE BASICS A NEWCOMER NEEDS (who, what, when, where and why)
 - Assume the viewer knows nothing about the subject. Soon after the opening, make sure they know \
@@ -224,8 +262,8 @@ if a hard word or term is needed, explain it in a few plain words right away.
 - Simple grammar: one main idea per sentence, active voice, no stacked clauses, no fancy or \
 literary phrasing, no long lists of names or dates in one sentence.
 - Keep it gripping through the story itself (stakes, mystery, surprise), not through elaborate wording.
-- Tone: an upbeat, enthusiastic storyteller who can't wait to tell you what happened next. \
-Energetic and curious, never sarcastic or flat. Stay respectful during sad or serious moments.
+- Tone: a confident, curious storyteller talking straight to one viewer, clearly gripped by what \
+happens next. Vivid and energetic, never sarcastic or flat. Stay respectful during sad or serious moments.
 
 SMOOTH NARRATION (the voice is an AI, and punctuation controls its pauses)
 - Every comma, period and dash makes the voice pause, and too many pauses sound choppy. \
@@ -258,7 +296,8 @@ thing", "turns out", "meanwhile", "a few weeks later". Mix sentence lengths natu
 "fast forward to", "the rest is history", "sent shockwaves", "forever changed", "a chilling \
 reminder", "stood the test of time", "against all odds", "what happened next will shock you", \
 "but here's the kicker", "plot twist".
-- Avoid the patterns that give it away: "It wasn't X. It was Y." contrasts, lists of three \
+- Avoid the patterns that give it away: more than two "It wasn't X. It was Y." contrasts in a \
+script, lists of three \
 adjectives, a rhetorical question at the end of every paragraph, and the same re-hook line twice. \
 Each re-hook must be written for that exact moment of this story.
 
