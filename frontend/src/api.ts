@@ -39,7 +39,7 @@ export const api = {
 export interface Job {
   id: string;
   kind: string;
-  status: "running" | "done" | "error";
+  status: "running" | "stopping" | "stopped" | "done" | "error";
   message: string;
   progress: number;
   result: unknown;
@@ -51,22 +51,29 @@ export interface Job {
 export async function waitForJob(job: Job, onUpdate: (j: Job) => void, alive: () => boolean = () => true): Promise<Job> {
   let j = job;
   onUpdate(j);
-  while (j.status === "running") {
+  while (j.status === "running" || j.status === "stopping") {
     await new Promise((r) => setTimeout(r, 1000));
     if (!alive()) return new Promise<Job>(() => {});
     j = await api.get<Job>(`/api/jobs/${j.id}`);
     onUpdate(j);
   }
   if (j.status === "error") throw new ApiError(j.error || "Job failed");
+  if (j.status === "stopped") throw new ApiError("Stopped. You can start it again whenever you like.");
   return j;
 }
 
 /** POST to an SSE endpoint and call onEvent for each `data:` message. */
-export async function streamSSE(url: string, body: unknown, onEvent: (e: Record<string, unknown>) => void): Promise<void> {
+export async function streamSSE(
+  url: string,
+  body: unknown,
+  onEvent: (e: Record<string, unknown>) => void,
+  signal?: AbortSignal,
+): Promise<void> {
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+    signal,
   });
   if (!res.ok || !res.body) {
     const t = await res.text();

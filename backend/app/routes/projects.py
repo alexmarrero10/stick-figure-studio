@@ -116,6 +116,15 @@ def get_job(job_id: str) -> dict[str, Any]:
     return j
 
 
+@jobs_router.post("/{job_id}/stop")
+def stop_job(job_id: str) -> dict[str, Any]:
+    """Stop a running job: it ends at its next step, and its ffmpeg or Claude process is killed now."""
+    j = jobs.stop(job_id)
+    if not j:
+        raise HTTPException(404, "Job not found")
+    return j
+
+
 def rel(project: dict[str, Any], path: str | Path) -> str:
     """Path relative to the project folder, for the /file endpoint."""
     return Path(path).resolve().relative_to(project_dir(project["slug"]).resolve()).as_posix()

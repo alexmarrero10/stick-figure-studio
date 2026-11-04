@@ -6,6 +6,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from pipeline import procs
+
 
 class FFmpegError(RuntimeError):
     pass
@@ -16,18 +18,23 @@ def available() -> bool:
 
 
 def run(args: list[str]) -> None:
-    proc = subprocess.run(
-        ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *args],
-        capture_output=True, text=True,
+    # -nostdin and no stdin: otherwise ffmpeg can sit waiting on the server's console for keys forever.
+    procs.check()
+    proc = subprocess.Popen(
+        ["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", "-y", *args],
+        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
     )
+    with procs.track(proc):
+        _, err = proc.communicate()
+    procs.check()
     if proc.returncode != 0:
-        raise FFmpegError(proc.stderr.strip() or f"ffmpeg exited with {proc.returncode}")
+        raise FFmpegError(err.strip() or f"ffmpeg exited with {proc.returncode}")
 
 
 def duration(path: Path) -> float:
     proc = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "json", str(path)],
-        capture_output=True, text=True,
+        stdin=subprocess.DEVNULL, capture_output=True, text=True,
     )
     if proc.returncode != 0:
         raise FFmpegError(proc.stderr.strip())

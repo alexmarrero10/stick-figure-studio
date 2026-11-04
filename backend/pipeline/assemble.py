@@ -6,6 +6,7 @@ the voice is muxed in. Exact frame counts keep the picture locked to the word ti
 """
 from __future__ import annotations
 
+import contextvars
 import hashlib
 import shutil
 from concurrent.futures import ThreadPoolExecutor
@@ -106,8 +107,10 @@ def encode(stills: list[tuple[Path, int]], audio: Path, out: Path, fps: int, crf
             "-pix_fmt", "yuv420p", "-r", str(fps), "-video_track_timescale", str(fps * 1000), str(seg),
         ])
     done = 0
+    # Each encode runs in the job's context, so stopping the job reaches the ffmpeg processes.
+    tasks = [(contextvars.copy_context(), a) for a in jobs]
     with ThreadPoolExecutor(max_workers=4) as pool:
-        for _ in pool.map(ffmpeg.run, jobs):
+        for _ in pool.map(lambda t: t[0].run(ffmpeg.run, t[1]), tasks):
             done += 1
             if done % 10 == 0 or done == len(jobs):
                 progress(f"Encoding shots ({done}/{len(jobs)})", 0.25 + 0.65 * done / len(jobs))

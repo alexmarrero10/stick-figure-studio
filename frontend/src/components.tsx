@@ -16,10 +16,16 @@ export function ErrorBox({ error, onClose }: { error: string | null; onClose?: (
 }
 
 export function JobProgress({ job }: { job: Job | null }) {
-  if (!job || job.status !== "running") return null;
+  if (!job || (job.status !== "running" && job.status !== "stopping")) return null;
+  const stop = () => api.post(`/api/jobs/${job.id}/stop`).catch(() => {});
   return (
     <div className="job">
-      <div className="job-msg">{job.message}</div>
+      <div className="row between">
+        <div className="job-msg">{job.message}</div>
+        <button className="secondary small danger" onClick={stop} disabled={job.status === "stopping"}>
+          {job.status === "stopping" ? "Stopping…" : "Stop"}
+        </button>
+      </div>
       <div className="bar">
         <div className="bar-fill" style={{ width: `${Math.round(job.progress * 100)}%` }} />
       </div>
@@ -62,7 +68,7 @@ export function useJob(resume?: {
       alive.current = false;
     };
   }, [resume?.project, resume?.kind]);
-  return { run, job, busy: job?.status === "running" };
+  return { run, job, busy: job?.status === "running" || job?.status === "stopping" };
 }
 
 export function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {

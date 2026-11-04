@@ -35,6 +35,7 @@ export default function ScriptStep({ project, refresh }: StepProps) {
   const [saved, setSaved] = useState("");
   const [notes, setNotes] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
   const [versions, setVersions] = useState<VersionRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [WPM, setWpm] = useState(180);
@@ -123,6 +124,8 @@ export default function ScriptStep({ project, refresh }: StepProps) {
     setStreaming(true);
     setText("");
     let acc = "";
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
     try {
       await streamSSE(`/api/projects/${pid}/script/generate`, { notes }, (e) => {
         if (e.type === "text") {
@@ -135,12 +138,18 @@ export default function ScriptStep({ project, refresh }: StepProps) {
         } else if (e.type === "error") {
           setError(e.error as string);
         }
-      });
+      }, ctrl.signal);
       setVersions(await api.get<VersionRow[]>(`/api/projects/${pid}/script/versions`));
       refresh();
     } catch (e) {
-      setError((e as Error).message);
+      if (ctrl.signal.aborted) {
+        setText(saved); // stopped: the half-written script is dropped and the previous one kept
+        setError("Stopped. Your previous script is unchanged.");
+      } else {
+        setError((e as Error).message);
+      }
     } finally {
+      abortRef.current = null;
       setStreaming(false);
     }
   };
@@ -242,6 +251,11 @@ export default function ScriptStep({ project, refresh }: StepProps) {
             <button onClick={generate} disabled={!research || streaming}>
               {streaming ? "Writing…" : text ? "Rewrite script" : "Write script"}
             </button>
+            {streaming && (
+              <button className="secondary danger" onClick={() => abortRef.current?.abort()}>
+                Stop
+              </button>
+            )}
           </div>
           <textarea
             className="script-text"

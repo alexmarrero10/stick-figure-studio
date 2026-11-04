@@ -15,6 +15,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Iterator
 
+from pipeline import procs
 from pipeline.claude_client import ClaudeError
 
 # Long system prompts go into the prompt body instead, to stay under Windows' command-line limit.
@@ -174,12 +175,15 @@ class ClaudeCode:
     def _run_json(self, system: Any, messages: list[dict[str, Any]], tools: list[dict[str, Any]] | None,
                   effort: str | None, schema: dict[str, Any] | None) -> dict[str, Any]:
         args, prefix = self._args(system, "json", tools, effort, schema)
+        procs.check()
         proc = self._popen(args, prefix + _prompt(messages))
         try:
-            out, err = proc.communicate(timeout=TIMEOUT_S)
+            with procs.track(proc):
+                out, err = proc.communicate(timeout=TIMEOUT_S)
         except subprocess.TimeoutExpired:
-            proc.kill()
+            procs.kill(proc)
             raise ClaudeError("Claude Code took too long to respond.")
+        procs.check()
         try:
             result = json.loads(out.decode("utf-8", "replace"))
         except ValueError:
