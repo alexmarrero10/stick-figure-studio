@@ -11,6 +11,7 @@ import os
 import shutil
 import subprocess
 import threading
+import time
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Iterator
@@ -92,6 +93,23 @@ class ClaudeCode:
         self.effort = cfg.get("effort", "high")
         self.workdir = workdir
         self.workdir.mkdir(parents=True, exist_ok=True)
+        # Set to a list to record each call's time and the token use the CLI reports (evals/speed.py).
+        self.usage_log: list[dict[str, Any]] | None = None
+
+    def _record(self, result: dict[str, Any] | None, seconds: float) -> None:
+        if self.usage_log is None or not result:
+            return
+        u = result.get("usage") or {}
+        self.usage_log.append({
+            "seconds": round(seconds, 2),
+            "input_tokens": u.get("input_tokens", 0),
+            "cache_write_tokens": u.get("cache_creation_input_tokens", 0),
+            "cache_read_tokens": u.get("cache_read_input_tokens", 0),
+            "output_tokens": u.get("output_tokens", 0),
+            "web_searches": (u.get("server_tool_use") or {}).get("web_search_requests", 0),
+            "turns": result.get("num_turns", 1),
+            "cost_usd": result.get("total_cost_usd") or 0.0,
+        })
 
     # -- internals -----------------------------------------------------------
 
@@ -150,6 +168,7 @@ class ClaudeCode:
     def stream_text(self, system: Any, messages: list[dict[str, Any]], max_tokens: int = 64000,
                     tools: list[dict[str, Any]] | None = None) -> Iterator[str]:
         args, prefix = self._args(system, "stream-json", tools, None)
+        t0 = time.monotonic()
         proc = self._popen(args, prefix + _prompt(messages))
         result: dict[str, Any] | None = None
         try:
@@ -171,11 +190,13 @@ class ClaudeCode:
                 proc.kill()
         stderr = proc.stderr.read().decode("utf-8", "replace") if proc.stderr else ""
         self._raise_for(result, stderr, proc.returncode)
+        self._record(result, time.monotonic() - t0)
 
     def _run_json(self, system: Any, messages: list[dict[str, Any]], tools: list[dict[str, Any]] | None,
                   effort: str | None, schema: dict[str, Any] | None) -> dict[str, Any]:
         args, prefix = self._args(system, "json", tools, effort, schema)
         procs.check()
+        t0 = time.monotonic()
         proc = self._popen(args, prefix + _prompt(messages))
         try:
             with procs.track(proc):
@@ -189,6 +210,7 @@ class ClaudeCode:
         except ValueError:
             result = None
         self._raise_for(result, err.decode("utf-8", "replace"), proc.returncode)
+        self._record(result, time.monotonic() - t0)
         return result  # type: ignore[return-value]
 
     def complete(self, system: Any, messages: list[dict[str, Any]], max_tokens: int = 64000,

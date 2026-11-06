@@ -69,3 +69,15 @@ def test_to_ascii_cleans_typography_and_accents():
     assert to_ascii("a well-known man") == "a well-known man"
     text = clean_script("Naïve façade.\n\n\n\nThe end —.")
     assert text == "Naive facade.\n\nThe end." and text.isascii()
+
+
+def test_usage_is_recorded_only_when_asked(cc):
+    result = {"usage": {"input_tokens": 120, "cache_creation_input_tokens": 3000, "cache_read_input_tokens": 9000,
+                        "output_tokens": 800, "server_tool_use": {"web_search_requests": 4}},
+              "num_turns": 6, "total_cost_usd": 0.42}
+    cc._record(result, 12.345)  # off by default: nothing kept
+    assert cc.usage_log is None
+    cc.usage_log = []
+    cc._record(result, 12.345)
+    assert cc.usage_log == [{"seconds": 12.35, "input_tokens": 120, "cache_write_tokens": 3000, "cache_read_tokens": 9000,
+                             "output_tokens": 800, "web_searches": 4, "turns": 6, "cost_usd": 0.42}]
