@@ -37,8 +37,8 @@ Both providers have the same interface (`stream_text` / `complete` / `json`), so
 
 ## Next steps (in order)
 
-**Current project: the public video library with search and RAG Q&A.** The full plan, task checklist
-and log are in [docs/PUBLIC_SITE_PLAN.md](docs/PUBLIC_SITE_PLAN.md). Start there after a disconnect.
+**For the current state, start with [CLAUDE.md](CLAUDE.md) and [NOTES.md](NOTES.md).** This file is the
+older build log. The public video library plan in [docs/PUBLIC_SITE_PLAN.md](docs/PUBLIC_SITE_PLAN.md) is parked.
 
 1. Add the ElevenLabs key (Settings page) and run a **full real video** end to end. Note any rough spots below.
    The research step (web search) and a full-length script haven't run through Claude Code yet.

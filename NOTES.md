@@ -1,0 +1,55 @@
+# Notes: current state (updated 2026-11-06)
+
+Read CLAUDE.md first for how the project works and the rules. This file is what's happening now.
+
+## Where things stand
+
+- The full pipeline works end to end and has made two real videos (both format "story"):
+  1. **Project 1:** "The Inuit Knew Where Franklin's Lost Ships Were. No One Listened" (151 shots)
+  2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
+- Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
+  about 65% on Shorts, and views are low. Recent work targets this.
+- 129 backend tests pass; the frontend builds.
+
+## Recently done
+
+- **Script style modeled on top channels** (commit 0b31f28): a new CHANNEL STYLE section in `SCRIPT_SYSTEM`
+  (see CLAUDE.md), new ending rule (no subscribe asks; end on a bookend line or one comment question), more
+  energetic tone, scene-drop openings allowed. Not yet tried on a new video.
+- **Slow zoom on long shots** (0b31f28, f76c398): shots of 3 s or longer zoom in at 1.5%/s, capped at 12%.
+  About 81 of 151 shots (project 1) and 76 of 238 (project 2) qualify. Applies on the next Assemble. Settings
+  has both knobs under Video. The Final Cut export and Shorts are not zoomed.
+- Restored `docs/PUBLIC_SITE_PLAN.md`, which f76c398 had deleted by mistake (de096c5).
+- Earlier: Stop button for long steps, Settings save feedback and dropdowns, beat undo, script drawer, grammar
+  check, image slot picking and swapping, thumbnail prompts from the user's own idea, Shorts ending on the best
+  cliffhanger at 50-70 s, social posting to YouTube/Instagram/Facebook/TikTok.
+
+## Next
+
+1. Make the next video with the new script style and zoom, then compare its retention with the first two.
+2. Possibly re-assemble projects 1 and 2 to see the zoom (only if the user wants new versions).
+3. Push to GitHub when the user asks (`alexmarrero10/stick-figure-studio`, private). 9 local commits are unpushed:
+   265a170, c029b03, f893369, 66df7fb, bee4a24, 0b31f28, f76c398, de096c5, plus the commit adding these notes.
+
+## Ideas discussed, not started
+
+- **A few Veo clips via Google Flow** for small figure animations. Free tier ~50 credits/day; Veo 3.1 Lite ~10
+  credits per clip, Fast ~20, Quality ~100. Plan was the FFmpeg zoom for most shots plus a handful of Veo clips.
+  Would be done manually by the user (no Flow automation).
+- **Settings toggle for an AI-voice line** at the bottom of the description (offered, not accepted).
+- **RAG:** decided *not* worth it for the research step (research already uses WebSearch/WebFetch in
+  `claude_code.py`). A possible use is era corpora (medieval, samurai, Chronicling America) to improve Ideas.
+  Parked.
+- **Public portfolio site / video library with RAG Q&A:** plan in `docs/PUBLIC_SITE_PLAN.md` (Phase 4 not
+  started). Parked; only two videos exist so far.
+
+## Open issues
+
+- `README.md` and `PROGRESS.md` are partly out of date. They say pictures are never zoomed, the Short is the
+  first 59 s, and the "current project" is the public site. CLAUDE.md and this file are correct. The
+  `shots.py` docstring also says "pictures are never zoomed" (zoom now happens in `assemble.py`).
+- `projects/a-han-governor-removed-the-tiger-traps-and-the-tigers-left/` exists on disk but has no project row
+  in the database (leftover folder).
+- `config.yaml` has an uncommitted change by the user: `claude.research_depth: thorough`.
+- Still never checked by hand: importing `timeline.fcpxml` into DaVinci Resolve.
+- TikTok posting only works as "Only me" until TikTok approves the app.
