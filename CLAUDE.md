@@ -69,7 +69,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
   rebuild after frontend changes.
 - **Public site:** `cd site/web && npm run build`, then
   `.venv\Scripts\python.exe -m uvicorn app:app --app-dir site/api --port 8790` (reuses the root `.env`).
-  Tests: `cd site/api && ../../.venv/Scripts/python -m pytest -q` (11 passing). Self-contained: it doesn't
+  Tests: `cd site/api && ../../.venv/Scripts/python -m pytest -q` (16 passing). Self-contained: it doesn't
   import the backend (it has its own copies of the embedding call and hybrid search), so it deploys alone.
 - Shell notes: `bc` isn't available in Git Bash. Use PowerShell `Measure-Command` for timing. Prefer the
   Edit tool over heredoc/sed for multi-line edits (heredocs have mangled text before).

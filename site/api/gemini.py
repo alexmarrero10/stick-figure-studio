@@ -16,6 +16,11 @@ BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 EMBED_MODEL = "gemini-embedding-001"  # same as backend/pipeline/embeddings.py
 DIMENSIONS = 768
 CHAT_MODEL = os.environ.get("GEMINI_CHAT_MODEL", "gemini-flash-lite-latest")
+# Google's own filter on top of the instructions. Medium, not low: the videos are history, and wars and
+# crimes must stay discussable.
+SAFETY = [{"category": c, "threshold": "BLOCK_MEDIUM_AND_ABOVE"} for c in (
+    "HARM_CATEGORY_HARASSMENT", "HARM_CATEGORY_HATE_SPEECH", "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+    "HARM_CATEGORY_DANGEROUS_CONTENT")]
 
 
 class GeminiError(RuntimeError):
@@ -57,7 +62,7 @@ class Gemini:
 
     def stream_answer(self, system: str, contents: list[dict[str, Any]], max_tokens: int = 500) -> Iterator[str]:
         """Stream the answer's text pieces."""
-        body = {"systemInstruction": {"parts": [{"text": system}]}, "contents": contents,
+        body = {"systemInstruction": {"parts": [{"text": system}]}, "contents": contents, "safetySettings": SAFETY,
                 "generationConfig": {"maxOutputTokens": max_tokens, "temperature": 0.3}}
         with self.client.stream("POST", f"{BASE}/{CHAT_MODEL}:streamGenerateContent", params={"alt": "sse"},
                                 headers=self._headers(), json=body) as r:

@@ -29,6 +29,16 @@ Tests: `cd site/api && ../../.venv/Scripts/python -m pytest -q`
   answer "too many requests", never send a bill.
 - **Limits per visitor:** 10 questions an hour and 30 a day; 60 searches an hour and 300 a day. **Site-wide:**
   500 questions and 5,000 searches a day. Change them with the environment variables below.
+- **Off-topic questions are turned away for free.** Each question is compared with the video's narration
+  and sources (using the free embedding). Below `CHAT_MIN_SIMILARITY` (0.55; real questions score
+  0.58-0.77, recipes, code and "ignore your rules" 0.46-0.56) it replies "I can only answer questions about
+  this video" without asking Gemini to write anything.
+- **Rules and filters:** the instructions treat visitors' text as questions only (no role-play, no
+  revealing instructions), and Google's safety filter blocks hateful, sexual, harassing and dangerous
+  answers (medium level, so history's wars and crimes stay discussable).
+- **Keys can't leak:** the model only ever sees the instructions, narration and source passages. Keys stay
+  in the server's environment, the Gemini key goes in a request header (never a URL), errors shown to
+  visitors are generic, and the database user can only read.
 - Repeated first questions are answered from a cache (no Gemini call). Questions are capped at 500
   characters, answers at about 500 tokens, and only the last 4 turns of a chat are sent.
 - **Read-only database user:** run `backend/supabase/002_site_reader.sql` once in Supabase's SQL Editor
@@ -45,7 +55,7 @@ Not done yet: do it once a video is published.
    - `GEMINI_API_KEY`: your free-tier key
    - `SITE_DATABASE_URL`: the Session pooler address with `site_reader.<project-ref>` and its password
    - optional: `CHAT_PER_HOUR`, `CHAT_PER_DAY`, `CHAT_GLOBAL_PER_DAY`, `SEARCH_PER_HOUR`, `SEARCH_PER_DAY`,
-     `SEARCH_GLOBAL_PER_DAY`, `GEMINI_CHAT_MODEL` (default `gemini-flash-lite-latest`)
+     `SEARCH_GLOBAL_PER_DAY`, `CHAT_MIN_SIMILARITY`, `GEMINI_CHAT_MODEL` (default `gemini-flash-lite-latest`)
 4. Deploy. Render gives a `https://<name>.onrender.com` address; a custom domain can be added later.
 
 Free Render services sleep after 15 minutes without visitors, so the first visit after a quiet spell

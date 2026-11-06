@@ -14,6 +14,12 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Chatbot guard rails** (site): questions scoring under 0.55 similarity to the video's narration/sources
+  are turned away before Gemini writes anything (measured on the real videos: real questions 0.58-0.77,
+  off-topic 0.46-0.56); stricter rules (visitor text is questions only, no role-play, no revealing
+  instructions); Google safety filter at medium; empty/blocked answers get a polite reply. Tests check that
+  keys and the DB password never reach the model or the visitor. Checked live with real Gemini.
+
 - **Short tab and all posting removed** (user's request): Assemble now renders the Short next to the full
   video (shown side by side on the Assemble step; download and upload it yourself). Deleted the Short step,
   `routes/shorts.py`, `routes/social.py`, `pipeline/social/`, `SocialAccounts.tsx`, the Short title/caption

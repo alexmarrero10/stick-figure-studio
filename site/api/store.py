@@ -84,6 +84,8 @@ class PgReader:
         """Research passages from the sources this video was made from (background facts)."""
         with self._conn() as c:
             return c.execute(
-                "select ch.id, ch.text, ch.heading, d.title, d.url from chunks ch join documents d on d.id = ch.document_id "
+                "select ch.id, ch.text, ch.heading, d.title, d.url, 1 - (ch.embedding <=> %s::vector) as similarity "
+                "from chunks ch join documents d on d.id = ch.document_id "
                 "join project_documents pd on pd.document_id = d.id where pd.project_key = %s "
-                "order by ch.embedding <=> %s::vector limit %s", (project_key, _vec(query_vec), k)).fetchall()
+                "order by ch.embedding <=> %s::vector limit %s",
+                (_vec(query_vec), project_key, _vec(query_vec), k)).fetchall()
