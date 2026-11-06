@@ -63,8 +63,7 @@ provider, Claude uses your existing `claude` login. If you're logged out, run `c
      - `captions.srt`: upload to YouTube
      - `short.mp4`: the vertical Short (1080×1920), the opening up to the best cliffhanger between 50 and 70 s,
        with your channel name under the pictures. Download it and upload it yourself.
-8. **Publish.** Title options, a description with chapters and sources, tags, thumbnail prompts, and a
-   pre-upload monetization checklist. The general tags from Settings (animation, history, education, …)
+8. **Publish.** Title options, a description with chapters and sources, tags and thumbnail prompts. The general tags from Settings (animation, history, education, …)
    are added to every video's tags.
 
 Video types: a project is **one story**, a **topic explained** (e.g. how Blitzkrieg worked), or a

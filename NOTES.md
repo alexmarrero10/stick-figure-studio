@@ -14,6 +14,9 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **"Your video site" is its own step** (UI step 7, `frontend/src/steps/Site.tsx`), split out of Publish; the
+  "Before you upload" checklist was removed from Publish.
+
 - **RAG evals** (`evals/`, see its README). First run, 2026-11-06, 2 videos + project 3's sources:
   - Retrieval: narration hit@6 100% (hit@1 88%); sources hit@3 80%, hit@6 95%; hybrid slightly beats
     vector-only on sources; search bar right video first 100%; off-topic searches empty 8/8.
@@ -67,7 +70,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Next
 
-1. User: publish projects 1 and 2 on the site (Publish step, paste their YouTube links), run
+1. User: (projects 1 and 2 are published on the site) run
    `backend/supabase/002_site_reader.sql`, then deploy per `site/README.md` (needs a push to GitHub first).
 2. Finish project 3 ("The Piece of Tape...", researched with RAG) with the new script style and zoom, then
    compare its retention with the first two.

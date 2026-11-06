@@ -11,6 +11,7 @@ import VoiceStep from "./steps/Voice";
 import ImagesStep from "./steps/Images";
 import AssembleStep from "./steps/Assemble";
 import PublishStep from "./steps/Publish";
+import SiteStep from "./steps/Site";
 
 export const STEPS = [
   { key: "script", label: "1. Script" },
@@ -19,6 +20,7 @@ export const STEPS = [
   { key: "images", label: "4. Images" },
   { key: "assemble", label: "5. Assemble" },
   { key: "publish", label: "6. Publish" },
+  { key: "site", label: "7. Your video site" },
 ] as const;
 
 type Route =
@@ -93,6 +95,7 @@ function ProjectView({ id, step }: { id: number; step: string }) {
     images: s.prompts && s.prompts_missing ? `${s.prompts_missing} prompts missing` : s.prompts || s.images ? `${s.images_filled}/${s.beats}` : "",
     assemble: s.shots ? "done" : "",
     publish: s.publish ? "done" : "",
+    site: s.site ? "published" : "",
   };
   const props = { project, refresh };
   return (
@@ -128,6 +131,7 @@ function ProjectView({ id, step }: { id: number; step: string }) {
         {step === "images" && <ImagesStep {...props} />}
         {step === "assemble" && <AssembleStep {...props} />}
         {step === "publish" && <PublishStep {...props} />}
+        {step === "site" && <SiteStep {...props} />}
       </section>
     </div>
   );

@@ -217,7 +217,6 @@ button.danger:hover:not(:disabled) { background: var(--danger-soft); }
 .copy-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
 .copy-list li { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
 .description { white-space: pre-wrap; font: inherit; margin: 0; }
-.checklist { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
 
 @media (max-width: 900px) {
   .script-layout { grid-template-columns: 1fr; }
