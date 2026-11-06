@@ -56,7 +56,7 @@ def zoom_for(n_frames: int, fps: int, cfg: dict[str, Any]) -> float:
     sits on screen for many seconds feels frozen, while short ones already change often enough."""
     per_s = float(cfg.get("zoom_per_second", 0.015) or 0)
     seconds = n_frames / fps
-    if per_s <= 0 or seconds < float(cfg.get("zoom_min_seconds", 4)):
+    if per_s <= 0 or seconds < float(cfg.get("zoom_min_seconds", 3)):
         return 0.0
     return min(per_s * seconds, 0.12)
 

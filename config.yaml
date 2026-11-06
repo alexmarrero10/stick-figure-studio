@@ -37,7 +37,7 @@ video:
   fps: 30
   crf: 18
   background: '#F7F4EC'
-  zoom_min_seconds: 4
+  zoom_min_seconds: 3
   zoom_per_second: 0.015
 publish:
   general_tags:
