@@ -323,6 +323,7 @@ def test_settings_show_rag_defaults_and_save_the_new_section(temp_db, tmp_path, 
             s = c.get("/api/settings").json()
             assert s["config"]["rag"]["docs_min"] == 10
             assert "GEMINI_API_KEY" in s["keys"] and "SUPABASE_DB_URL" in s["keys"]
+            assert "SITE_DATABASE_URL" in s["keys"]
             assert c.put("/api/settings/config", json={"rag": {"docs_max": 12}}).status_code == 200
             assert yaml.safe_load(cfg.read_text(encoding="utf-8"))["rag"]["docs_max"] == 12
             assert c.put("/api/settings/config", json={"nonsense": {"a": 1}}).status_code == 200

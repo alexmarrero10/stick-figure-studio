@@ -184,6 +184,8 @@ const KEY_HELP: Record<string, string> = {
   GEMINI_API_KEY: "Free key from aistudio.google.com. Leave billing off on that Google project so it can never cost money.",
   SUPABASE_DB_URL:
     "Supabase: Connect > Session pooler > URI, with your database password filled in. Run backend/supabase/schema.sql once in its SQL Editor.",
+  SITE_DATABASE_URL:
+    "For the public site only: the same Session pooler URI, but with the user site_reader.<project-ref> and the password you gave it in 002_site_reader.sql.",
 };
 
 interface RagCheck {
@@ -194,7 +196,7 @@ interface RagCheck {
 
 export default function SettingsPage() {
   const [s, setS] = useState<Settings | null>(null);
-  const [keys, setKeys] = useState({ ANTHROPIC_API_KEY: "", ELEVENLABS_API_KEY: "", GEMINI_API_KEY: "", SUPABASE_DB_URL: "" });
+  const [keys, setKeys] = useState({ ANTHROPIC_API_KEY: "", ELEVENLABS_API_KEY: "", GEMINI_API_KEY: "", SUPABASE_DB_URL: "", SITE_DATABASE_URL: "" });
   const [ragCheck, setRagCheck] = useState<RagCheck | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Result of the last save, shown next to the button that made it.

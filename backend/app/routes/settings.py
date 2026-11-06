@@ -11,7 +11,7 @@ from pipeline.voice import VoiceError, list_voices, resolve_voice
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 
-KEY_NAMES = ("ANTHROPIC_API_KEY", "ELEVENLABS_API_KEY", "GEMINI_API_KEY", "SUPABASE_DB_URL")
+KEY_NAMES = ("ANTHROPIC_API_KEY", "ELEVENLABS_API_KEY", "GEMINI_API_KEY", "SUPABASE_DB_URL", "SITE_DATABASE_URL")
 
 
 def _mask(v: str | None) -> str | None:
