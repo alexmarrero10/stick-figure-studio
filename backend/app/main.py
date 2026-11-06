@@ -12,12 +12,13 @@ from fastapi.staticfiles import StaticFiles
 
 from app import db
 from app.config import ROOT
+from app.version import VERSION
 from app.routes import assemble, beats, ideas, images, projects, prompts, script, settings, site, voice
 from pipeline.claude_client import ClaudeError
 from pipeline.ffmpeg import FFmpegError
 from pipeline.voice import VoiceError
 
-app = FastAPI(title="Stick Figure Video Studio")
+app = FastAPI(title="Stick Figure Video Studio", version=VERSION)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],

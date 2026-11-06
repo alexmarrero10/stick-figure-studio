@@ -56,9 +56,12 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <a className="brand" href="#/">
-          Stick Figure Studio
-        </a>
+        <div className="brand-row">
+          <a className="brand" href="#/">
+            Stick Figure Studio
+          </a>
+          <span className="muted small" title="App version">v{__APP_VERSION__}</span>
+        </div>
         <nav>
           <a href="#/">Projects</a>
           <a href="#/ideas">New video</a>

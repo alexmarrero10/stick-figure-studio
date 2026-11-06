@@ -135,6 +135,8 @@ who/what/when/where/why for a newcomer.
   in `Settings.tsx` FIELDS with a short plain-language label and help text.
 - UI text and docs: plain, short, friendly language. No jargon.
 - Add or update tests with every change. Tests use `temp_db` / `tmp_path` and mock network calls.
+- **Version:** `VERSION` at the repo root (now 1.0.0) is the one place to change it; shown in the top bar and
+  `/api/settings/health`. Bump it and add a line to `CHANGELOG.md` for user-facing releases.
 - Commit messages: one short plain sentence saying what changed for the user (e.g. "Zoom in on shots of 3 s
   or more"), ending with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - Keep `NOTES.md` current at the end of each piece of work.

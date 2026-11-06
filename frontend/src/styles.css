@@ -63,6 +63,7 @@ h3 { font-size: 1rem; margin: 0 0 6px; }
   position: sticky; top: 0; z-index: 5;
 }
 .brand { font-weight: 700; color: var(--accent); }
+.brand-row { display: flex; align-items: baseline; gap: 8px; }
 .topbar nav { display: flex; gap: 20px; }
 main { max-width: 1280px; margin: 0 auto; padding: 24px; }
 

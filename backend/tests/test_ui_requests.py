@@ -65,7 +65,9 @@ def test_health_keeps_the_voice_name_in_step_with_the_id(client, tmp_path, monke
     monkeypatch.setattr(settings, "resolve_voice",
                         lambda key, vid, name: {"voice_id": vid, "name": "Brian - Deep, Resonant and Comforting"})
     monkeypatch.setattr(settings.claude_code, "auth_status", lambda: {})
-    assert client.get("/api/settings/health").json()["voice"]["name"].startswith("Brian")
+    health = client.get("/api/settings/health").json()
+    assert health["voice"]["name"].startswith("Brian")
+    assert health["version"] == (ROOT / "VERSION").read_text(encoding="utf-8").strip()
     on_disk = yaml.safe_load((tmp_path / "config.yaml").read_text(encoding="utf-8"))
     assert on_disk["voice"] == {**on_disk["voice"], "voice_id": "brian-id", "voice_name": "Brian"}
 

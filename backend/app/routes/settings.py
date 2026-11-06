@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.config import get_key, load_config, read_config_file, save_config, set_api_key
+from app.version import VERSION
 from pipeline import claude_code, ffmpeg
 from pipeline.voice import VoiceError, list_voices, resolve_voice
 
@@ -113,6 +114,7 @@ def health() -> dict[str, Any]:
     cfg = load_config()
     provider = cfg["claude"].get("provider", "claude_code")
     out: dict[str, Any] = {
+        "version": VERSION,
         "ffmpeg": ffmpeg.available(),
         "claude_provider": provider,
         "claude_code": claude_code.auth_status() if provider == "claude_code" else None,
