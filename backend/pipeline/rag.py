@@ -232,6 +232,14 @@ def script_excerpts(store: Store, embed: EmbedFn, key: str, brief: str, idea: di
     return format_excerpts(chunks, max_words) if chunks else ""
 
 
+def fact_check_excerpts(store: Store, embed: EmbedFn, key: str, script: str, k: int = 24,
+                        max_words: int = 5000) -> str:
+    """Passages for the fact check: the best two for each paragraph of the script, from this project's sources."""
+    from pipeline.fact_check import paragraph_queries
+    chunks = retrieve(store, embed, key, paragraph_queries(script), k=k, per_query=2, shared=False)
+    return format_excerpts(chunks, max_words) if chunks else ""
+
+
 def revise_excerpts(store: Store, embed: EmbedFn, key: str, instruction: str, k: int = 5,
                     max_words: int = 1200) -> str:
     chunks = retrieve(store, embed, key, [instruction], k=k, per_query=k, shared=False)

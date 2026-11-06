@@ -135,6 +135,7 @@ export default function ScriptStep({ project, refresh }: StepProps) {
   const [suggest, setSuggest] = useState<{ text: string } | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [grammarAsk, setGrammarAsk] = useState(0); // bumped to make the chat run a grammar check
+  const [factAsk, setFactAsk] = useState(0); // bumped to make the chat run a fact check
   const scriptRef = useRef<HTMLTextAreaElement>(null);
   const { run, job, busy } = useJob({ project: pid, kind: "research", done: () => afterResearch(), failed: (m) => setError(m) });
 
@@ -265,6 +266,12 @@ export default function ScriptStep({ project, refresh }: StepProps) {
     setGrammarAsk((n) => n + 1);
   };
 
+  const checkFacts = async () => {
+    if (text !== saved) await save();
+    setChatOpen(true);
+    setFactAsk((n) => n + 1);
+  };
+
   // Scroll the script to a passage and select it, e.g. when a suggested edit is clicked.
   const locate = (find: string) => {
     const ta = scriptRef.current;
@@ -376,6 +383,14 @@ export default function ScriptStep({ project, refresh }: StepProps) {
             >
               Check grammar
             </button>
+            <button
+              className="secondary"
+              onClick={checkFacts}
+              disabled={!text.trim() || streaming}
+              title="Check names, dates, numbers and quotes against the sources. Wrong ones come back as fixes you can accept"
+            >
+              Check facts
+            </button>
             <button className="secondary" onClick={() => setChatOpen(!chatOpen)}>
               {chatOpen ? "Close Ask Claude" : "Ask Claude to change it"}
             </button>
@@ -436,6 +451,7 @@ export default function ScriptStep({ project, refresh }: StepProps) {
         onClose={() => setChatOpen(false)}
         suggest={suggest}
         grammarAsk={grammarAsk}
+        factAsk={factAsk}
         onLocate={locate}
         disabled={!saved || streaming || text !== saved}
         onApplied={(t) => {
@@ -458,6 +474,7 @@ function Chat({
   onLocate,
   suggest,
   grammarAsk,
+  factAsk,
 }: {
   pid: number;
   open: boolean;
@@ -467,6 +484,7 @@ function Chat({
   onLocate: (find: string) => void;
   suggest: { text: string } | null; // a request to put in the box, e.g. from "Ask Claude to fix them"
   grammarAsk: number;
+  factAsk: number;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -511,6 +529,10 @@ function Chat({
   useEffect(() => {
     if (grammarAsk) ask("Check grammar", `/api/projects/${pid}/script/grammar`, {});
   }, [grammarAsk]);
+
+  useEffect(() => {
+    if (factAsk) ask("Check facts", `/api/projects/${pid}/script/factcheck`, {});
+  }, [factAsk]);
 
   const apply = async () => {
     if (!pending) return;

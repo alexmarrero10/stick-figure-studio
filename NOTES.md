@@ -14,6 +14,13 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Check facts** button on the Script step (`fact_check.py`, `POST /script/factcheck`): checks names, dates,
+  numbers and quotes; wrong ones come back as fixes in the chat, unconfirmed ones are listed. With RAG it
+  checks against the stored passages for each paragraph (no tools); without, against the brief + web search.
+  The speed test (`evals/speed.py`) now runs the same four steps both ways: research, script, fact check,
+  one revision. First run (research + script only): research 39% faster and 91% fewer input tokens with
+  RAG, script ~1 min slower (it gets passages too), total about even. Voice is now Brian at 1.2x; v1.0.0 tagged.
+
 - **Faster narration** (`voice.speed`, set to 1.1 on 2026-11-06): the voice-over is sped up after ElevenLabs
   (FFmpeg atempo, pitch kept) and word timings are scaled to the measured length. Previews use it too.
   Previews now trim pauses and apply the speed too (before, they had untrimmed 0.6-0.8 s sentence gaps).

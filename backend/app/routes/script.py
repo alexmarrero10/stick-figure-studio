@@ -12,7 +12,7 @@ from app import db, jobs
 from app.config import load_config
 from app.deps import claude, embedder, project_or_404, rag_config, rag_ready, vector_store
 from app.storage import write_script_mirror
-from pipeline import rag
+from pipeline import fact_check, rag
 from pipeline import script as script_mod
 from pipeline.claude_client import ClaudeError
 
@@ -277,6 +277,26 @@ def grammar(project_id: int) -> dict[str, Any]:
 class ApplyBody(BaseModel):
     edits: list[dict[str, Any]]
     instruction: str | None = None
+
+
+@router.post("/script/factcheck")
+def factcheck(project_id: int) -> dict[str, Any]:
+    """Check the script's facts: against the stored source passages with RAG, otherwise against the
+    brief plus web search. Wrong facts come back as pending edits in the chat."""
+    project_or_404(project_id)
+    cur = db.current_script(project_id)
+    if not cur:
+        raise HTTPException(400, "Generate or write a script first")
+    brief = (db.latest_research(project_id) or {}).get("content", "")
+    passages = ""
+    if rag_ready() and any(s["status"] == "ok" for s in db.list_sources(project_id)):
+        passages = _excerpts(lambda: rag.fact_check_excerpts(vector_store(), embedder(), _key(project_id), cur["text"]))
+    result = fact_check.check(claude(), cur["text"], brief, passages, load_config()["claude"].get("web_search", True))
+    db.add_revision_message(project_id, "user", "Check facts")
+    msg = db.add_revision_message(project_id, "assistant", fact_check.summary(result), result["edits"])
+    msg["edits"] = result["edits"]
+    msg["script_version_id"] = cur["id"]
+    return msg
 
 
 @router.post("/script/apply-edits")

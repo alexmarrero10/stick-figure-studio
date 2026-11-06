@@ -18,7 +18,8 @@ is the active plan for RAG research and the public site (both built; deployment 
    (`rag.enabled` + `GEMINI_API_KEY` + `SUPABASE_DB_URL`), research downloads 10-15 sources (`sources.py`),
    chunks and embeds them into Supabase pgvector (`chunking.py`, `embeddings.py`, `vector_store.py`) and
    writes the brief from retrieved passages (`rag.py`); script and chat get source excerpts too. Without
-   it, Claude researches with web search. Chat revisions are shown as find/replace diffs the user accepts or rejects. Every save is a version.
+   it, Claude researches with web search. Chat revisions, the grammar check and **Check facts** (`fact_check.py`: against stored passages with RAG,
+   else brief + web search) are shown as find/replace diffs the user accepts or rejects. Every save is a version.
    The style rules live in `SCRIPT_SYSTEM` (see "Script style" below).
 3. **Beats** (`scenes.py`, `beat_review.py`): split into 2-13 word picture chunks; Claude can review the
    boundaries; manual split/merge/edit with undo.
@@ -64,7 +65,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (158 passing as of 2026-11-06,
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (164 passing as of 2026-11-06,
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.

@@ -1,5 +1,6 @@
-"""Speed and token test: research and script writing the old way (Claude searches the web itself) vs
-with RAG (Python downloads the sources into the vector database; Claude writes from the best passages).
+"""Speed and token test: the same four steps the old way (Claude searches the web itself) vs with RAG
+(Python downloads the sources into the vector database; Claude works from the best passages):
+research, write the script, check its facts, and one chat revision that asks for a new fact.
 
 Both ways run on the same topic, with the same model and settings, one after the other. For every Claude
 call it records the time and the token use the Claude CLI reports (plus the API-equivalent cost the CLI
@@ -8,7 +9,7 @@ stay in the shared vector database (that is how RAG works), but are not linked t
 
     .venv\\Scripts\\python evals\\speed.py                                 # default new topic
     .venv\\Scripts\\python evals\\speed.py --topic "The Great Molasses Flood of 1919"
-    .venv\\Scripts\\python evals\\speed.py --research-only                 # skip script writing (faster)
+    .venv\\Scripts\\python evals\\speed.py --research-only                 # only research (faster)
     .venv\\Scripts\\python evals\\speed.py --rag-first                     # run RAG before the old way
 
 Pick a topic that isn't in the database yet to measure a first-time video. Run it twice with
@@ -42,6 +43,9 @@ def totals(log: list[dict[str, Any]], seconds: float) -> dict[str, Any]:
     t["seconds"] = round(seconds, 1)
     t["other_seconds"] = round(max(0.0, seconds - t["claude_seconds"]), 1)
     return t
+
+
+REVISION = "Add one more specific, true detail to the opening scene that makes it more vivid."
 
 
 class Meter:
@@ -104,6 +108,27 @@ def write_script(claude, idea, brief, fmt, excerpts_key: str | None) -> tuple[st
     return text, m.result
 
 
+def check_facts(claude, script_text, brief, key: str | None) -> tuple[dict, dict]:
+    """The same fact check both ways: RAG checks against stored passages, the old way against the brief
+    plus web search."""
+    from app.deps import embedder
+    from pipeline import fact_check, rag
+    with Meter(claude) as m:
+        passages = rag.fact_check_excerpts(common.studio_store(), embedder(), key, script_text) if key else ""
+        result = fact_check.check(claude, script_text, brief, passages, common_cfg().get("web_search", True))
+    return result, m.result
+
+
+def revise(claude, script_text, key: str | None) -> tuple[dict, dict]:
+    """One chat revision that asks for a new fact, the way the Script step's chat does it."""
+    from app.deps import embedder
+    from pipeline import rag, script
+    with Meter(claude) as m:
+        excerpts = rag.revise_excerpts(common.studio_store(), embedder(), key, REVISION) if key else ""
+        result = script.revise(claude, script_text, [], REVISION, excerpts)
+    return result, m.result
+
+
 def common_cfg() -> dict[str, Any]:
     from app.config import load_config
     return load_config()["claude"]
@@ -122,11 +147,18 @@ def row(name: str, t: dict[str, Any]) -> list[Any]:
             f"${t['cost_usd']:.2f}"]
 
 
+def add(*ts: dict[str, Any]) -> dict[str, Any]:
+    return {k: sum(t[k] for t in ts) for k in ts[0]}
+
+
+STEPS = [("research", "Research"), ("script", "Script"), ("facts", "Fact check"), ("revision", "Revision")]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--topic", help="video title to research (default: %s)" % DEFAULT_TOPIC["title"])
     ap.add_argument("--format", default="story", choices=["story", "topic", "list"])
-    ap.add_argument("--research-only", action="store_true", help="skip writing the two scripts")
+    ap.add_argument("--research-only", action="store_true", help="only the research step")
     ap.add_argument("--rag-first", action="store_true", help="run the RAG way first")
     args = ap.parse_args()
 
@@ -144,6 +176,7 @@ def main() -> None:
 
     res: dict[str, Any] = {}
     order = ["rag", "old"] if args.rag_first else ["old", "rag"]
+    steps = STEPS[:1] if args.research_only else STEPS
     try:
         for way in order:
             if way == "old":
@@ -154,56 +187,70 @@ def main() -> None:
                 res["rag_sources"] = extra
         if not args.research_only:
             for way in order:
-                print(f"  Writing the script ({'old way' if way == 'old' else 'RAG, with source excerpts'})...")
-                text, res[f"{way}_script"] = write_script(claude, idea, res[f"{way}_brief"], args.format,
-                                                          key if way == "rag" else None)
-                res[f"{way}_script_words"] = len(text.split())
+                k = key if way == "rag" else None
+                label = "old way" if way == "old" else "RAG"
+                print(f"  Writing the script ({label})...")
+                text, res[f"{way}_script"] = write_script(claude, idea, res[f"{way}_brief"], args.format, k)
+                res[f"{way}_script_text"] = text
+                print(f"  Checking the facts ({label})...")
+                res[f"{way}_facts_result"], res[f"{way}_facts"] = check_facts(claude, text, res[f"{way}_brief"], k)
+                print(f"  One chat revision ({label})...")
+                res[f"{way}_revision_result"], res[f"{way}_revision"] = revise(claude, text, k)
     finally:
         store = common.studio_store()
         for doc_id in store.project_documents(key):  # keep the sources in the shared corpus, unlinked
             store.unlink_project(key, doc_id)
 
-    o, r = res["old_research"], res["rag_research"]
-    rows = [row("Research, old way", o), row("Research, RAG (first time)", r),
-            row("Research, RAG (sources already stored)", res["rag_again"])]
-    if not args.research_only:
-        rows += [row("Script, old way", res["old_script"]), row("Script, RAG (with excerpts)", res["rag_script"])]
-        ot = {k: o[k] + res["old_script"][k] for k in o}
-        rt = {k: r[k] + res["rag_script"][k] for k in r}
-        rows += [row("**Total, old way**", ot), row("**Total, RAG**", rt)]
+    rows = []
+    for step, name in steps:
+        rows += [row(f"{name}, old way", res[f"old_{step}"]), row(f"{name}, RAG", res[f"rag_{step}"])]
+    rows.append(row("Research again, RAG (sources already stored)", res["rag_again"]))
+    ot = add(*(res[f"old_{s}"] for s, _ in steps))
+    rt = add(*(res[f"rag_{s}"] for s, _ in steps))
+    rows += [row("**Total, old way**", ot), row("**Total, RAG**", rt)]
+
+    def cmp_row(name: str, o: dict, r: dict) -> list[str]:
+        return [name, f"{o['seconds'] / 60:.1f} vs {r['seconds'] / 60:.1f} min", change(o["seconds"], r["seconds"]),
+                change(o["all_input_tokens"], r["all_input_tokens"]), change(o["cost_usd"], r["cost_usd"])]
+
+    compare = [cmp_row(name, res[f"old_{s}"], res[f"rag_{s}"]) for s, name in steps]
+    compare.append(cmp_row("**All steps**", ot, rt))
     body = [
         f"Topic: **{idea['title']}** ({args.format}). Model {claude.model}, effort {claude.effort}, old research "
-        f"depth {cfg.get('research_depth', 'quick')}. Order: {' then '.join(order)}.\n",
+        f"depth {cfg.get('research_depth', 'quick')}. Order: {' then '.join(order)}. Both ways run the same steps: "
+        "research, write the script, check its facts, then one chat revision that asks for a new fact.\n",
+        "## RAG compared with the old way\n",
+        sc.md_table(["Step", "Time (old vs RAG)", "Time", "Input tokens", "API-equivalent cost"], compare),
+        "\n## Every step\n",
         sc.md_table(["Step", "Time", "Claude / other time", "Claude calls", "Turns", "Input tokens", "Output tokens",
                      "API-equivalent cost"], rows),
         "\nInput tokens include cached ones (cache reads are much cheaper, which the cost column accounts for). "
-        "\"Other time\" is downloading, embedding and database work. Turns count Claude's tool steps (each web "
+        "'Other time' is downloading, embedding and database work. Turns count Claude's tool steps (each web "
         "search or page read is another turn, and each turn re-reads the conversation).\n",
-        "## Research: RAG vs the old way\n",
-        f"- Time: {change(o['seconds'], r['seconds'])} ({o['seconds'] / 60:.1f} vs {r['seconds'] / 60:.1f} min)",
-        f"- Input tokens: {change(o['all_input_tokens'], r['all_input_tokens'])}",
-        f"- Output tokens: {change(o['output_tokens'], r['output_tokens'])}",
-        f"- API-equivalent cost: {change(o['cost_usd'], r['cost_usd'])}",
-        f"- Re-researching with sources already stored: {res['rag_again']['seconds'] / 60:.1f} min, "
-        f"${res['rag_again']['cost_usd']:.2f}",
-        f"- Briefs: old {len(res['old_brief'].split())} words citing {len(old_src)} sources; RAG "
+        "How each step differs:",
+        "- Research: the old way has Claude search and read pages itself; RAG downloads the sources in code, "
+        "stores them, and Claude writes the brief from the best passages.",
+        "- Script: both write from the brief; RAG also gets source passages to check details against.",
+        "- Fact check: the old way checks the script against the brief and searches the web for the rest; RAG "
+        "checks it against the stored passages that match each paragraph, with no web search.",
+        f"- Revision ('{REVISION}'): the old way sends only the script; RAG adds the 5 passages that match "
+        "the request, so the new fact comes from a source.\n",
+        f"Briefs: old {len(res['old_brief'].split())} words citing {len(old_src)} sources; RAG "
         f"{len(res['rag_brief'].split())} words citing {len(rag_src)} of {res['rag_sources']['sources_ok']} "
-        "downloaded sources",
+        "downloaded sources.",
     ]
     if not args.research_only:
-        os_, rs = res["old_script"], res["rag_script"]
-        body += [
-            "\n## Script writing\n",
-            f"- Time: {change(os_['seconds'], rs['seconds'])}; input tokens: "
-            f"{change(os_['all_input_tokens'], rs['all_input_tokens'])}; cost: {change(os_['cost_usd'], rs['cost_usd'])}",
-            f"- Scripts: old {res['old_script_words']} words, RAG {res['rag_script_words']} words",
-            "- RAG adds source excerpts to the script prompt, so this step isn't expected to be cheaper; the "
-            "excerpts are there for accuracy.",
-        ]
+        for way, label in (("old", "Old way"), ("rag", "RAG")):
+            f = res[f"{way}_facts_result"]
+            wrong = sum(i.get("verdict") == "wrong" for i in f["issues"])
+            body.append(f"- {label}: script {len(res[f'{way}_script_text'].split())} words; the fact check found "
+                        f"{wrong} wrong and {len(f['issues']) - wrong} unconfirmed claims ({f['reply']})")
     headline = {"topic": idea["title"], "order": order,
-                "research_minutes": [round(o["seconds"] / 60, 1), round(r["seconds"] / 60, 1)],
-                "research_input_tokens": [o["all_input_tokens"], r["all_input_tokens"]],
-                "research_cost": [round(o["cost_usd"], 3), round(r["cost_usd"], 3)]}
+                "minutes": [round(ot["seconds"] / 60, 1), round(rt["seconds"] / 60, 1)],
+                "input_tokens": [ot["all_input_tokens"], rt["all_input_tokens"]],
+                "cost": [round(ot["cost_usd"], 3), round(rt["cost_usd"], 3)],
+                **{f"{s}_minutes": [round(res[f"old_{s}"]["seconds"] / 60, 1),
+                                    round(res[f"rag_{s}"]["seconds"] / 60, 1)] for s, _ in steps}}
     common.report("speed", "Speed and tokens: RAG vs the old way", "\n".join(body), headline,
                   {k: v for k, v in res.items()})
 

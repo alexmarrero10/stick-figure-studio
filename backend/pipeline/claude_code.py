@@ -220,8 +220,9 @@ class ClaudeCode:
                                stop_reason="end_turn")
 
     def json(self, system: Any, messages: list[dict[str, Any]], schema: dict[str, Any],
-             max_tokens: int = 32000, effort: str | None = None) -> dict[str, Any]:
-        result = self._run_json(system, messages, None, effort, schema)
+             max_tokens: int = 32000, effort: str | None = None,
+             tools: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+        result = self._run_json(system, messages, tools, effort, schema)
         data = result.get("structured_output")
         if data is None:
             try:

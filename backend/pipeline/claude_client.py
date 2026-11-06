@@ -117,11 +117,13 @@ class Claude:
             raise self._wrap(e) from e
 
     def json(self, system: Any, messages: list[dict[str, Any]], schema: dict[str, Any],
-             max_tokens: int = 32000, effort: str | None = None) -> dict[str, Any]:
+             max_tokens: int = 32000, effort: str | None = None,
+             tools: list[dict[str, Any]] | None = None) -> dict[str, Any]:
         """Structured output constrained to a JSON schema."""
         fmt = {"type": "json_schema", "schema": schema}
         try:
-            with self._stream(self._params(system, messages, max_tokens, fmt=fmt, effort=effort)) as stream:
+            with self._stream(self._params(system, messages, max_tokens, fmt=fmt, tools=tools,
+                                           effort=effort)) as stream:
                 msg = stream.get_final_message()
         except anthropic.AnthropicError as e:
             raise self._wrap(e) from e
