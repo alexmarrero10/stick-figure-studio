@@ -14,6 +14,11 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **`SITE_DATABASE_URL` on Settings** (4e8eeac): the read-only `site_reader` address is saved to `.env` from
+  the Settings page; the local site reads it (falls back to `SUPABASE_DB_URL` when empty). The user's local
+  `002_site_reader.sql` has their real password as an uncommitted edit: **never commit it**; restore the
+  placeholder with `git checkout` once they confirm they've run it.
+
 - **Public site built** (`site/`, Phase D): search by meaning, watch page with YouTube player and a Gemini
   chatbot with clickable timestamps, abuse limits, read-only DB user. Tested locally against real Supabase
   and Gemini; not deployed. Run it: see CLAUDE.md "Public site". Deploy steps: `site/README.md`.
