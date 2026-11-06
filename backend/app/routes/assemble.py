@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import Any
 
@@ -12,7 +13,7 @@ from app.deps import claude, project_or_404
 from app.routes.images import beat_image_map
 from app.routes.projects import rel
 from app.storage import output_dir
-from pipeline import assemble, captions, fcpxml, publish, shots as shots_mod
+from pipeline import assemble, captions, fcpxml, procs, publish, shorts, shots as shots_mod
 
 router = APIRouter(prefix="/api/projects/{project_id}", tags=["assemble"])
 
@@ -31,6 +32,30 @@ def _plan(project_id: int) -> dict[str, Any]:
     plan = shots_mod.build_shots(beats, words, images, voice["duration_s"], cfg["shots"], cfg["video"]["fps"])
     plan["missing_images"] = [b["idx"] for b in beats if b["idx"] not in images]
     return plan
+
+
+def short_cfg() -> dict[str, Any]:
+    return {**{"min_seconds": 50, "max_seconds": 70, "channel_name": ""}, **load_config().get("shorts", {})}
+
+
+def stored_cut(project_id: int) -> float | None:
+    """Where the Short ends, if it was chosen for the current voice-over."""
+    short, cfg = db.get_short(project_id), short_cfg()
+    words = db.list_words(project_id)
+    if words and short["cut_s"] is not None and short["cut_key"] == shorts.cut_key(words, float(cfg["max_seconds"])):
+        return short["cut_s"]
+    return None
+
+
+def _cut(project_id: int) -> float:
+    """Where the Short ends: chosen once per voice-over (at the best cliffhanger in the window), then kept."""
+    cut = stored_cut(project_id)
+    if cut is None:
+        cfg = short_cfg()
+        words = db.list_words(project_id)
+        cut = shorts.choose_cut(claude(), words, float(cfg["min_seconds"]), float(cfg["max_seconds"]))
+        db.save_short(project_id, cut_s=cut, cut_key=shorts.cut_key(words, float(cfg["max_seconds"])))
+    return cut
 
 
 @router.get("/shots/preview")
@@ -62,6 +87,7 @@ def run_assembly(project_id: int) -> dict[str, Any]:
     words = db.list_words(project_id)
     beat_text = {b["idx"]: b["text"] for b in db.list_beats(project_id)}
     out = output_dir(p["slug"])
+    scfg = short_cfg()
 
     def work(progress):
         db.replace_shots(project_id, plan["shots"])
@@ -70,10 +96,27 @@ def run_assembly(project_id: int) -> dict[str, Any]:
         timeline = fcpxml.build(plan["shots"], audio, voice["duration_s"], p["title"],
                                 vcfg["fps"], vcfg["width"], vcfg["height"])
         (out / "timeline.fcpxml").write_text(timeline, encoding="utf-8")
-        res = assemble.render(plan["shots"], audio, out / "video.mp4", vcfg, out / "_work", beat_text, progress)
+        res = assemble.render(plan["shots"], audio, out / "video.mp4", vcfg, out / "_work", beat_text,
+                              lambda msg, f: progress(msg, 0.75 * f))
         drift = abs(res["duration"] - res["expected"])
-        return {**res, "drift_s": round(drift, 3), "missing_images": plan["missing_images"],
-                "unused_images": plan["unused_images"]}
+        result = {**res, "drift_s": round(drift, 3), "missing_images": plan["missing_images"],
+                  "unused_images": plan["unused_images"], "short": None, "short_error": None}
+        # The vertical Short is made from the same shots. If it fails, the full video is still kept.
+        if not scfg["channel_name"].strip():
+            result["short_error"] = "Set your channel name on the Settings page to make the Short too."
+            return result
+        try:
+            progress("Short: finding the cliffhanger to end on", 0.76)
+            cut = _cut(project_id)
+            sres = shorts.render(plan["shots"], audio, out / "short.mp4", vcfg, scfg, out / "_short_work",
+                                 lambda msg, f: progress(f"Short: {msg}", 0.76 + 0.24 * f), seconds=cut)
+            db.save_short(project_id, rendered_at=time.strftime("%Y-%m-%d %H:%M:%S"), duration_s=sres["duration"])
+            result["short"] = sres
+        except procs.Stopped:
+            raise
+        except Exception as e:
+            result["short_error"] = f"The full video is done, but the Short failed: {e}"
+        return result
 
     return jobs.start("assemble", project_id, work)
 
@@ -83,7 +126,7 @@ def outputs(project_id: int) -> dict[str, Any]:
     p = project_or_404(project_id)
     out = output_dir(p["slug"])
     files = {}
-    for name in ("video.mp4", "timeline.fcpxml", "captions.srt"):
+    for name in ("video.mp4", "short.mp4", "timeline.fcpxml", "captions.srt"):
         f = out / name
         if f.exists():
             files[name] = {"url": f"/api/projects/{project_id}/file?path={rel(p, f)}", "path": str(f),

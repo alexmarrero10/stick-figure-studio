@@ -11,7 +11,6 @@ import VoiceStep from "./steps/Voice";
 import ImagesStep from "./steps/Images";
 import AssembleStep from "./steps/Assemble";
 import PublishStep from "./steps/Publish";
-import ShortStep from "./steps/Short";
 
 export const STEPS = [
   { key: "script", label: "1. Script" },
@@ -20,7 +19,6 @@ export const STEPS = [
   { key: "images", label: "4. Images" },
   { key: "assemble", label: "5. Assemble" },
   { key: "publish", label: "6. Publish" },
-  { key: "short", label: "7. Short" },
 ] as const;
 
 type Route =
@@ -35,7 +33,7 @@ function parseHash(): Route {
   if (parts[0] === "settings") return { page: "settings" };
   if (parts[0] === "p" && parts[1]) {
     // Prompts and images share one step now; old #/p/1/prompts links open it.
-    const step = parts[2] === "prompts" ? "images" : parts[2] || "script";
+    const step = parts[2] === "prompts" ? "images" : parts[2] === "short" ? "assemble" : parts[2] || "script";
     return { page: "project", id: Number(parts[1]), step };
   }
   return { page: "home" };
@@ -95,7 +93,6 @@ function ProjectView({ id, step }: { id: number; step: string }) {
     images: s.prompts && s.prompts_missing ? `${s.prompts_missing} prompts missing` : s.prompts || s.images ? `${s.images_filled}/${s.beats}` : "",
     assemble: s.shots ? "done" : "",
     publish: s.publish ? "done" : "",
-    short: s.short_posts ? `on ${s.short_posts} apps` : s.short ? "made" : "",
   };
   const props = { project, refresh };
   return (
@@ -131,7 +128,6 @@ function ProjectView({ id, step }: { id: number; step: string }) {
         {step === "images" && <ImagesStep {...props} />}
         {step === "assemble" && <AssembleStep {...props} />}
         {step === "publish" && <PublishStep {...props} />}
-        {step === "short" && <ShortStep {...props} />}
       </section>
     </div>
   );

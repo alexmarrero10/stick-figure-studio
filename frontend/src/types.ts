@@ -36,7 +36,6 @@ export interface Status {
   shots: number;
   publish: boolean;
   short: boolean;
-  short_posts: number;
 }
 
 export interface Project {

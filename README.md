@@ -56,19 +56,16 @@ provider, Claude uses your existing `claude` login. If you're logged out, run `c
    - Check each picture against its narration and drag any that are out of order.
 7. **Assemble.**
    - Each picture appears 0.08 s before its first word and holds until the next beat.
-   - Shots under 0.5 s merge with a neighbour. Pictures are never zoomed in.
+   - Shots under 0.5 s merge with a neighbour. Shots of 3 s or longer slowly zoom in.
    - Outputs go to `projects/<slug>/output/`:
      - `video.mp4`: preview render (1080p30, H.264 + AAC)
      - `timeline.fcpxml`: in Resolve, **File → Import → Timeline…**; every shot is its own clip on V1 and the voice is on A1
      - `captions.srt`: upload to YouTube
+     - `short.mp4`: the vertical Short (1080×1920), the opening up to the best cliffhanger between 50 and 70 s,
+       with your channel name under the pictures. Download it and upload it yourself.
 8. **Publish.** Title options, a description with chapters and sources, tags, thumbnail prompts, and a
    pre-upload monetization checklist. The general tags from Settings (animation, history, education, …)
    are added to every video's tags.
-9. **Short.** The first 59 seconds as a vertical 1080×1920 video (`output/short.mp4`) with your channel
-   name under the pictures, cut off abruptly at 59 s. Paste the full video's YouTube link, let Claude
-   write the title, caption and hashtags, then **Publish short form videos** posts it to YouTube Shorts,
-   Instagram Reels, Facebook Reels and TikTok. Connect each account once under **Settings → Connected
-   accounts**; their tokens are saved to `.env`.
 
 Video types: a project is **one story**, a **topic explained** (e.g. how Blitzkrieg worked), or a
 **countdown list** (e.g. top 5 Navy pilot UFO encounters). Pick it at the top of the Script step before

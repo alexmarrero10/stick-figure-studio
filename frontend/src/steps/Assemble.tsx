@@ -16,11 +16,18 @@ interface Outputs {
   files: Record<string, { url: string; path: string; size: number; modified: number }>;
 }
 
+interface AssembleResult {
+  duration: number;
+  drift_s: number;
+  short: { duration: number } | null;
+  short_error: string | null;
+}
+
 export default function AssembleStep({ project, refresh }: StepProps) {
   const pid = project.id;
   const [preview, setPreview] = useState<Preview | null>(null);
   const [outputs, setOutputs] = useState<Outputs | null>(null);
-  const [result, setResult] = useState<{ duration: number; drift_s: number } | null>(null);
+  const [result, setResult] = useState<AssembleResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { run, job, busy } = useJob({ project: pid, kind: "assemble", done: (j) => afterAssemble(j), failed: (m) => setError(m) });
 
@@ -37,7 +44,7 @@ export default function AssembleStep({ project, refresh }: StepProps) {
   }, [pid]);
 
   const afterAssemble = async (j: Job) => {
-    setResult(j.result as { duration: number; drift_s: number });
+    setResult(j.result as AssembleResult);
     await load();
     refresh();
   };
@@ -52,14 +59,16 @@ export default function AssembleStep({ project, refresh }: StepProps) {
   };
 
   const video = outputs?.files["video.mp4"];
+  const short = outputs?.files["short.mp4"];
   return (
     <div>
       <div className="panel">
         <h2>Assemble the video</h2>
         <p className="muted small">
           Each picture appears just before its first word and stays until the next beat. Shots under 0.5 s merge with a
-          neighbour. Pictures are never zoomed in. Output: a preview MP4, an FCPXML timeline for DaVinci
-          Resolve (File → Import → Timeline), and SRT captions.
+          neighbour. Shots of 3 s or longer slowly zoom in. Output: the MP4, an FCPXML timeline for DaVinci Resolve
+          (File → Import → Timeline), SRT captions, and the vertical Short (short.mp4): the opening, ending on the best
+          cliffhanger, with your channel name under the pictures.
         </p>
         {preview && (
           <div className="stats">
@@ -88,7 +97,7 @@ export default function AssembleStep({ project, refresh }: StepProps) {
         )}
         <div className="row">
           <button onClick={assemble} disabled={busy || !preview}>
-            {busy ? "Rendering…" : video ? "Render again" : "Render MP4 + timeline"}
+            {busy ? "Rendering…" : video ? "Render again" : "Render the video and the Short"}
           </button>
           {outputs && (
             <button className="secondary" onClick={() => api.post(`/api/projects/${pid}/open-folder?sub=output`)}>
@@ -101,12 +110,27 @@ export default function AssembleStep({ project, refresh }: StepProps) {
         {result && (
           <div className={result.drift_s < 0.1 ? "ok" : "warning"}>
             Rendered {fmtTime(result.duration)}. Picture/audio length difference: {result.drift_s.toFixed(3)} s.
+            {result.short && ` Short: ${fmtTime(result.short.duration)}.`}
+          </div>
+        )}
+        {result?.short_error && (
+          <div className="warning small">
+            <span>
+              {result.short_error} {result.short_error.includes("Settings") && <a href="#/settings">Open Settings</a>}
+            </span>
           </div>
         )}
       </div>
       {video && (
         <div className="panel">
-          <video controls src={`${video.url}&t=${video.modified}`} className="preview-video" />
+          <div className="short-layout">
+            <video controls src={`${video.url}&t=${video.modified}`} className="preview-video" />
+            {short && (
+              <div className="phone">
+                <video controls src={`${short.url}&t=${short.modified}`} />
+              </div>
+            )}
+          </div>
           <ul className="files">
             {Object.entries(outputs!.files).map(([name, f]) => (
               <li key={name}>

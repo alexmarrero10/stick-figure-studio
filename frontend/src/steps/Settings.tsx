@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { api } from "../api";
 import { ErrorBox, SecretInput } from "../components";
 import { Settings } from "../types";
-import SocialAccounts from "./SocialAccounts";
 
 const FIELDS: {
   section: string;
@@ -151,33 +150,9 @@ const FIELDS: {
     type: "list",
     help: "Comma separated, e.g. animation, history, education",
   },
-  { section: "shorts", key: "channel_name", label: "Channel name on Shorts", help: "Just the name, e.g. NextDoorHistorian; the @ is added under the video" },
+  { section: "shorts", key: "channel_name", label: "Channel name on the Short", help: "Just the name, e.g. NextDoorHistorian; the @ is added under the video" },
   { section: "shorts", key: "min_seconds", label: "Shortest Short (s)", type: "number", help: "The Short ends on the best cliffhanger between these two lengths" },
   { section: "shorts", key: "max_seconds", label: "Longest Short (s)", type: "number", help: "With no sentence ending in between, it cuts off here" },
-  {
-    section: "social",
-    key: "youtube_privacy",
-    label: "YouTube Short visibility",
-    type: "select",
-    options: [
-      { value: "public", label: "Public" },
-      { value: "unlisted", label: "Unlisted" },
-      { value: "private", label: "Private" },
-    ],
-  },
-  {
-    section: "social",
-    key: "tiktok_privacy",
-    label: "TikTok visibility",
-    type: "select",
-    options: [
-      { value: "PUBLIC_TO_EVERYONE", label: "Everyone" },
-      { value: "FOLLOWER_OF_CREATOR", label: "Followers" },
-      { value: "MUTUAL_FOLLOW_FRIENDS", label: "Friends" },
-      { value: "SELF_ONLY", label: "Only me" },
-    ],
-    help: "Until TikTok approves your app, only Only me works",
-  },
 ];
 
 const KEY_HELP: Record<string, string> = {
@@ -319,7 +294,6 @@ export default function SettingsPage() {
           </ul>
         )}
       </div>
-      <SocialAccounts />
       <div className="panel">
         <h2>Pipeline</h2>
         <div className="grid2">

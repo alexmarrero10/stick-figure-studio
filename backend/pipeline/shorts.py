@@ -1,4 +1,4 @@
-"""Vertical Shorts (YouTube Shorts, Instagram and Facebook Reels, TikTok) cut from the start of a video.
+"""The vertical Short cut from the start of a video, made by Assemble next to the full video.
 
 The Short reuses the main video's shots and voice from the start up to the cliffhanger sentence
 that ends between `min_seconds` and `max_seconds` (50-70 by default), and stops right there. Each 16:9 picture is trimmed a little at the sides, scaled to the phone's width and
@@ -16,10 +16,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from pipeline import ffmpeg
 from pipeline.assemble import _hex_to_rgb, encode
-from pipeline.claude_client import INT, STR, Claude, arr, obj
-
-PLATFORMS = ("youtube", "instagram", "facebook", "tiktok")
-
+from pipeline.claude_client import INT, Claude, obj
 
 def opening_beats(beats: list[dict[str, Any]], words: list[dict[str, Any]], seconds: float = 59,
                   wpm: float = 180) -> set[int]:
@@ -176,54 +173,3 @@ def render(shots: list[dict[str, Any]], audio: Path, out: Path, video_cfg: dict[
     progress("Done", 1.0)
     return {"path": str(out), "duration": round(ffmpeg.duration(out), 3), "expected": round(length, 3),
             "shots": len(shots)}
-
-
-# --- text for each app --------------------------------------------------------
-
-TEXT_SYSTEM = """You write the text that goes with a YouTube Short, Instagram Reel, Facebook Reel and \
-TikTok cut from the first minute of a narrated stick-figure history video. The clip stops abruptly on \
-a cliffhanger, so the text must make viewers want to watch the full video on YouTube. Be accurate: \
-promise nothing the video doesn't deliver.
-
-- title: a short, direct question ending in "?" (under 60 characters, about 4-9 words), \
-curiosity-driven, no hashtags, no emojis.
-- caption: 1-2 short sentences (under 200 characters) that tease the mystery and say the full story \
-is on YouTube. No hashtags, no links (the link is added automatically).
-- hashtags: 5-8 hashtags without the # sign, mixing broad ones (history, animation) with ones about \
-this subject."""
-
-TEXT_SCHEMA = obj({"title": STR, "caption": STR, "hashtags": arr(STR)})
-
-
-def write_text(claude: Claude, title: str, opening: str) -> dict[str, Any]:
-    msg = f"VIDEO TITLE: {title}\n\nNARRATION OF THE CLIP (it cuts off at the end of this):\n{opening}"
-    res = claude.json(TEXT_SYSTEM, [{"role": "user", "content": msg}], TEXT_SCHEMA, effort="low")
-    res["hashtags"] = clean_hashtags(res["hashtags"])
-    return res
-
-
-def clean_hashtags(tags: list[str]) -> list[str]:
-    out: list[str] = []
-    for t in tags:
-        t = "".join(ch for ch in t.lstrip("#") if ch.isalnum() or ch == "_")
-        if t and t.lower() not in {x.lower() for x in out}:
-            out.append(t)
-    return out
-
-
-def platform_text(short: dict[str, Any], platform: str) -> dict[str, str]:
-    """The title and description/caption to post on one app, with the link to the full video."""
-    title = short["title"].strip()
-    caption = short["caption"].strip()
-    url = short["youtube_url"].strip()
-    tags = " ".join(f"#{t}" for t in short["hashtags"])
-    if platform == "youtube":
-        tags = " ".join(f"#{t}" for t in ["Shorts", *[t for t in short["hashtags"] if t.lower() != "shorts"]])
-        full_title = title if "#shorts" in title.lower() else f"{title} #Shorts"
-        if len(full_title) > 100:
-            full_title = title[:100]
-        desc = "\n\n".join(x for x in [caption, f"Watch the full video: {url}" if url else "", tags] if x)
-        return {"title": full_title, "text": desc[:5000]}
-    link = f"Full video on YouTube: {url}" if url else ""
-    text = "\n\n".join(x for x in [caption, link, tags] if x)
-    return {"title": title, "text": text[:2200]}

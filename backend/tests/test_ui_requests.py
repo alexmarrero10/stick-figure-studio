@@ -11,7 +11,7 @@ import yaml
 from fastapi.testclient import TestClient
 
 from pipeline import images as images_mod
-from pipeline import publish, script as script_mod, shorts
+from pipeline import publish, script as script_mod
 from tests.test_images_prompts_api import FakeClaude, _wait, png_bytes, project_with_beats
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -76,7 +76,6 @@ def test_dropdown_choices_cover_the_current_config(client):
 def test_suggested_titles_are_short_questions():
     assert 'short, direct question ending in "?"' in publish.SYSTEM
     assert "under 60 characters" in publish.SYSTEM
-    assert 'short, direct question ending in "?"' in shorts.TEXT_SYSTEM
 
 
 # --- 4: undo on the Beats step ---------------------------------------------------------------

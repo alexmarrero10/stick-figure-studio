@@ -239,12 +239,7 @@ label.inline select { width: auto; }
 .short-layout .panel { margin-bottom: 0; }
 .phone { aspect-ratio: 9 / 16; background: #000; border-radius: 22px; overflow: hidden; border: 6px solid var(--text); }
 .phone video { width: 100%; height: 100%; display: block; }
-.phone-empty { height: 100%; display: grid; place-items: center; color: #aaa; background: var(--panel); }
 @media (max-width: 760px) { .short-layout { grid-template-columns: 1fr; } .phone { max-width: 260px; } }
-.platforms { list-style: none; padding: 0; margin: 0 0 12px; display: flex; flex-direction: column; gap: 8px; }
-.platforms li { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-.platforms li > span { min-width: 0; overflow-wrap: anywhere; }
-.preview-text { margin-top: 10px; }
 .account { border-top: 1px solid var(--border); padding: 10px 0; }
 .account summary { cursor: pointer; }
 .account code { overflow-wrap: anywhere; }

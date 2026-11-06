@@ -538,7 +538,7 @@ def save_site_video(project_id: int, **fields: Any) -> dict[str, Any]:
         return _row(conn.execute("SELECT * FROM site_videos WHERE project_id = ?", (project_id,)).fetchone())
 
 
-# --- shorts + social posts --------------------------------------------------
+# --- shorts ------------------------------------------------------------
 
 def get_short(project_id: int) -> dict[str, Any]:
     with tx() as conn:
@@ -560,24 +560,6 @@ def save_short(project_id: int, **fields: Any) -> dict[str, Any]:
             cols = ", ".join(f"{k} = ?" for k in fields)
             conn.execute(f"UPDATE shorts SET {cols} WHERE project_id = ?", (*fields.values(), project_id))
     return get_short(project_id)
-
-
-def add_social_post(project_id: int, platform: str, status: str, post_id: str | None = None,
-                    url: str | None = None, error: str | None = None, rendered_at: str | None = None) -> dict[str, Any]:
-    with tx() as conn:
-        cur = conn.execute(
-            "INSERT INTO social_posts (project_id, platform, status, post_id, url, error, rendered_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (project_id, platform, status, post_id, url, error, rendered_at),
-        )
-        return _row(conn.execute("SELECT * FROM social_posts WHERE id = ?", (cur.lastrowid,)).fetchone())
-
-
-def list_social_posts(project_id: int) -> list[dict[str, Any]]:
-    with tx() as conn:
-        return _rows(conn.execute(
-            "SELECT * FROM social_posts WHERE project_id = ? ORDER BY id DESC", (project_id,)
-        ).fetchall())
 
 
 # --- status -----------------------------------------------------------------
@@ -615,5 +597,4 @@ def project_status(project_id: int) -> dict[str, Any]:
         "shots": n_shots,
         "publish": get_publish_meta(project_id) is not None,
         "short": get_short(project_id)["rendered_at"] is not None,
-        "short_posts": len({p["platform"] for p in list_social_posts(project_id) if p["status"] == "posted"}),
     }

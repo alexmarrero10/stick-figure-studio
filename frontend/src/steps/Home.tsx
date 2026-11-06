@@ -150,7 +150,7 @@ function ProjectCard({ p, children }: { p: Project; children: React.ReactNode })
           label={`Images ${p.status.images_filled}/${p.status.beats || "?"}`}
         />
         <Chip on={p.status.shots > 0} label="Assembled" />
-        <Chip on={p.status.short_posts > 0} label={p.status.short_posts ? `Short on ${p.status.short_posts} apps` : "Short"} />
+        <Chip on={p.status.short} label="Short" />
       </div>
       <div className="row between">
         <small className="muted">Updated {p.updated_at}</small>

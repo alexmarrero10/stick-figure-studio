@@ -1,9 +1,7 @@
-"""General tags, video formats and sources, eye-catching openings, the vertical Short, posting to the
-four apps (against fake APIs: nothing is ever posted), and archiving projects."""
+"""General tags, video formats and sources, eye-catching openings, the vertical Short (made by Assemble),
+and archiving projects."""
 import json
 import subprocess
-import time
-from urllib.parse import parse_qs, urlparse
 
 import httpx
 import pytest
@@ -11,7 +9,6 @@ from fastapi.testclient import TestClient
 from PIL import Image, ImageDraw
 
 from pipeline import ffmpeg, ideas, prompts, publish, script, shorts
-from pipeline.social import SocialError, meta, tiktok, youtube
 from tests.test_voice import make_wav
 
 
@@ -24,16 +21,6 @@ def client(temp_db, tmp_path, monkeypatch):
     from app.main import app
     with TestClient(app) as c:
         yield c
-
-
-@pytest.fixture
-def env(monkeypatch):
-    """A fake .env for the social routes, so tests never touch the real one."""
-    store: dict[str, str] = {}
-    from app.routes import social
-    monkeypatch.setattr(social, "get_key", lambda k: store.get(k) or None)
-    monkeypatch.setattr(social, "set_api_key", lambda k, v: store.__setitem__(k, v))
-    return store
 
 
 # --- 1. tags --------------------------------------------------------------------
@@ -180,21 +167,6 @@ def test_cut_shots_stops_at_59_seconds():
     assert len(cut) == 6 and cut[-1]["end_frame"] == 1770
 
 
-def test_platform_text_has_the_link_everywhere():
-    s = {"title": "They vanished in the ice", "caption": "129 men. Zero survivors.", "hashtags": ["history", "arctic"],
-         "youtube_url": "https://youtu.be/abc"}
-    yt = shorts.platform_text(s, "youtube")
-    assert yt["title"] == "They vanished in the ice #Shorts"
-    assert "Watch the full video: https://youtu.be/abc" in yt["text"] and "#Shorts #history #arctic" in yt["text"]
-    for pl in ("instagram", "facebook", "tiktok"):
-        t = shorts.platform_text(s, pl)["text"]
-        assert "Full video on YouTube: https://youtu.be/abc" in t and "#history" in t
-
-
-def test_hashtags_are_cleaned():
-    assert shorts.clean_hashtags(["#History", "history", "true story", "#UFO!"]) == ["History", "truestory", "UFO"]
-
-
 @pytest.mark.skipif(not ffmpeg.available(), reason="ffmpeg not installed")
 def test_short_render_is_vertical_and_cuts_at_59_seconds(tmp_path):
     wav = tmp_path / "voice.wav"
@@ -238,225 +210,54 @@ def test_short_render_is_vertical_and_cuts_at_59_seconds(tmp_path):
         assert f.getpixel((540, 40)) == (247, 244, 236)  # the rest is background
 
 
-# --- 4b. posting, against fake APIs ------------------------------------------------
+# --- 4b. Assemble makes the Short too ------------------------------------------------
 
-class FakeApi:
-    """Answers requests from a list of (method, url substring, response) rules and records every call."""
-
-    def __init__(self, rules):
-        self.rules = rules
-        self.calls: list[httpx.Request] = []
-
-    def __call__(self, req: httpx.Request) -> httpx.Response:
-        self.calls.append(req)
-        for method, part, resp in self.rules:
-            if req.method == method and part in str(req.url):
-                return resp(req) if callable(resp) else resp
-        return httpx.Response(500, json={"error": {"message": f"unexpected {req.method} {req.url}"}})
-
-    def client(self):
-        return httpx.Client(transport=httpx.MockTransport(self))
-
-
-@pytest.fixture
-def video(tmp_path):
-    p = tmp_path / "short.mp4"
-    p.write_bytes(b"\x00" * 1000)
-    return p
-
-
-def test_youtube_upload(video):
-    api = FakeApi([
-        ("POST", "upload/youtube/v3/videos", httpx.Response(200, headers={"location": "https://upload.example/session1"})),
-        ("PUT", "upload.example/session1", httpx.Response(200, json={"id": "vid123"})),
-    ])
-    res = youtube.upload(api.client(), "tok", video, "Title #Shorts", "desc", ["history"], "public")
-    assert res == {"post_id": "vid123", "url": "https://www.youtube.com/shorts/vid123"}
-    start = json.loads(api.calls[0].content)
-    assert start["snippet"]["title"] == "Title #Shorts" and start["status"]["privacyStatus"] == "public"
-    assert api.calls[0].headers["authorization"] == "Bearer tok"
-    assert len(api.calls[1].content) == 1000
-
-
-def test_youtube_expired_login_says_reconnect():
-    api = FakeApi([("POST", "oauth2.googleapis.com/token", httpx.Response(400, json={"error": "invalid_grant"}))])
-    with pytest.raises(SocialError, match="Connect YouTube again"):
-        youtube.access_token(api.client(), "id", "secret", "refresh")
-
-
-def test_instagram_reel(video):
-    polls = iter(["IN_PROGRESS", "FINISHED"])
-    api = FakeApi([
-        ("POST", "/ig1/media_publish", httpx.Response(200, json={"id": "media9"})),
-        ("POST", "/ig1/media", httpx.Response(200, json={"id": "box1", "uri": "https://rupload.facebook.com/ig-api-upload/v24.0/box1"})),
-        ("POST", "rupload.facebook.com/ig-api-upload", httpx.Response(200, json={"success": True})),
-        ("GET", "/box1", lambda r: httpx.Response(200, json={"status_code": next(polls)})),
-        ("GET", "/media9", httpx.Response(200, json={"permalink": "https://www.instagram.com/reel/xyz/"})),
-    ])
-    res = meta.post_instagram(api.client(), "v24.0", "ig1", "ptok", video, "caption", sleep=lambda s: None)
-    assert res == {"post_id": "media9", "url": "https://www.instagram.com/reel/xyz/"}
-    create = parse_qs(api.calls[0].content.decode())
-    assert create["media_type"] == ["REELS"] and create["upload_type"] == ["resumable"]
-    up = api.calls[1]
-    assert up.headers["authorization"] == "OAuth ptok" and up.headers["file_size"] == "1000" and up.headers["offset"] == "0"
-
-
-def test_instagram_processing_error(video):
-    api = FakeApi([
-        ("POST", "/ig1/media", httpx.Response(200, json={"id": "box1"})),
-        ("POST", "rupload.facebook.com", httpx.Response(200, json={"success": True})),
-        ("GET", "/box1", httpx.Response(200, json={"status_code": "ERROR", "status": "Video too short"})),
-    ])
-    with pytest.raises(SocialError, match="Video too short"):
-        meta.post_instagram(api.client(), "v24.0", "ig1", "ptok", video, "c", sleep=lambda s: None)
-
-
-def test_facebook_reel(video):
-    api = FakeApi([
-        ("POST", "/page1/video_reels", lambda r: httpx.Response(200, json=(
-            {"video_id": "v77", "upload_url": "https://rupload.facebook.com/video-upload/v24.0/v77"}
-            if b"upload_phase=start" in r.content else {"success": True}))),
-        ("POST", "rupload.facebook.com/video-upload", httpx.Response(200, json={"success": True})),
-        ("GET", "/v77", httpx.Response(200, json={"status": {"video_status": "ready"}})),
-    ])
-    res = meta.post_facebook(api.client(), "v24.0", "page1", "ptok", video, "desc", sleep=lambda s: None)
-    assert res == {"post_id": "v77", "url": "https://www.facebook.com/reel/v77"}
-    finish = parse_qs(api.calls[2].content.decode())
-    assert finish["upload_phase"] == ["finish"] and finish["video_state"] == ["PUBLISHED"] and finish["description"] == ["desc"]
-
-
-def test_meta_connect_finds_page_and_instagram():
-    api = FakeApi([
-        ("GET", "fb_exchange_token", httpx.Response(200, json={"access_token": "long"})),
-        ("GET", "oauth/access_token", httpx.Response(200, json={"access_token": "short"})),
-        ("GET", "me/accounts", httpx.Response(200, json={"data": [
-            {"id": "p1", "name": "Other page", "access_token": "t1"},
-            {"id": "p2", "name": "History Page", "access_token": "t2",
-             "instagram_business_account": {"id": "ig2", "username": "historyig"}}]})),
-    ])
-    acct = meta.connect(api.client(), "app", "secret", "code", "http://localhost:8765/cb", "v24.0")
-    assert acct["page_id"] == "p2" and acct["page_token"] == "t2" and acct["ig_username"] == "historyig"
-
-
-def test_tiktok_post(video):
-    polls = iter([{"status": "PROCESSING_UPLOAD"}, {"status": "PUBLISH_COMPLETE", "publicaly_available_post_id": [555]}])
-    ok = {"error": {"code": "ok"}}
-    api = FakeApi([
-        ("POST", "creator_info/query", httpx.Response(200, json={**ok, "data": {
-            "privacy_level_options": ["PUBLIC_TO_EVERYONE", "SELF_ONLY"], "creator_username": "histtok"}})),
-        ("POST", "video/init", httpx.Response(200, json={**ok, "data": {"publish_id": "pub1", "upload_url": "https://up.tiktok/x"}})),
-        ("PUT", "up.tiktok/x", httpx.Response(201)),
-        ("POST", "status/fetch", lambda r: httpx.Response(200, json={**ok, "data": next(polls)})),
-    ])
-    res = tiktok.post(api.client(), "tok", video, "caption", sleep=lambda s: None)
-    assert res == {"post_id": "555", "url": "https://www.tiktok.com/@histtok/video/555"}
-    init = json.loads(api.calls[1].content)
-    assert init["source_info"] == {"source": "FILE_UPLOAD", "video_size": 1000, "chunk_size": 1000, "total_chunk_count": 1}
-    assert api.calls[2].headers["content-range"] == "bytes 0-999/1000"
-
-
-def test_tiktok_refuses_a_privacy_the_account_cant_use(video):
-    api = FakeApi([("POST", "creator_info/query", httpx.Response(200, json={
-        "error": {"code": "ok"}, "data": {"privacy_level_options": ["SELF_ONLY"]}}))])
-    with pytest.raises(SocialError, match="allowed: SELF_ONLY"):
-        tiktok.post(api.client(), "tok", video, "c", "PUBLIC_TO_EVERYONE", sleep=lambda s: None)
-
-
-def test_tiktok_api_error_is_readable(video):
-    api = FakeApi([("POST", "creator_info/query", httpx.Response(401, json={
-        "error": {"code": "access_token_invalid", "message": "The access token is invalid"}}))])
-    with pytest.raises(SocialError, match="access token is invalid"):
-        tiktok.post(api.client(), "tok", video, "c", sleep=lambda s: None)
-
-
-# --- 4c. connect + publish routes -----------------------------------------------------
-
-def test_connect_redirects_to_the_platform_login(client, env):
-    assert client.get("/api/social/youtube/connect", follow_redirects=False).status_code == 400
-    env.update(YOUTUBE_CLIENT_ID="cid", YOUTUBE_CLIENT_SECRET="sec")
-    r = client.get("/api/social/youtube/connect", follow_redirects=False)
-    q = parse_qs(urlparse(r.headers["location"]).query)
-    assert r.headers["location"].startswith("https://accounts.google.com/")
-    assert q["redirect_uri"] == ["http://localhost:8765/api/social/youtube/callback"]
-    assert q["access_type"] == ["offline"] and q["code_challenge_method"] == ["S256"]
-    # A callback with a made-up state is refused and stores nothing.
-    bad = client.get("/api/social/youtube/callback?state=forged&code=x")
-    assert bad.status_code == 400 and "expired" in bad.text and "YOUTUBE_REFRESH_TOKEN" not in env
-
-
-def test_callback_stores_the_login(client, env, monkeypatch):
-    env.update(TIKTOK_CLIENT_KEY="ck", TIKTOK_CLIENT_SECRET="cs")
-    r = client.get("/api/social/tiktok/connect", follow_redirects=False)
-    state = parse_qs(urlparse(r.headers["location"]).query)["state"][0]
-    monkeypatch.setattr(tiktok, "exchange_code", lambda *a: {"access_token": "at", "refresh_token": "rt"})
-    monkeypatch.setattr(tiktok, "user", lambda c, t: {"name": "History Tok"})
-    page = client.get(f"/api/social/tiktok/callback?state={state}&code=abc")
-    assert page.status_code == 200 and "History Tok" in page.text
-    assert env["TIKTOK_REFRESH_TOKEN"] == "rt"
-    st = client.get("/api/social").json()
-    assert st["platforms"]["tiktok"] and st["tiktok"]["account"] == "History Tok"
-    assert "rt" not in json.dumps(st) and "cs" not in json.dumps(st)  # secrets never go to the page
-    client.post("/api/social/tiktok/disconnect")
-    assert not client.get("/api/social").json()["platforms"]["tiktok"]
-
-
-def _project_with_short(temp_db, tmp_path):
-    from app.storage import output_dir
+def _assemble(client, temp_db, monkeypatch, channel="NextDoorHistorian", short_fails=False):
+    """Run the Assemble job with the slow parts faked; returns the finished job."""
+    import time as _time
+    from app.routes import assemble as route
     p = temp_db.create_project("Franklin")
-    (output_dir(p["slug"]) / "short.mp4").write_bytes(b"\x00" * 10)
-    temp_db.save_short(p["id"], title="They vanished", caption="129 men.", hashtags=["history"],
-                       rendered_at="2026-10-29 10:00:00", duration_s=59.0)
-    return p
+    words = [{"text": "w", "start": i * 0.5, "end": i * 0.5 + 0.4} for i in range(200)]
+    plan = {"shots": [{"image": "a.png", "start_frame": 0, "end_frame": 30, "scale": 1.0, "beat_ids": [0]}],
+            "missing_images": [], "unused_images": [], "total_frames": 30}
+    monkeypatch.setattr(route, "_plan", lambda pid: plan)
+    monkeypatch.setattr(route.db, "get_voiceover", lambda pid: {"audio_path": "voice.wav", "duration_s": 100.0, "script_version_id": None})
+    monkeypatch.setattr(route.db, "list_words", lambda pid: words)
+    monkeypatch.setattr(route.fcpxml, "build", lambda *a, **k: "<fcpxml/>")
+    monkeypatch.setattr(route, "short_cfg", lambda: {"min_seconds": 50, "max_seconds": 70, "channel_name": channel})
+    monkeypatch.setattr(route.assemble, "render", lambda *a, **k: {"duration": 100.0, "expected": 100.0})
+    monkeypatch.setattr(route.shorts, "choose_cut", lambda claude, w, lo, hi: 61.5)
+    monkeypatch.setattr(route, "claude", lambda: None)
+    made = []
 
+    def fake_short(shots, audio, out, vcfg, scfg, work, progress, seconds=None):
+        if short_fails:
+            raise RuntimeError("ffmpeg broke")
+        made.append(seconds)
+        return {"duration": seconds}
 
-def _wait(client, job):
+    monkeypatch.setattr(route.shorts, "render", fake_short)
+    job = client.post(f"/api/projects/{p['id']}/assemble").json()
     for _ in range(200):
         job = client.get(f"/api/jobs/{job['id']}").json()
         if job["status"] != "running":
-            return job
-        time.sleep(0.02)
-    return job
+            break
+        _time.sleep(0.02)
+    return p, job, made
 
 
-def test_publish_posts_everywhere_and_one_failure_doesnt_stop_the_rest(client, temp_db, tmp_path, monkeypatch):
-    from app.routes import social
-    p = _project_with_short(temp_db, tmp_path)
-    monkeypatch.setattr(social, "connected", lambda pl: True)
-    sent = []
-
-    def fake_post(c, platform, path, title, text, tags=None):
-        sent.append((platform, title, text))
-        if platform == "facebook":
-            raise SocialError("Facebook said no")
-        return {"post_id": f"{platform}-1", "url": f"https://{platform}.example/1"}
-
-    monkeypatch.setattr(social, "post_video", fake_post)
-    body = {"platforms": ["youtube", "instagram", "facebook", "tiktok"]}
-    r = client.post(f"/api/projects/{p['id']}/short/publish", json=body)
-    assert r.status_code == 400 and "YouTube link" in r.json()["detail"]
-    assert client.put(f"/api/projects/{p['id']}/short", json={"youtube_url": "not a link"}).status_code == 400
-    client.put(f"/api/projects/{p['id']}/short", json={"youtube_url": "https://youtu.be/full1"})
-
-    job = _wait(client, client.post(f"/api/projects/{p['id']}/short/publish", json=body).json())
-    assert job["status"] == "done"
-    assert [r["status"] for r in job["result"]] == ["posted", "posted", "error", "posted"]
-    assert [s[0] for s in sent] == ["youtube", "instagram", "facebook", "tiktok"]
-    assert sent[0][1] == "They vanished #Shorts" and "https://youtu.be/full1" in sent[0][2]
-    assert all("https://youtu.be/full1" in s[2] for s in sent)
-    assert temp_db.project_status(p["id"])["short_posts"] == 3
-
-    # Pressing publish again only retries the app that failed.
-    sent.clear()
-    job = _wait(client, client.post(f"/api/projects/{p['id']}/short/publish", json=body).json())
-    assert [s[0] for s in sent] == ["facebook"]
-    assert [r["status"] for r in job["result"]] == ["skipped", "skipped", "error", "skipped"]
+def test_assemble_makes_the_full_video_and_the_short(client, temp_db, monkeypatch):
+    p, job, made = _assemble(client, temp_db, monkeypatch)
+    assert job["status"] == "done" and job["result"]["short"] == {"duration": 61.5}
+    assert made == [61.5] and job["result"]["short_error"] is None
+    assert temp_db.get_short(p["id"])["cut_s"] == 61.5 and temp_db.project_status(p["id"])["short"]
 
 
-def test_publish_needs_connected_accounts(client, temp_db, tmp_path, env):
-    p = _project_with_short(temp_db, tmp_path)
-    client.put(f"/api/projects/{p['id']}/short", json={"youtube_url": "https://youtu.be/full1"})
-    r = client.post(f"/api/projects/{p['id']}/short/publish", json={"platforms": ["youtube", "tiktok"]})
-    assert r.status_code == 400 and "Connect Youtube, Tiktok" in r.json()["detail"]
+def test_assemble_keeps_the_full_video_when_the_short_cant_be_made(client, temp_db, monkeypatch):
+    _, job, made = _assemble(client, temp_db, monkeypatch, channel="")
+    assert job["status"] == "done" and made == [] and "channel name" in job["result"]["short_error"]
+    _, job, _ = _assemble(client, temp_db, monkeypatch, short_fails=True)
+    assert job["status"] == "done" and "ffmpeg broke" in job["result"]["short_error"]
 
 
 # --- 5. archive -------------------------------------------------------------------------

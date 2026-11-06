@@ -175,7 +175,7 @@ frozen island in the Arctic"). Same for ships, organizations and other proper no
 - Never change or invent a real name to make it easier. If no easy true form exists, use the role.
 
 THE OPENING (the first 50-70 seconds, about 150-210 words, is ALSO cut out and posted on its own as a \
-YouTube Short, Instagram Reel and TikTok, so it must grab a scrolling viewer and work by itself)
+Short, so it must grab a scrolling viewer and work by itself)
 - No intro. No "welcome back", no channel name, no "in this video", no "let's dive in".
 - The very first sentence is the hook, and it must stop a thumb mid-scroll: a shocking true fact, an \
 impossible-sounding outcome, a vivid moment of danger or the viewer dropped into a scene ("Right \

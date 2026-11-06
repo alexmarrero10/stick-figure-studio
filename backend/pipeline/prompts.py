@@ -124,7 +124,7 @@ gray squiggle lines, screens as glowing rectangles, and speaking as an open mout
 - Avoids gore and graphic violence: imply danger with poses, shadows and props.
 
 OPENING IMAGES: the beats marked as the opening are the first minute of the video, which is also \
-posted on its own as a YouTube Short, Reel and TikTok. They must stop a viewer scrolling past, so \
+posted on its own as a Short. They must stop a viewer scrolling past, so \
 make them the most eye-catching images in the video: one bold, dramatic focal point; big, \
 exaggerated emotions (wide eyes, gaping mouths, frantic poses); strong contrast and the boldest \
 colors of the palette; close-ups and low or high dramatic angles; danger, scale or mystery you can \

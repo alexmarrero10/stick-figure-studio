@@ -9,10 +9,16 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 165 backend tests pass; the frontend builds.
+- 152 backend tests pass; the frontend builds.
 - Active plan: `docs/PUBLIC_SITE_PLAN.md` (RAG research built; public site with chatbot next).
 
 ## Recently done
+
+- **Short tab and all posting removed** (user's request): Assemble now renders the Short next to the full
+  video (shown side by side on the Assemble step; download and upload it yourself). Deleted the Short step,
+  `routes/shorts.py`, `routes/social.py`, `pipeline/social/`, `SocialAccounts.tsx`, the Short title/caption
+  writer and the social settings. Kept the `shorts` table (cut point, rendered time) and left the
+  `social_posts` table and any social tokens in `.env` alone. The `social:` section in config.yaml is unused.
 
 - **`SITE_DATABASE_URL` on Settings** (4e8eeac): the read-only `site_reader` address is saved to `.env` from
   the Settings page; the local site reads it (falls back to `SUPABASE_DB_URL` when empty). The user's local
@@ -42,7 +48,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 - Restored `docs/PUBLIC_SITE_PLAN.md`, which f76c398 had deleted by mistake (de096c5).
 - Earlier: Stop button for long steps, Settings save feedback and dropdowns, beat undo, script drawer, grammar
   check, image slot picking and swapping, thumbnail prompts from the user's own idea, Shorts ending on the best
-  cliffhanger at 50-70 s, social posting to YouTube/Instagram/Facebook/TikTok.
+  cliffhanger at 50-70 s.
 
 ## Next
 
@@ -64,12 +70,10 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Open issues
 
-- `README.md` and `PROGRESS.md` are partly out of date. They say pictures are never zoomed, the Short is the
-  first 59 s, and the "current project" is the public site. CLAUDE.md and this file are correct. The
+- `README.md` and `PROGRESS.md` are partly out of date. They say the "current project" is the public site. CLAUDE.md and this file are correct. The
   `shots.py` docstring also says "pictures are never zoomed" (zoom now happens in `assemble.py`).
 - `projects/a-han-governor-removed-the-tiger-traps-and-the-tigers-left/` exists on disk but has no project row
   in the database (leftover folder).
 - `config.yaml` has an uncommitted change by the user: `claude.research_depth: thorough`. The new `rag:`
   section isn't in config.yaml yet (code defaults in `app/deps.py` RAG_DEFAULTS); saving Settings adds it.
 - Still never checked by hand: importing `timeline.fcpxml` into DaVinci Resolve.
-- TikTok posting only works as "Only me" until TikTok approves the app.

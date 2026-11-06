@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from app import db, jobs
 from app.config import load_config
 from app.deps import claude, project_or_404
-from app.routes.shorts import stored_cut
+from app.routes.assemble import stored_cut
 from app.storage import prompts_dir
 from pipeline import prompts as prompts_mod
 from pipeline import shorts

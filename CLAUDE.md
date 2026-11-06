@@ -29,12 +29,12 @@ is the active plan for RAG research and the public site (both built; deployment 
 6. **Images** (`images.py`): import, ordered by metadata timestamp, then drag or slot-pick to fix.
 7. **Shots + Assemble** (`shots.py`, `assemble.py`, `fcpxml.py`, `captions.py`): shots locked to word timings,
    FFmpeg renders `output/video.mp4`, plus `timeline.fcpxml` and `captions.srt`. Shots of 3 s or longer
-   slowly zoom in (`video.zoom_min_seconds`, `video.zoom_per_second`, capped at 12%).
+   slowly zoom in (`video.zoom_min_seconds`, `video.zoom_per_second`, capped at 12%). The same job also
+   renders the vertical Short (`shorts.py`, `output/short.mp4`): 50-70 s, ending on the best cliffhanger
+   (Claude picks it once per voice-over), channel name under the pictures. If the Short fails, the video is kept.
 8. **Publish** (`publish.py`, `site_publish.py`): titles, description with chapters and sources, tags,
    thumbnail prompts. "Your video site" stores the video and its narration in 30-45 s timed windows in
    Supabase `videos` / `video_chunks` for the public site.
-9. **Short** (`shorts.py`, `social/`): 50-70 s vertical cut ending on the best cliffhanger; captions written
-   by Claude; can post to YouTube Shorts, Instagram/Facebook Reels and TikTok.
 
 ## Tech stack
 
@@ -63,7 +63,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (165 passing as of 2026-11-06,
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (152 passing as of 2026-11-06,
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
@@ -80,18 +80,18 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 backend/app/            FastAPI app: main.py, config.py (config.yaml + .env), db.py, jobs.py (background
                         jobs with stop), storage.py, routes/ (one file per step), migrations/ (001-011 .sql)
 backend/pipeline/       one module per step (see Pipeline), claude_client.py (API), claude_code.py (CLI),
-                        ffmpeg.py, procs.py, social/ (youtube, meta, tiktok)
+                        ffmpeg.py, procs.py
 backend/tests/          pytest suite + fixtures/
 backend/supabase/       SQL the user runs in Supabase: schema.sql, 002_site_reader.sql (read-only site user)
 site/api/               public site API (FastAPI: videos, search, chat) + serves site/web/dist
 site/web/               public site pages (React + Vite)
 frontend/src/           App.tsx, api.ts, types.ts, components.tsx, styles.css, steps/ (one .tsx per step,
-                        plus Home, Settings, SocialAccounts), aiTells.ts, textarea.ts
+                        plus Home, Settings), aiTells.ts, textarea.ts
 config.yaml             all tunables; most are on the Settings page (frontend/src/steps/Settings.tsx FIELDS)
-.env                    API keys and social tokens (gitignored)
+.env                    API keys (gitignored)
 data/app.db             SQLite DB (gitignored). Tables: projects, ideas, research_briefs, script_versions,
                         revision_messages, beats, beat_undo, voiceovers, words, style_guides, image_prompts,
-                        prompt_batches, images, shots, publish_meta, shorts, social_posts, project_sources,
+                        prompt_batches, images, shots, publish_meta, shorts, social_posts (unused since posting was removed), project_sources,
                         site_videos
 projects/<slug>/        per-video media: audio/, prompts/, images/batch_XX/, output/ (gitignored)
 channel_model_transcripts.txt   other channels' transcripts the script style was distilled from.
@@ -145,7 +145,7 @@ who/what/when/where/why for a newcomer.
   unrelated file is added or deleted (a commit once deleted `docs/PUBLIC_SITE_PLAN.md` by accident).
 - **Never kill running jobs** when restarting the server.
 - **No Google Flow browser automation** unless the user confirms it for that task.
-- **Don't build:** YouTube draft upload, a character sheet feature, or image filename-based matching.
+- **Don't build:** posting to social apps (removed 2026-11-06 at the user's request), YouTube draft upload, a character sheet feature, or image filename-based matching.
 - Don't commit `channel_model_transcripts.txt` (other channels' content).
 - Leave the user's own uncommitted `config.yaml` edits alone unless asked.
 - When the user says they're just brainstorming ("don't execute anything"), only discuss.
