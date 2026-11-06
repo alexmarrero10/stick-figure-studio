@@ -64,7 +64,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (155 passing as of 2026-11-06,
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (156 passing as of 2026-11-06,
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.

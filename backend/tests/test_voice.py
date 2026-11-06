@@ -145,3 +145,25 @@ def test_speed_up_shortens_audio_and_scales_word_times(tmp_path):
     ratio = dur / 11.0  # timings follow the measured length, so they stay locked to the audio
     assert scaled[0]["start"] == pytest.approx(1.0 * ratio, abs=0.002)
     assert scaled[1]["end"] == pytest.approx(10.6 * ratio, abs=0.002) and scaled[1]["end"] <= dur
+
+
+@pytest.mark.skipif(not ffmpeg.available(), reason="ffmpeg not installed")
+def test_preview_trims_pauses_and_applies_speed_like_the_full_voice(tmp_path, monkeypatch):
+    import base64
+    src = tmp_path / "src.wav"
+    make_wav(src, 6.0, tone_spans=[(0.1, 1.0), (3.0, 4.0)])  # 2 s of silence between two "sentences"
+    mp3 = tmp_path / "src.mp3"
+    ffmpeg.wav_to_mp3(src, mp3)
+    chars = list("one two")
+    starts = [0.1, 0.4, 0.7, 0.95, 3.0, 3.4, 3.7]
+    alignment = {"characters": chars, "character_start_times_seconds": starts,
+                 "character_end_times_seconds": [x + 0.29 for x in starts]}
+    monkeypatch.setattr(voice, "_tts_request", lambda *a, **k: ({"audio_base64": base64.b64encode(mp3.read_bytes()).decode(),
+                                                                 "alignment": alignment}, None))
+    out = tmp_path / "preview.mp3"
+    plain = voice.preview("one two", out, "key", {"trim_pauses": False, "speed": 1.0})
+    trimmed = voice.preview("one two", out, "key", {"trim_pauses": True, "max_pause_s": 0.3, "speed": 1.0})
+    fast = voice.preview("one two", out, "key", {"trim_pauses": True, "max_pause_s": 0.3, "speed": 1.2})
+    assert plain > 5.5 and trimmed < plain - 1.5  # the long gap is cut down
+    assert fast == pytest.approx(trimmed / 1.2, abs=0.1)
+    assert sorted(f.name for f in tmp_path.iterdir()) == ["preview.mp3", "src.mp3", "src.wav"]  # no leftovers

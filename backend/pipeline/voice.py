@@ -315,18 +315,37 @@ def preview_text(text: str, seconds: float = 30, wpm: float = 180) -> str:
 
 
 def preview(text: str, out_path: Path, api_key: str, cfg: dict[str, Any]) -> float:
-    """Generate a short sample (no timings, no trimming) at the narration speed. Returns its length in seconds."""
+    """Generate a short sample that sounds like the final voice-over: long pauses trimmed and played at the
+    narration speed, exactly as generate() does. Returns its length in seconds."""
     resp, _ = _tts_request(api_key, cfg.get("voice_id", DEFAULT_JOSH_ID), cfg, text, None, None)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    factor = speed_factor(cfg)
-    if factor == 1.0:
-        out_path.write_bytes(base64.b64decode(resp["audio_base64"]))
-    else:
-        raw = out_path.with_name(out_path.stem + "_raw.mp3")
-        raw.write_bytes(base64.b64decode(resp["audio_base64"]))
-        ffmpeg.change_speed(raw, out_path, factor)
-        raw.unlink(missing_ok=True)
+    raw = out_path.with_name(out_path.stem + "_raw.mp3")
+    raw.write_bytes(base64.b64decode(resp["audio_base64"]))
+    wav = out_path.with_name(out_path.stem + "_work.wav")
+    ffmpeg.to_wav(raw, wav)
+    finish_audio(wav, out_path, resp.get("alignment") or resp.get("normalized_alignment"), cfg)
+    for f in (raw, wav):
+        f.unlink(missing_ok=True)
     return ffmpeg.duration(out_path)
+
+
+def finish_audio(wav: Path, mp3_out: Path, alignment: dict[str, list] | None, cfg: dict[str, Any]) -> None:
+    """Trim long pauses and apply the narration speed to a sample, then save it as mp3."""
+    words = chars_to_words(alignment) if alignment else []
+    current = wav
+    if words and cfg.get("trim_pauses", True):
+        trimmed = wav.with_name(wav.stem + "_trim.wav")
+        trim_pauses(wav, trimmed, words, cfg.get("max_pause_s", 0.45))
+        current = trimmed
+    factor = speed_factor(cfg)
+    if factor != 1.0:
+        fast = wav.with_name(wav.stem + "_fast.wav")
+        ffmpeg.change_speed(current, fast, factor)
+        current = fast
+    ffmpeg.wav_to_mp3(current, mp3_out)
+    for f in {current, wav.with_name(wav.stem + "_trim.wav"), wav.with_name(wav.stem + "_fast.wav")}:
+        if f != wav:
+            f.unlink(missing_ok=True)
 
 
 def generate(text: str, out_dir: Path, api_key: str, cfg: dict[str, Any],
