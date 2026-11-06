@@ -6,14 +6,17 @@ Single user, runs on their Windows PC. Not deployed anywhere.
 
 Current status, recent work and open issues are in **NOTES.md**. Read it at the start of a session.
 `PROGRESS.md` holds the older stage-by-stage build log and architecture notes; `docs/PUBLIC_SITE_PLAN.md`
-is a parked plan for a public video library with RAG Q&A.
+is the active plan for RAG research (built) and the public video site with a chatbot (next).
 
 ## Pipeline (one step per UI tab, one module per step)
 
 1. **Ideas** (`ideas.py`): Claude suggests topics or the user types one. Choosing one creates a project.
    Formats: one story, topic explained, countdown list.
-2. **Script** (`script.py`): research brief with web search, then a streamed script (target 1,550-1,650
-   words). Chat revisions are shown as find/replace diffs the user accepts or rejects. Every save is a version.
+2. **Script** (`script.py`): research brief, then a streamed script (target 1,550-1,650 words). With RAG on
+   (`rag.enabled` + `GEMINI_API_KEY` + `SUPABASE_DB_URL`), research downloads 10-15 sources (`sources.py`),
+   chunks and embeds them into Supabase pgvector (`chunking.py`, `embeddings.py`, `vector_store.py`) and
+   writes the brief from retrieved passages (`rag.py`); script and chat get source excerpts too. Without
+   it, Claude researches with web search. Chat revisions are shown as find/replace diffs the user accepts or rejects. Every save is a version.
    The style rules live in `SCRIPT_SYSTEM` (see "Script style" below).
 3. **Beats** (`scenes.py`, `beat_review.py`): split into 2-13 word picture chunks; Claude can review the
    boundaries; manual split/merge/edit with undo.
@@ -41,6 +44,9 @@ is a parked plan for a public video library with RAG Q&A.
   - `api`: Anthropic SDK with `ANTHROPIC_API_KEY`; IDs `claude-fable-5-1`, `claude-opus-5-5` (default),
     `claude-sonnet-5-5`, `claude-haiku-5-5`.
 - **ElevenLabs** for voice. **Google Flow** for images (manual, by the user).
+- **RAG:** Supabase Postgres + pgvector (psycopg, plain SQL; schema in `backend/supabase/schema.sql`, run by
+  the user in Supabase's SQL Editor), Gemini embeddings (`gemini-embedding-001`, 768 dims, free tier),
+  trafilatura for page text. Wikipedia requires a User-Agent with a contact URL (the GitHub page, never email).
 
 ## Run, build, test
 
@@ -53,7 +59,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (129 passing as of 2026-11-06,
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (148 passing as of 2026-11-06,
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
@@ -64,7 +70,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 
 ```
 backend/app/            FastAPI app: main.py, config.py (config.yaml + .env), db.py, jobs.py (background
-                        jobs with stop), storage.py, routes/ (one file per step), migrations/ (001-009 .sql)
+                        jobs with stop), storage.py, routes/ (one file per step), migrations/ (001-010 .sql)
 backend/pipeline/       one module per step (see Pipeline), claude_client.py (API), claude_code.py (CLI),
                         ffmpeg.py, procs.py, social/ (youtube, meta, tiktok)
 backend/tests/          pytest suite + fixtures/

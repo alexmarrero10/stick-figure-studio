@@ -27,6 +27,97 @@ interface VersionRow {
 }
 
 
+interface SourceRow {
+  id: number;
+  url: string;
+  title: string;
+  source_type: string;
+  status: "ok" | "skipped";
+  reason: string;
+  words: number;
+  chunks: number;
+  reused: number;
+}
+
+/** The pages downloaded into the vector database for this video (shown when RAG research is on). */
+function SourcesPanel({ pid, version }: { pid: number; version: number }) {
+  const [data, setData] = useState<{ rag: boolean; sources: SourceRow[] } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const load = () =>
+    api
+      .get<{ rag: boolean; sources: SourceRow[] }>(`/api/projects/${pid}/sources`)
+      .then(setData)
+      .catch((e) => setError(e.message));
+  const { run, job, busy } = useJob({ project: pid, kind: "sources", done: () => load(), failed: setError });
+  useEffect(() => {
+    load();
+  }, [pid, version]);
+
+  if (!data || (!data.rag && !data.sources.length)) return null;
+  const ok = data.sources.filter((s) => s.status === "ok");
+  const skipped = data.sources.filter((s) => s.status === "skipped");
+
+  const more = async () => {
+    setError(null);
+    try {
+      await run(() => api.post(`/api/projects/${pid}/sources/more`));
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
+  const remove = async (s: SourceRow) => {
+    if (!window.confirm(`Stop using "${s.title}" for this video? It stays saved for other videos.`)) return;
+    try {
+      await api.del(`/api/projects/${pid}/sources/${s.id}`);
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
+
+  return (
+    <details open={ok.length > 0 && ok.length < 10}>
+      <summary>
+        Downloaded sources: {ok.length}
+        {skipped.length > 0 && <span className="muted"> ({skipped.length} couldn't be used)</span>}
+      </summary>
+      <ErrorBox error={error} onClose={() => setError(null)} />
+      <p className="muted small">
+        These pages were saved to your vector database. The brief and the script are written from their best passages.
+        Click Research again after changing them to rewrite the brief.
+      </p>
+      <ul className="sources">
+        {ok.map((s) => (
+          <li key={s.id}>
+            <a href={s.url} target="_blank" rel="noreferrer">
+              {s.title}
+            </a>{" "}
+            <span className="muted small">
+              {s.source_type === "wikipedia" ? "Wikipedia · " : ""}
+              {s.words.toLocaleString()} words · {s.chunks} passages{s.reused ? " · already saved" : ""}
+            </span>{" "}
+            <button className="secondary small" onClick={() => remove(s)}>
+              Remove
+            </button>
+          </li>
+        ))}
+        {skipped.map((s) => (
+          <li key={s.id} className="muted small">
+            {s.title} (skipped: {s.reason})
+          </li>
+        ))}
+      </ul>
+      {data.rag && (
+        <button className="secondary small" onClick={more} disabled={busy}>
+          Find more sources
+        </button>
+      )}
+      <JobProgress job={job} />
+    </details>
+  );
+}
+
 export default function ScriptStep({ project, refresh }: StepProps) {
   const pid = project.id;
   const [research, setResearch] = useState<Research | null>(null);
@@ -132,7 +223,9 @@ export default function ScriptStep({ project, refresh }: StepProps) {
     abortRef.current = ctrl;
     try {
       await streamSSE(`/api/projects/${pid}/script/generate`, { notes }, (e) => {
-        if (e.type === "text") {
+        if (e.type === "status") {
+          setText(`(${e.text}…)`);
+        } else if (e.type === "text") {
           acc += e.text as string;
           setText(acc);
         } else if (e.type === "done") {
@@ -222,6 +315,7 @@ export default function ScriptStep({ project, refresh }: StepProps) {
           type before researching.
         </p>
         <JobProgress job={job} />
+        <SourcesPanel pid={pid} version={research?.id ?? 0} />
         <label>
           Notes for Claude when writing the script
           <input

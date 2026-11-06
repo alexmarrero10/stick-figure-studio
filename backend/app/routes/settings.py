@@ -11,7 +11,7 @@ from pipeline.voice import VoiceError, list_voices, resolve_voice
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 
-KEY_NAMES = ("ANTHROPIC_API_KEY", "ELEVENLABS_API_KEY")
+KEY_NAMES = ("ANTHROPIC_API_KEY", "ELEVENLABS_API_KEY", "GEMINI_API_KEY", "SUPABASE_DB_URL")
 
 
 def _mask(v: str | None) -> str | None:
@@ -28,7 +28,10 @@ def voices() -> list[dict[str, Any]]:
 
 @router.get("")
 def get_settings() -> dict[str, Any]:
-    return {"config": load_config(), "keys": {k: _mask(get_key(k)) for k in KEY_NAMES}}
+    from app.deps import rag_config
+    cfg = load_config()
+    cfg["rag"] = rag_config()  # show the defaults even before the section is in config.yaml
+    return {"config": cfg, "keys": {k: _mask(get_key(k)) for k in KEY_NAMES}}
 
 
 # The dropdown choices on the Settings page. A value outside these is refused, so a typo can't
@@ -38,6 +41,10 @@ CODE_MODELS = ("fable", "opus", "sonnet", "haiku")
 API_MODELS = ("claude-fable-5-1", "claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5")
 CHOICES = {("claude", "effort"): EFFORTS, ("claude", "code_model"): CODE_MODELS,
            ("claude", "code_fallback_model"): CODE_MODELS, ("claude", "model"): API_MODELS}
+
+
+# Sections that may be added by the Settings page even if config.yaml doesn't have them yet.
+NEW_SECTIONS = ("rag",)
 
 
 @router.get("/choices")
@@ -56,8 +63,8 @@ def put_config(cfg: dict[str, Any]) -> dict[str, Any]:
             if allowed and v not in allowed:
                 raise HTTPException(400, f"{section}.{key} must be one of {', '.join(allowed)} (got {v!r})")
     for section, values in cfg.items():
-        if section in current and isinstance(values, dict):
-            current[section].update(values)
+        if (section in current or section in NEW_SECTIONS) and isinstance(values, dict):
+            current.setdefault(section, {}).update(values)
     save_config(current)
     saved = read_config_file()
     if any(saved.get(s, {}).get(k) != v for s, vals in cfg.items() if s in current and isinstance(vals, dict)
@@ -77,6 +84,28 @@ def put_key(body: KeyBody) -> dict[str, Any]:
         raise HTTPException(400, "Unknown key")
     set_api_key(body.name, body.value.strip())
     return {"ok": True, "masked": _mask(body.value.strip())}
+
+
+@router.post("/rag-check")
+def rag_check() -> dict[str, Any]:
+    """Try the Gemini key and the vector database, and say plainly what works."""
+    from app.deps import embedder, rag_config, vector_store
+    out: dict[str, Any] = {"enabled": rag_config()["enabled"], "gemini": None, "database": None}
+    try:
+        vec = embedder()(["test"], "RETRIEVAL_QUERY")[0]
+        out["gemini"] = {"ok": True, "message": f"Gemini embeddings work ({len(vec)} numbers per passage)."}
+    except Exception as e:  # noqa: BLE001 - shown to the user
+        out["gemini"] = {"ok": False, "message": getattr(e, "detail", None) or str(e)}
+    try:
+        n = vector_store().ping()
+        out["database"] = {"ok": True, "message": f"Database connected: {n['documents']} sources, "
+                                                  f"{n['chunks']} passages stored."}
+    except Exception as e:  # noqa: BLE001 - shown to the user
+        msg = getattr(e, "detail", None) or str(e)
+        if "does not exist" in msg:
+            msg = "Connected, but the tables are missing. Run backend/supabase/schema.sql in Supabase's SQL Editor."
+        out["database"] = {"ok": False, "message": msg.split("\n")[0][:300]}
+    return out
 
 
 @router.get("/health")

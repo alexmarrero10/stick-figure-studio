@@ -192,6 +192,39 @@ def latest_research(project_id: int) -> dict[str, Any] | None:
     return r
 
 
+def save_sources(project_id: int, docs: list[dict[str, Any]]) -> None:
+    """Add or update the project's downloaded sources (keyed by URL)."""
+    with tx() as conn:
+        for d in docs:
+            conn.execute(
+                "INSERT INTO project_sources (project_id, url, title, source_type, status, reason, words, chunks, "
+                "reused, remote_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (project_id, url) DO UPDATE SET "
+                "title = excluded.title, source_type = excluded.source_type, status = excluded.status, "
+                "reason = excluded.reason, words = excluded.words, chunks = excluded.chunks, "
+                "reused = excluded.reused, remote_id = excluded.remote_id",
+                (project_id, d["url"], d.get("title", ""), d.get("source_type", "web"), d.get("status", "ok"),
+                 d.get("reason", ""), d.get("words", 0), d.get("chunks", 0), int(bool(d.get("reused"))),
+                 d.get("doc_id")))
+
+
+def list_sources(project_id: int) -> list[dict[str, Any]]:
+    with tx() as conn:
+        return _rows(conn.execute(
+            "SELECT * FROM project_sources WHERE project_id = ? ORDER BY status = 'skipped', id", (project_id,)
+        ).fetchall())
+
+
+def get_source(project_id: int, source_id: int) -> dict[str, Any] | None:
+    with tx() as conn:
+        return _row(conn.execute("SELECT * FROM project_sources WHERE project_id = ? AND id = ?",
+                                 (project_id, source_id)).fetchone())
+
+
+def delete_source(project_id: int, source_id: int) -> None:
+    with tx() as conn:
+        conn.execute("DELETE FROM project_sources WHERE project_id = ? AND id = ?", (project_id, source_id))
+
+
 def save_script(project_id: int, text: str, source: str, instruction: str | None = None) -> dict[str, Any]:
     with tx() as conn:
         cur = conn.execute(

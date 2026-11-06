@@ -9,10 +9,16 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 129 backend tests pass; the frontend builds.
+- 148 backend tests pass; the frontend builds.
+- Active plan: `docs/PUBLIC_SITE_PLAN.md` (RAG research built; public site with chatbot next).
 
 ## Recently done
 
+- **RAG research (Phases A + B)**: research can download 10-15 sources (Wikipedia + pages Claude picks),
+  chunk and embed them (Gemini) into Supabase pgvector, and write the brief from retrieved passages with no
+  web tools. Script and chat requests get source excerpts. Sources are listed on the Script step (remove,
+  find more). Off until the user adds `GEMINI_API_KEY` and `SUPABASE_DB_URL` on Settings; the old web-search
+  research is used otherwise. **Not yet run against real Supabase/Gemini.** Setup steps are in the plan file.
 - **Script style modeled on top channels** (commit 0b31f28): a new CHANNEL STYLE section in `SCRIPT_SYSTEM`
   (see CLAUDE.md), new ending rule (no subscribe asks; end on a bookend line or one comment question), more
   energetic tone, scene-drop openings allowed. Not yet tried on a new video.
@@ -26,6 +32,9 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Next
 
+1. User: create a Supabase project, run `backend/supabase/schema.sql`, add the Session pooler URI and a
+   Gemini key on Settings, click "Test Gemini and Supabase". Then research a new video with RAG and compare
+   time and quality with the old research. Then Phase C (publish to site) of the plan.
 1. Make the next video with the new script style and zoom, then compare its retention with the first two.
 2. Possibly re-assemble projects 1 and 2 to see the zoom (only if the user wants new versions).
 3. Push to GitHub when the user asks (`alexmarrero10/stick-figure-studio`, private). 9 local commits are unpushed:
@@ -37,11 +46,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   credits per clip, Fast ~20, Quality ~100. Plan was the FFmpeg zoom for most shots plus a handful of Veo clips.
   Would be done manually by the user (no Flow automation).
 - **Settings toggle for an AI-voice line** at the bottom of the description (offered, not accepted).
-- **RAG:** decided *not* worth it for the research step (research already uses WebSearch/WebFetch in
-  `claude_code.py`). A possible use is era corpora (medieval, samurai, Chronicling America) to improve Ideas.
-  Parked.
-- **Public portfolio site / video library with RAG Q&A:** plan in `docs/PUBLIC_SITE_PLAN.md` (Phase 4 not
-  started). Parked; only two videos exist so far.
+- **Era corpora** (medieval, samurai, Chronicling America) in the vector DB to improve Ideas. Parked.
 
 ## Open issues
 
@@ -50,6 +55,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   `shots.py` docstring also says "pictures are never zoomed" (zoom now happens in `assemble.py`).
 - `projects/a-han-governor-removed-the-tiger-traps-and-the-tigers-left/` exists on disk but has no project row
   in the database (leftover folder).
-- `config.yaml` has an uncommitted change by the user: `claude.research_depth: thorough`.
+- `config.yaml` has an uncommitted change by the user: `claude.research_depth: thorough`. The new `rag:`
+  section isn't in config.yaml yet (code defaults in `app/deps.py` RAG_DEFAULTS); saving Settings adds it.
 - Still never checked by hand: importing `timeline.fcpxml` into DaVinci Resolve.
 - TikTok posting only works as "Only me" until TikTok approves the app.

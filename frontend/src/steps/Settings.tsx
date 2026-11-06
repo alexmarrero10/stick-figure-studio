@@ -74,6 +74,36 @@ const FIELDS: {
     ],
     help: "Quick starts from what Claude already knows and searches only to check the key facts",
   },
+  {
+    section: "rag",
+    key: "enabled",
+    label: "Research from downloaded sources",
+    type: "bool",
+    help: "Downloads 10-15 sources into your Supabase database and writes the brief from them. Needs the Gemini key and Supabase address. Research depth is not used when this is on.",
+  },
+  { section: "rag", key: "docs_min", label: "Fewest sources to download", type: "number" },
+  { section: "rag", key: "docs_max", label: "Most sources to download", type: "number" },
+  {
+    section: "rag",
+    key: "brief_chunks",
+    label: "Passages used for the brief",
+    type: "number",
+    help: "About 300 words each. More gives a fuller brief but uses more of your Claude plan",
+  },
+  {
+    section: "rag",
+    key: "script_chunks",
+    label: "Passages sent with the script",
+    type: "number",
+    help: "Extra source detail for fact checking while the script is written",
+  },
+  {
+    section: "rag",
+    key: "use_shared",
+    label: "Also use sources from other videos",
+    type: "bool",
+    help: "Close matches from earlier videos' sources can fill gaps",
+  },
   { section: "script", key: "target_words_min", label: "Script target: min words", type: "number" },
   { section: "script", key: "target_words_max", label: "Script target: max words", type: "number" },
   { section: "script", key: "wpm_estimate", label: "Narration speed (words/min)", type: "number" },
@@ -150,9 +180,22 @@ const FIELDS: {
   },
 ];
 
+const KEY_HELP: Record<string, string> = {
+  GEMINI_API_KEY: "Free key from aistudio.google.com. Leave billing off on that Google project so it can never cost money.",
+  SUPABASE_DB_URL:
+    "Supabase: Connect > Session pooler > URI, with your database password filled in. Run backend/supabase/schema.sql once in its SQL Editor.",
+};
+
+interface RagCheck {
+  enabled: boolean;
+  gemini: { ok: boolean; message: string };
+  database: { ok: boolean; message: string };
+}
+
 export default function SettingsPage() {
   const [s, setS] = useState<Settings | null>(null);
-  const [keys, setKeys] = useState({ ANTHROPIC_API_KEY: "", ELEVENLABS_API_KEY: "" });
+  const [keys, setKeys] = useState({ ANTHROPIC_API_KEY: "", ELEVENLABS_API_KEY: "", GEMINI_API_KEY: "", SUPABASE_DB_URL: "" });
+  const [ragCheck, setRagCheck] = useState<RagCheck | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Result of the last save, shown next to the button that made it.
   const [saved, setSaved] = useState<Record<string, { ok: boolean; text: string }>>({});
@@ -215,6 +258,18 @@ export default function SettingsPage() {
     }
   };
 
+  const testRag = async () => {
+    setSaving("rag");
+    setRagCheck(null);
+    try {
+      setRagCheck(await api.post<RagCheck>("/api/settings/rag-check"));
+    } catch (e) {
+      report("rag", false, (e as Error).message);
+    } finally {
+      setSaving(null);
+    }
+  };
+
   const status = (where: string) =>
     saved[where] && <span className={`save-status ${saved[where].ok ? "good" : "bad"}`}>{saved[where].text}</span>;
 
@@ -226,12 +281,14 @@ export default function SettingsPage() {
         <h2>API keys</h2>
         <p className="muted small">
           Stored in the .env file in the app folder. The Anthropic key is only needed if the Claude provider is set
-          to "Anthropic API"; with Claude Code, your Claude login is used instead.
+          to "Anthropic API"; with Claude Code, your Claude login is used instead. The Gemini key (free, from Google AI
+          Studio) and the Supabase database address are for researching from downloaded sources.
         </p>
         {(Object.keys(keys) as (keyof typeof keys)[]).map((name) => (
           <div className="row" key={name}>
             <label className="grow">
               {name} <span className="muted">{s.keys[name] ? `(current: ${s.keys[name]})` : "(not set)"}</span>
+              {KEY_HELP[name] && <small className="muted">{KEY_HELP[name]}</small>}
               <input
                 type="password"
                 value={keys[name]}
@@ -245,6 +302,21 @@ export default function SettingsPage() {
             {status(name)}
           </div>
         ))}
+        <div className="row">
+          <button className="secondary" onClick={testRag} disabled={saving === "rag"}>
+            {saving === "rag" ? "Testing…" : "Test Gemini and Supabase"}
+          </button>
+          {status("rag")}
+        </div>
+        {ragCheck && (
+          <ul className="small">
+            {[ragCheck.gemini, ragCheck.database].map((r, i) => (
+              <li key={i} className={r.ok ? "good" : "bad"}>
+                {r.ok ? "✓" : "✗"} {r.message}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       <SocialAccounts />
       <div className="panel">

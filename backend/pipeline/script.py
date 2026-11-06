@@ -329,7 +329,7 @@ words. Give the top entry the most time.
 
 
 def build_script_messages(idea: dict[str, Any], brief: str, target: tuple[int, int], notes: str = "",
-                          wpm: float = 180, format: str = "story") -> list[dict[str, Any]]:
+                          wpm: float = 180, format: str = "story", excerpts: str = "") -> list[dict[str, Any]]:
     minutes = (target[0] + target[1]) / 2 / wpm
     content = (
         f"Write the full narration script.\n\nTOPIC\nTitle: {idea.get('title', '')}\n"
@@ -341,15 +341,18 @@ def build_script_messages(idea: dict[str, Any], brief: str, target: tuple[int, i
         f"TARGET LENGTH: {target[0]}-{target[1]} words (about {minutes:.1f} minutes). "
         "Never go under the minimum: the video must run at least 8 minutes."
     )
+    if excerpts.strip():
+        content += ("\n\nSOURCE EXCERPTS (from the downloaded sources; use them to check facts and add accurate "
+                    "detail. Every fact must come from the research brief or these excerpts.)\n" + excerpts.strip())
     if notes.strip():
         content += f"\n\nEXTRA NOTES FROM THE CHANNEL OWNER\n{notes.strip()}"
     return [{"role": "user", "content": content}]
 
 
 def generate(claude: Claude, idea: dict[str, Any], brief: str, target: tuple[int, int], notes: str = "",
-             wpm: float = 180, format: str = "story") -> Iterator[str]:
-    yield from claude.stream_text(SCRIPT_SYSTEM, build_script_messages(idea, brief, target, notes, wpm, format),
-                                  max_tokens=32000)
+             wpm: float = 180, format: str = "story", excerpts: str = "") -> Iterator[str]:
+    yield from claude.stream_text(SCRIPT_SYSTEM, build_script_messages(idea, brief, target, notes, wpm, format,
+                                                                       excerpts), max_tokens=32000)
 
 
 def clean_script(text: str) -> str:
@@ -411,13 +414,16 @@ REVISE_SCHEMA = obj({
 })
 
 
-def revise(claude: Claude, script: str, history: list[dict[str, Any]], instruction: str) -> dict[str, Any]:
+def revise(claude: Claude, script: str, history: list[dict[str, Any]], instruction: str,
+           excerpts: str = "") -> dict[str, Any]:
     messages: list[dict[str, Any]] = []
     for h in history[-12:]:
         messages.append({"role": h["role"], "content": h["content"]})
+    sources = (f"SOURCE EXCERPTS (any fact you add must come from these or the script)\n{excerpts.strip()}\n\n"
+               if excerpts.strip() else "")
     messages.append({
         "role": "user",
-        "content": f"CURRENT SCRIPT\n<script>\n{script}\n</script>\n\nREQUEST\n{instruction}",
+        "content": f"CURRENT SCRIPT\n<script>\n{script}\n</script>\n\n{sources}REQUEST\n{instruction}",
     })
     result = claude.json(cached(REVISE_SYSTEM), messages, REVISE_SCHEMA, effort="medium")
     result["edits"] = [check_edit(script, {**e, "replace": to_ascii(e["replace"])}) for e in result["edits"]]
