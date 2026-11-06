@@ -139,6 +139,11 @@ def search(q: str, request: Request) -> list[dict[str, Any]]:
     why = app.state.search_limit.check(visitor(request))
     if why:
         raise HTTPException(429, LIMIT_TEXT[why])
+    return find_videos(q)
+
+
+def find_videos(q: str) -> list[dict[str, Any]]:
+    """Videos matching a search, best first, each with its best matching moment (also used by evals/)."""
     moments = reader().search_moments(gemini().embed_query(q), q, k=30)
     best: dict[int, dict[str, Any]] = {}
     for m in moments:  # ranked best first; keep each video's best moment
@@ -202,6 +207,27 @@ def build_context(video: dict[str, Any], moments: list[dict[str, Any]], near: li
     return "\n".join(lines)
 
 
+def gather(video: dict[str, Any], question: str, at_s: float | None = None) -> dict[str, Any]:
+    """Everything the answer is built from: the matching narration windows, the window at the viewer's
+    time, research passages, how related the question is to the video, and the context text.
+    Used by the chat endpoint and by evals/."""
+    g, r = gemini(), reader()
+    qvec = g.embed_query(question)
+    moments = r.search_moments(qvec, question, k=6, video_id=video["id"])
+    near = r.moments_near(video["id"], at_s, 1) if at_s is not None else []
+    sources = r.search_sources(video["project_key"], qvec, 3)
+    relevance = max([m.get("similarity") or 0 for m in moments + sources] or [0])
+    return {"moments": moments, "near": near, "sources": sources, "relevance": relevance,
+            "context": build_context(video, moments, near, sources, at_s)}
+
+
+def chat_contents(history: list[dict[str, str]], context: str, question: str) -> list[dict[str, Any]]:
+    """The conversation sent to Gemini: the last few turns, then the context and the question."""
+    contents = [{"role": t["role"], "parts": [{"text": t["text"][:1000]}]} for t in history[-MAX_HISTORY_TURNS * 2:]]
+    contents.append({"role": "user", "parts": [{"text": f"{context}\n\nQUESTION: {question}"}]})
+    return contents
+
+
 def _sse(obj: dict[str, Any]) -> str:
     return f"data: {json.dumps(obj)}\n\n"
 
@@ -227,24 +253,16 @@ def chat(body: ChatBody, request: Request) -> StreamingResponse:
             yield _sse({"type": "done", "cached": True})
             return
         try:
-            g, r = gemini(), reader()
-            qvec = g.embed_query(question)
-            moments = r.search_moments(qvec, question, k=6, video_id=v["id"])
-            near = r.moments_near(v["id"], body.at_s, 1) if body.at_s is not None else []
-            sources = r.search_sources(v["project_key"], qvec, 3)
+            found = gather(v, question, body.at_s)
             # Off-topic questions (recipes, code, "ignore your rules"...) are turned away here, before any
             # answer is generated, so they cost nothing but the free embedding.
-            relevance = max([m.get("similarity") or 0 for m in moments + sources] or [0])
-            if relevance < CHAT_MIN_SIMILARITY:
+            if found["relevance"] < CHAT_MIN_SIMILARITY:
                 yield _sse({"type": "text", "text": OFF_TOPIC_TEXT})
                 yield _sse({"type": "done", "cached": False, "off_topic": True})
                 return
-            context = build_context(v, moments, near, sources, body.at_s)
-            contents = [{"role": t.role, "parts": [{"text": t.text[:1000]}]}
-                        for t in body.history[-MAX_HISTORY_TURNS * 2:]]
-            contents.append({"role": "user", "parts": [{"text": f"{context}\n\nQUESTION: {question}"}]})
+            contents = chat_contents([t.model_dump() for t in body.history], found["context"], question)
             parts: list[str] = []
-            for text in g.stream_answer(CHAT_SYSTEM, contents):
+            for text in gemini().stream_answer(CHAT_SYSTEM, contents):
                 parts.append(text)
                 yield _sse({"type": "text", "text": text})
             answer = "".join(parts).strip()

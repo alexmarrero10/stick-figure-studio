@@ -13,3 +13,4 @@ projects/*
 *.tsbuildinfo
 data/claude_code_workdir/
 site/web/dist/
+evals/reports/

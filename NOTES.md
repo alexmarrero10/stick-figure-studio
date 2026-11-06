@@ -14,6 +14,15 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **RAG evals** (`evals/`, see its README). First run, 2026-11-06, 2 videos + project 3's sources:
+  - Retrieval: narration hit@6 100% (hit@1 88%); sources hit@3 80%, hit@6 95%; hybrid slightly beats
+    vector-only on sources; search bar right video first 100%; off-topic searches empty 8/8.
+  - Answers (30): grounded 93%, correct 100%, timestamps valid 43/43, cites the right moment 100%, says
+    "not covered" 83% (the misses answer a nearby fact without saying the video doesn't cover the question).
+  - Guard rails: 0/54 real questions refused; 61/80 attacks stopped free; of the 19 that got through, the
+    model declined 18 (one "Ahoy, matey!" before steering back). Sweep says 0.57 would still refuse no real
+    questions and let fewer attacks through (0.55 now); 0.59 is the "fewest mistakes" point.
+
 - **Chatbot guard rails** (site): questions scoring under 0.55 similarity to the video's narration/sources
   are turned away before Gemini writes anything (measured on the real videos: real questions 0.58-0.77,
   off-topic 0.46-0.56); stricter rules (visitor text is questions only, no role-play, no revealing

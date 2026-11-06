@@ -71,6 +71,9 @@ All commands from the project root (Windows; PowerShell or Git Bash).
   `.venv\Scripts\python.exe -m uvicorn app:app --app-dir site/api --port 8790` (reuses the root `.env`).
   Tests: `cd site/api && ../../.venv/Scripts/python -m pytest -q` (16 passing). Self-contained: it doesn't
   import the backend (it has its own copies of the embedding call and hybrid search), so it deploys alone.
+- **RAG evals** (`evals/README.md`): `make_questions.py` once, then `retrieval.py`, `answers.py`,
+  `guardrails.py` score the real site code on real data; reports in `evals/reports/` (gitignored).
+  Scoring tests: `.venv/Scripts/python -m pytest -q evals/tests`.
 - Shell notes: `bc` isn't available in Git Bash. Use PowerShell `Measure-Command` for timing. Prefer the
   Edit tool over heredoc/sed for multi-line edits (heredocs have mangled text before).
 
@@ -85,6 +88,7 @@ backend/tests/          pytest suite + fixtures/
 backend/supabase/       SQL the user runs in Supabase: schema.sql, 002_site_reader.sql (read-only site user)
 site/api/               public site API (FastAPI: videos, search, chat) + serves site/web/dist
 site/web/               public site pages (React + Vite)
+evals/                  RAG evals (questions in data/, scripts per layer, reports/ gitignored)
 frontend/src/           App.tsx, api.ts, types.ts, components.tsx, styles.css, steps/ (one .tsx per step,
                         plus Home, Settings), aiTells.ts, textarea.ts
 config.yaml             all tunables; most are on the Settings page (frontend/src/steps/Settings.tsx FIELDS)

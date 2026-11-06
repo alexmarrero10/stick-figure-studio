@@ -1,0 +1,393 @@
+{
+  "videos": [
+    {
+      "video_id": 5,
+      "title": "The Search to Find the Lost Ships of James Franklin",
+      "project_key": "owner:1",
+      "questions": [
+        {
+          "q": "How did John Rae get hold of Franklin's silverware?",
+          "ord": 0,
+          "start_s": 0.0,
+          "end_s": 32.08,
+          "text": "Picture this. London, autumn of eighteen fifty-four. A Scottish doctor named John Rae opens a bundle of Arctic relics and lifts out a small silver fork. On the back of the handle is a family crest. It belongs to Sir John Franklin, the famous explorer who sailed into the Arctic nine years earlier with two ships and one hundred and twenty-nine men, and was never seen again. Rae didn't find that fork in the snow. He bought it from Inuit hunters. And they told him a story that Victorian England flatly refused to believe."
+        },
+        {
+          "q": "When did Franklin's expedition leave England and what was it trying to find?",
+          "ord": 1,
+          "start_s": 32.16,
+          "end_s": 63.89,
+          "text": "Here's the strange part. Those ships stayed lost for nearly one hundred and seventy years, even though the Inuit had been describing what happened, and roughly where, the whole time. So why did it take so long? To answer that, we have to go back to the beginning. On May nineteenth, eighteen forty-five, HMS Erebus and HMS Terror sailed down the River Thames. Their mission was to find the Northwest Passage, a sea route over the top of North America. They were two sturdy ships, packed with supplies and led by one of Britain's most celebrated explorers."
+        },
+        {
+          "q": "What did search parties find on Beechey Island?",
+          "ord": 2,
+          "start_s": 63.93,
+          "end_s": 94.58,
+          "text": "In late July, whalers in Baffin Bay spotted them. After that, nobody outside the expedition ever saw them again. Years passed with no word. Britain sent ship after ship to search. Franklin's wife, Lady Jane Franklin, pushed harder than anyone. Searchers found three graves on tiny Beechey Island, where the crews had spent their first winter. But the ships, and the men who sailed them, were simply gone. John Rae wasn't even looking for Franklin. In the spring of eighteen fifty-four, he was mapping coastline for the Hudson's Bay Company."
+        },
+        {
+          "q": "What did the Inuit hunter at Pelly Bay tell Rae about the starving sailors?",
+          "ord": 3,
+          "start_s": 94.62,
+          "end_s": 124.66,
+          "text": "Rae traveled the way the Inuit did. He hunted for his food, built snow houses, and moved fast and light. At Pelly Bay, he met an Inuk hunter named In-nook-poo-zhee-jook. The man had something that didn't belong in the Arctic: a cap band from a Royal Navy uniform. Rae asked where it came from. The hunter said that some winters back, other Inuit had seen about forty white men dragging a boat south over the ice. They looked thin and hungry. Later, the bodies of some thirty people were found on the mainland, and five more on an island."
+        },
+        {
+          "q": "What did the Inuit say the last Franklin survivors did to stay alive?",
+          "ord": 4,
+          "start_s": 124.7,
+          "end_s": 160.27,
+          "text": "The hunter hadn't seen this himself. He was passing on what others had told him. But as Rae bought more objects from Inuit families, the story kept holding up. He found spoons with officers' initials, a silver plate engraved with Franklin's own name, and that fork. Then came the hardest part. The Inuit said the last survivors, starving and far from help, had been driven to eat their dead. Rae believed them. He also wrote that there was no reason to think the Inuit had harmed anyone. He carried his report and the relics home to London, thinking he was delivering the answer to the greatest mystery of his age."
+        },
+        {
+          "q": "How did Charles Dickens react to Rae's report about the Franklin crew?",
+          "ord": 5,
+          "start_s": 160.35,
+          "end_s": 195.55,
+          "text": "And that's when everything went wrong. The report ran in The Times, and Victorian England recoiled. British naval heroes, driven to that? Unthinkable. Lady Franklin rejected it outright. Then the most famous writer in the country stepped in. That December, Charles Dickens published a two-part essay in his magazine, Household Words. He argued Rae's account was highly improbable. He even suggested that if anyone had done something terrible, it may have been the Inuit. He dismissed their testimony as, in his words, \"the vague babble of savages.\""
+        },
+        {
+          "q": "Why was John Rae never given a knighthood?",
+          "ord": 6,
+          "start_s": 195.63,
+          "end_s": 225.75,
+          "text": "Think about that. The only witnesses anywhere near the scene were Inuit, and the most powerful voices in Britain decided their word was worthless. Rae fought back in print and defended the Inuit. He did collect the ten thousand pound reward. But unlike many of his fellow Arctic explorers, John Rae was never knighted. Nobody can say for certain why. Five years later, the frozen ground itself spoke up. In May eighteen fifty-nine, Lieutenant William Hobson was on a search paid for by Lady Franklin herself."
+        },
+        {
+          "q": "What did the note found on King William Island say about Franklin's death?",
+          "ord": 7,
+          "start_s": 225.95,
+          "end_s": 261.47,
+          "text": "On King William Island, he found a metal tube inside a pile of stones. Inside was a single sheet of paper. The first note, from eighteen forty-seven, ended with two words: All well. But squeezed into the margin was a second message, from April eighteen forty-eight. Franklin was dead. The ships had been trapped in ice for over a year and a half. One hundred and five survivors were abandoning them to walk south. Walking south was exactly what the Inuit had described. Nearby, searchers found a boat holding the remains of two men, along with books, soap, combs, and about forty pounds of chocolate."
+        },
+        {
+          "q": "Which Inuk man marked on a chart where a Franklin ship sank?",
+          "ord": 8,
+          "start_s": 261.63,
+          "end_s": 297.44,
+          "text": "Every new clue matched the Inuit account. So now you might be wondering: if the Inuit were right about the men, were they right about the ships too? They were. And that's where this story gets truly frustrating. In eighteen sixty-nine, an American journalist named Charles Francis Hall traveled the region, writing down what Inuit told him. One man, Inukpujijuk, described a ship that had gone down in a coastal area called Ugjulik. Then he took a navy chart and marked the spot. He even drew his own map. Within a decade, another American, Frederick Schwatka, sledded more than three thousand miles and recorded still more Inuit accounts."
+        },
+        {
+          "q": "Who brought the old Inuit stories back into the Franklin search?",
+          "ord": 9,
+          "start_s": 297.68,
+          "end_s": 328.08,
+          "text": "Then the trail mostly went cold. For more than a century, searchers came and went, and came up empty. The Inuit testimony sat in old notebooks that hardly anyone opened. That began to change in the nineteen nineties. A researcher named David Woodman went back to those notebooks and pieced the Inuit accounts together. He later said something like this: without that testimony, searchers wouldn't know where to look. In the town of Gjoa Haven, a teacher named Louie Kamookak spent years gathering stories from elders and matching them against explorers' journals."
+        },
+        {
+          "q": "How did a helicopter pilot help locate the first Franklin ship?",
+          "ord": 10,
+          "start_s": 328.16,
+          "end_s": 358.8,
+          "text": "He pointed out something outsiders kept missing. You couldn't ask the elders about Franklin, because they didn't know the name. You had to ask about the ships, and the strangers, and what their families remembered. Even then, it wasn't easy. The accounts pointed to more than one possible site. Parks Canada searched year after year starting in two thousand eight. Then, in September twenty fourteen, a helicopter pilot named Andrew Stirling, supporting a team of Nunavut archaeologists, spotted something on a small island. It was an iron fitting from a Royal Navy ship."
+        },
+        {
+          "q": "When and how was the wreck of HMS Erebus discovered?",
+          "ord": 11,
+          "start_s": 358.92,
+          "end_s": 395.08,
+          "text": "Nearby lay a wooden plug from a ship's anchor hole. The search moved to the waters around that island. On September second, Parks Canada archaeologists Ryan Harris and Jonathan Moore were watching a sonar screen when a shape appeared. It was a ship, sitting upright in about thirty-six feet of water: HMS Erebus. It lay close to where Inukpujijuk had marked that chart, one hundred and forty-five years earlier. A week later, Canada's Prime Minister announced it to the world. That same month, a memorial stone to John Rae was placed in Westminster Abbey, just below the memorial to Franklin."
+        },
+        {
+          "q": "How did Sammy Kogvik's memory lead the search to Terror Bay?",
+          "ord": 12,
+          "start_s": 395.12,
+          "end_s": 428.77,
+          "text": "It came one hundred and sixty years after Rae brought home the truth. But Terror was still missing, and the man who would find it almost wasn't on the boat. He was Sammy Kogvik, a Canadian Ranger from Gjoa Haven. As Kogvik told reporters, around two thousand nine he was out on the ice in Terror Bay when he saw a wooden pole sticking up through it. He posed beside it for a photo. Then, on the way home, he lost the camera. In twenty sixteen, Kogvik joined the research ship Martin Bergmann as a last-minute replacement. He told operations director Adrian Schimnowski about the pole."
+        },
+        {
+          "q": "What condition was HMS Terror in when it was found?",
+          "ord": 13,
+          "start_s": 429.22,
+          "end_s": 459.74,
+          "text": "Schimnowski took him at his word and steered toward Terror Bay. At about eight thirty in the morning on September third, twenty sixteen, the crew found a wreck on the seabed. It was HMS Terror, sitting upright about eighty feet down and astonishingly intact. Dishes were still stacked inside, and a desk sat with its drawers open. In April twenty eighteen, Britain gave both wrecks to Canada. Today they are owned jointly by Canada and Inuit. Louie Kamookak didn't live to see it. He died just weeks earlier."
+        },
+        {
+          "q": "How many Franklin crew members have been identified by DNA testing?",
+          "ord": 14,
+          "start_s": 460.19,
+          "end_s": 496.92,
+          "text": "Since then, DNA has identified six of the lost men, including Captain James Fitzjames of Erebus. Science has confirmed what Rae reported in eighteen fifty-four. The Inuit had told the truth. So why did it take nearly one hundred and seventy years? The answer wasn't hidden in the ice. It was kept in the memories of the people who had been there all along. A handful of outsiders listened, but far too many didn't. Charles Dickens called it babble. It turned out to be the best map anyone ever had. If you like stories where the overlooked witness turns out to be right, subscribe. There are more coming."
+        }
+      ],
+      "unanswerable": [
+        "What diseases, like scurvy or lead poisoning, killed Franklin's crew?",
+        "How old was Sir John Franklin when he died?",
+        "Who finally sailed through the whole Northwest Passage first?",
+        "Where is Sir John Franklin's body buried?",
+        "What artifacts have divers brought up from the Erebus wreck?",
+        "When did John Rae die and where is he buried?"
+      ]
+    },
+    {
+      "video_id": 4,
+      "title": "How the US Captured Saddam Hussein",
+      "project_key": "owner:2",
+      "questions": [
+        {
+          "q": "What did Saddam Hussein say when US troops found him underground?",
+          "ord": 0,
+          "start_s": 0.0,
+          "end_s": 33.68,
+          "text": "He built palaces, then hid in a hole barely bigger than a coffin. One night in December two thousand three, American soldiers lifted a hidden lid in the dirt. They pulled out a tired man with a long graying beard and messy hair. According to soldiers who were there, he said something like, \"I am Saddam Hussein, President of Iraq, and I am willing to negotiate.\" For nine months, Saddam had been the most hunted man on Earth. There was a twenty-five million dollar reward on his head. Soldiers had carried out more than five hundred raids around his hometown, but he kept slipping away."
+        },
+        {
+          "q": "When and where was Saddam Hussein born?",
+          "ord": 1,
+          "start_s": 33.76,
+          "end_s": 66.48,
+          "text": "So how did they finally track him down to that tiny hole? The surprising answer is a family tree. A team of Army analysts and one interrogator mapped out Saddam's bodyguards, his drivers and the families around him. Then with just hours left before the interrogator's flight home, they caught the one man who knew where Saddam was hiding. And he was a bodyguard Saddam trusted with his life. But before we get to the hunt, you need to know who Saddam was and where he came from. He was born in April nineteen thirty-seven in a poor village of mud houses near Tikrit, on the banks of the Tigris River."
+        },
+        {
+          "q": "How did young Saddam get wounded and flee Iraq in 1959?",
+          "ord": 2,
+          "start_s": 66.93,
+          "end_s": 99.29,
+          "text": "His father had inexplicably disappeared before he was born, and many accounts say his childhood was hard and lonely. When he was about ten, he moved in with his uncle, a former army officer with strong political views who shaped how the boy saw the world. As a young man in Baghdad, Saddam joined a political party called the Baath Party. In nineteen fifty-nine, when he was just twenty-two, he took part in a plot to kill Iraq's leader. The attack failed, Saddam was shot in the leg, and he escaped across the desert to Syria and then Egypt. It would not be the last time he had to run and hide."
+        },
+        {
+          "q": "How did Saddam rise to become Iraq's president in 1979?",
+          "ord": 3,
+          "start_s": 99.49,
+          "end_s": 131.81,
+          "text": "In nineteen sixty-eight, his party seized power and an older relative from Tikrit became president. Saddam became the number two man, and he slowly took control of the army, the police and the secret police. In July nineteen seventy-nine, the old president stepped down and Saddam finally took the top job himself. He filled the most important posts with relatives and men from his hometown, because those were the people he trusted most. For the next twenty-four years he ruled Iraq through fear. Now to see how the soldiers pulled it off, we need to jump ahead to the spring of two thousand three."
+        },
+        {
+          "q": "Which Army unit searched around Tikrit after Baghdad fell in 2003?",
+          "ord": 4,
+          "start_s": 131.89,
+          "end_s": 163.24,
+          "text": "On March twentieth, American-led forces invaded Iraq. On April ninth, the capital city of Baghdad fell and Saddam simply vanished. The hunt soon centered on Tikrit, his hometown about one hundred miles north of Baghdad. That spring, the Army's Fourth Infantry Division moved into the area. At first, soldiers went after the big names, the top officials who had helped run Saddam's government. Night after night they raided homes and hauled in suspects. In the middle of June they even caught Saddam's own presidential secretary."
+        },
+        {
+          "q": "Why did investigators switch to tracking Saddam's drivers and bodyguards?",
+          "ord": 5,
+          "start_s": 163.69,
+          "end_s": 195.49,
+          "text": "But every top official they captured got them no closer to Saddam himself. So in late June, the intelligence team tried something new. Instead of chasing powerful people, they started mapping the people who worked closest to Saddam, like his bodyguards and his drivers. They also focused on five families who had known Saddam since he was young. After all, nobody can hide for months without help. They started with just four names on a chart. After every raid and every interrogation, they added new names and drew new lines to show how everyone was connected."
+        },
+        {
+          "q": "Did anyone ever try to collect the $25 million reward for Saddam?",
+          "ord": 6,
+          "start_s": 195.94,
+          "end_s": 231.21,
+          "text": "One raid on the farm of a family leader turned up photos that helped them put faces to those names. Little by little, the web of names grew into a giant family tree. By the end, the team was tracking more than nine thousand people. The twenty-five million dollar reward for information about Saddam's hiding place should have been enough to tempt someone to give him up. But no one ever tried to claim it. Getting loyal people to talk would take real patience. And in July, a new face showed up in Tikrit. He was an Army sergeant named Eric Maddox, and he worked as an interrogator, which means his job was questioning prisoners."
+        },
+        {
+          "q": "Who was Mohammed Ibrahim and how did soldiers first learn of him?",
+          "ord": 7,
+          "start_s": 231.66,
+          "end_s": 265.07,
+          "text": "Maddox thought this would be a quick two-day assignment, so he packed just one change of clothes. He ended up staying for months and questioning hundreds of people. And he says he never once used force to do it. The first big crack came on October eleventh. Soldiers captured the youngest brother from one of the families on the chart, and he gave them a name. It belonged to the driver and close friend of a man named Mohammed Ibrahim. Ibrahim was a bodyguard from Saddam's inner circle, and he reported directly to Saddam. Officers later said he was one of the twenty people Saddam trusted most."
+        },
+        {
+          "q": "How did the military figure out where Ibrahim was located?",
+          "ord": 8,
+          "start_s": 265.15,
+          "end_s": 301.97,
+          "text": "Now the people involved tell this next part a little differently, and it really was a team effort. The Army's official history says that driver had already been questioned once and let go. When soldiers brought him back in, he told them where Ibrahim was. Maddox remembers a different key moment. In his account, on December first, a driver finally opened up after about eight hours of questioning. He said Ibrahim was the man running the armed fight against American troops for Saddam. Either way, the soldiers now had their target. According to Maddox, over the next twelve days soldiers picked up about forty of Ibrahim's relatives and people close to him."
+        },
+        {
+          "q": "When was Saddam's bodyguard Ibrahim finally arrested?",
+          "ord": 9,
+          "start_s": 302.13,
+          "end_s": 333.33,
+          "text": "Twenty more names were still on the list, and the net was closing fast. But Maddox had a problem of his own, because his time in Iraq was almost up. And that's when everything happened at once. On December twelfth, Maddox's very last scheduled day in Iraq, soldiers raided a house in Baghdad and finally caught Ibrahim. One Army historian puts the arrest in the early hours of December thirteenth, but whichever date is right, the timing was incredible. Ibrahim was brought north to Tikrit, and Maddox had only hours left to get him talking."
+        },
+        {
+          "q": "What did Ibrahim want in exchange for revealing Saddam's location?",
+          "ord": 10,
+          "start_s": 333.49,
+          "end_s": 364.37,
+          "text": "Now you might be wondering why one of Saddam's most loyal men would ever give him up. Maddox later said, \"I did not lay a finger on the guy.\" Instead, the two men talked and bargained, and Ibrahim asked for protection for about forty of his relatives. Then he gave up the secret that so many soldiers had been chasing for months. Saddam was hiding at a remote farm about fifteen kilometers south of Tikrit. Things moved fast after that. Within a day, commanders had two target sites near a small town south of Tikrit."
+        },
+        {
+          "q": "How many troops took part in Operation Red Dawn?",
+          "ord": 11,
+          "start_s": 364.45,
+          "end_s": 397.25,
+          "text": "They code-named them Wolverine One and Wolverine Two. On the evening of December thirteenth, about six hundred soldiers and special operations troops launched Operation Red Dawn. The colonel leading it said this was at least the tenth mission to capture Saddam. The farm sat in an orange grove on the bank of the Tigris River, with boats on the water. A team of around sixty soldiers sealed off about two square kilometers so nobody could slip away. Then the troops searched the first sites and found nothing. For a moment, it seemed like the hunt had hit another dead end."
+        },
+        {
+          "q": "What items were found in the small hut on the farm?",
+          "ord": 12,
+          "start_s": 397.33,
+          "end_s": 427.83,
+          "text": "Near the riverbank stood a tiny mud-brick hut. It was a single room about the size of a twin bed, with a simple kitchen shelter outside. Inside the fridge were lemonade, hot dogs and an open box of Belgian chocolates. New shoes sat in their boxes, and new clothes were still in their wrappers. There were no phones and no radios. And hanging outside was a sign that said \"God bless our home.\" Someone had clearly been living on this farm, but Saddam was nowhere in sight. But the strangest part of the night was still to come."
+        },
+        {
+          "q": "What was Saddam's underground hiding spot like inside?",
+          "ord": 13,
+          "start_s": 428.28,
+          "end_s": 460.07,
+          "text": "The Army says people working with the soldiers showed them where to look. Maddox remembers it differently. In his account, Ibrahim was there, but he didn't want to point straight at Saddam's hiding place. So instead, he kicked a rope at a patch of ground. Soldiers cleared away the brick and dirt hiding the entrance, and underneath was a lid made of Styrofoam. They lifted it and found a cramped hole about six to eight feet deep. There was just enough room for a person to lie down. It had an electric light, a fan to move fresh air and wooden beams holding up the roof."
+        },
+        {
+          "q": "Did Saddam fight back when he was captured, and what cash was found?",
+          "ord": 14,
+          "start_s": 460.35,
+          "end_s": 494.61,
+          "text": "And down in that hole was Saddam Hussein. It was around eight o'clock at night. Saddam had a pistol with him, but he never used it, and not a single shot was fired. Soldiers also found two rifles, a white-and-orange taxi and seven hundred fifty thousand dollars in American hundred-dollar bills. Two other men were caught too, one trying to run away and one inside the hut. The colonel in charge of the raid admitted, \"We didn't think it would be so simple.\" Commanders described Saddam as a \"tired man\" who seemed \"resigned to his fate,\" meaning he had accepted that it was over."
+        },
+        {
+          "q": "Who announced Saddam's capture to the public, and what did he say?",
+          "ord": 15,
+          "start_s": 494.69,
+          "end_s": 526.9,
+          "text": "Within an hour, he was flown away by helicopter. And the general in charge of the division pointed out the irony. From that riverbank, you could see Saddam's old palaces across the water. The man who built them had been hiding just across the river in a hole in the dirt. The next day, December fourteenth, Paul Bremer, the American official in charge of running Iraq, stepped up to a microphone at a press conference in Baghdad. Saddam had been identified, and now it was time to tell the whole world. He opened with the famous words: \"Ladies and gentlemen, we got him.\""
+        },
+        {
+          "q": "When was Saddam executed and what was he convicted of?",
+          "ord": 16,
+          "start_s": 526.94,
+          "end_s": 564.69,
+          "text": "The story didn't end neatly for everyone. Maddox says soldiers later found eleven point two million dollars at Ibrahim's house. After that, the protection deal for his family was over. In two thousand eight, Maddox said that as far as he knew, Ibrahim was still in prison. Saddam was put on trial and convicted of crimes against humanity, including the killing of one hundred forty-eight people in nineteen eighty-two. He was executed on December thirtieth, two thousand six. So think about what really happened here. Family loyalty was Saddam's best shield, and not one relative ever tried to cash in on the huge reward for identifying his location."
+        },
+        {
+          "q": "How many people were held in custody during the search for Saddam?",
+          "ord": 17,
+          "start_s": 564.71,
+          "end_s": 590.5,
+          "text": "But that same web of family ties is exactly what led the soldiers to his hiding place. The team started with just four names and ended up tracking more than nine thousand people. Along the way, more than twelve hundred people were detained. And in the end, it all came down to one bodyguard Saddam trusted. Not bad for a sergeant who showed up with just one change of clothes. If you love true stories where bad guys get caught, hit that subscribe button."
+        }
+      ],
+      "unanswerable": [
+        "What happened to Saddam's sons Uday and Qusay?",
+        "Where was Saddam Hussein held after being captured?",
+        "Who was the judge at Saddam Hussein's trial?",
+        "How was Saddam Hussein executed?",
+        "Did Eric Maddox get an award for finding Saddam?",
+        "Who got the $25 million reward in the end?"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "project_key": "owner:3",
+      "questions": [
+        {
+          "q": "What book did Woodward and Bernstein write about their Watergate reporting?",
+          "document_id": 5,
+          "ord": 0,
+          "source": "All the President's Men - Wikipedia"
+        },
+        {
+          "q": "What lasting reforms and political fallout came out of Watergate?",
+          "document_id": 1,
+          "ord": 38,
+          "source": "Watergate scandal - Wikipedia"
+        },
+        {
+          "q": "Which Nixon tapes discussed paying money to the Watergate defendants?",
+          "document_id": 8,
+          "ord": 9,
+          "source": "Watergate Trial Tapes - Richard Nixon Presidential Library and Museum"
+        },
+        {
+          "q": "Did the CIA secretly sabotage the Watergate break-in to hurt Nixon?",
+          "document_id": 1,
+          "ord": 12,
+          "source": "Watergate scandal - Wikipedia"
+        },
+        {
+          "q": "Why did Mark Felt leak information to reporters about Watergate?",
+          "document_id": 1,
+          "ord": 18,
+          "source": "Watergate scandal - Wikipedia"
+        },
+        {
+          "q": "Which top Nixon aides were forced out in April 1973?",
+          "document_id": 1,
+          "ord": 24,
+          "source": "Watergate scandal - Wikipedia"
+        },
+        {
+          "q": "Which recorded conversation shows Nixon planning to use the CIA to block the FBI?",
+          "document_id": 8,
+          "ord": 1,
+          "source": "Watergate Trial Tapes - Richard Nixon Presidential Library and Museum"
+        },
+        {
+          "q": "How did the Washington Post first connect the burglars to the White House?",
+          "document_id": 1,
+          "ord": 14,
+          "source": "Watergate scandal - Wikipedia"
+        },
+        {
+          "q": "What did Mark Felt do at the FBI during World War II?",
+          "document_id": 4,
+          "ord": 3,
+          "source": "Mark Felt - Wikipedia"
+        },
+        {
+          "q": "How did a security guard catch the Watergate burglars in the act?",
+          "document_id": 1,
+          "ord": 9,
+          "source": "Watergate scandal - Wikipedia"
+        },
+        {
+          "q": "When were Liddy and McCord convicted in the first Watergate trial?",
+          "document_id": 1,
+          "ord": 22,
+          "source": "Watergate scandal - Wikipedia"
+        },
+        {
+          "q": "What did Nixon and Haldeman say about Liddy being responsible for the burglary?",
+          "document_id": 9,
+          "ord": 4,
+          "source": "The Smoking Gun Tape (June 23, 1972) - Watergate.info"
+        },
+        {
+          "q": "Why did the June 23, 1972 recording force Nixon to resign?",
+          "document_id": 9,
+          "ord": 0,
+          "source": "The Smoking Gun Tape (June 23, 1972) - Watergate.info"
+        },
+        {
+          "q": "What did Nixon mean by referring to 'the Bay of Pigs thing'?",
+          "document_id": 1,
+          "ord": 17,
+          "source": "Watergate scandal - Wikipedia"
+        },
+        {
+          "q": "How did Woodward and Deep Throat signal each other to arrange meetings?",
+          "document_id": 4,
+          "ord": 10,
+          "source": "Mark Felt - Wikipedia"
+        },
+        {
+          "q": "How was the Senate Watergate committee led by Sam Ervin created?",
+          "document_id": 1,
+          "ord": 23,
+          "source": "Watergate scandal - Wikipedia"
+        },
+        {
+          "q": "Who suggested having the CIA's Walters tell Pat Gray to stop investigating?",
+          "document_id": 9,
+          "ord": 1,
+          "source": "The Smoking Gun Tape (June 23, 1972) - Watergate.info"
+        },
+        {
+          "q": "What happened to Martha Mitchell after she tried to talk to the press?",
+          "document_id": 1,
+          "ord": 15,
+          "source": "Watergate scandal - Wikipedia"
+        },
+        {
+          "q": "Who were the Watergate Seven and what were they charged with?",
+          "document_id": 1,
+          "ord": 31,
+          "source": "Watergate scandal - Wikipedia"
+        },
+        {
+          "q": "What happened to J. Edgar Hoover's secret files after he died?",
+          "document_id": 4,
+          "ord": 6,
+          "source": "Mark Felt - Wikipedia"
+        }
+      ]
+    }
+  ],
+  "made_at": "2026-11-06 17:17"
+}
