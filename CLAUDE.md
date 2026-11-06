@@ -2,11 +2,13 @@
 
 A local web app that takes a true-history story from idea to finished video for the user's YouTube channel
 **NextDoorHistorian** (narrated stick-figure explainers, ~8.5-9 min, plus vertical Shorts).
-Single user, runs on their Windows PC. Not deployed anywhere.
+Single user, runs on their Windows PC. The studio is never deployed. A separate read-only **public site**
+(`site/`, see `site/README.md`) shows published videos with semantic search and a Gemini chatbot; it's built
+but not deployed yet.
 
 Current status, recent work and open issues are in **NOTES.md**. Read it at the start of a session.
 `PROGRESS.md` holds the older stage-by-stage build log and architecture notes; `docs/PUBLIC_SITE_PLAN.md`
-is the active plan for RAG research (built) and the public video site with a chatbot (next).
+is the active plan for RAG research and the public site (both built; deployment next).
 
 ## Pipeline (one step per UI tab, one module per step)
 
@@ -28,7 +30,9 @@ is the active plan for RAG research (built) and the public video site with a cha
 7. **Shots + Assemble** (`shots.py`, `assemble.py`, `fcpxml.py`, `captions.py`): shots locked to word timings,
    FFmpeg renders `output/video.mp4`, plus `timeline.fcpxml` and `captions.srt`. Shots of 3 s or longer
    slowly zoom in (`video.zoom_min_seconds`, `video.zoom_per_second`, capped at 12%).
-8. **Publish** (`publish.py`): titles, description with chapters and sources, tags, thumbnail prompts.
+8. **Publish** (`publish.py`, `site_publish.py`): titles, description with chapters and sources, tags,
+   thumbnail prompts. "Your video site" stores the video and its narration in 30-45 s timed windows in
+   Supabase `videos` / `video_chunks` for the public site.
 9. **Short** (`shorts.py`, `social/`): 50-70 s vertical cut ending on the best cliffhanger; captions written
    by Claude; can post to YouTube Shorts, Instagram/Facebook Reels and TikTok.
 
@@ -63,6 +67,10 @@ All commands from the project root (Windows; PowerShell or Git Bash).
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
+- **Public site:** `cd site/web && npm run build`, then
+  `.venv\Scripts\python.exe -m uvicorn app:app --app-dir site/api --port 8790` (reuses the root `.env`).
+  Tests: `cd site/api && ../../.venv/Scripts/python -m pytest -q` (11 passing). Self-contained: it doesn't
+  import the backend (it has its own copies of the embedding call and hybrid search), so it deploys alone.
 - Shell notes: `bc` isn't available in Git Bash. Use PowerShell `Measure-Command` for timing. Prefer the
   Edit tool over heredoc/sed for multi-line edits (heredocs have mangled text before).
 
@@ -74,13 +82,17 @@ backend/app/            FastAPI app: main.py, config.py (config.yaml + .env), db
 backend/pipeline/       one module per step (see Pipeline), claude_client.py (API), claude_code.py (CLI),
                         ffmpeg.py, procs.py, social/ (youtube, meta, tiktok)
 backend/tests/          pytest suite + fixtures/
+backend/supabase/       SQL the user runs in Supabase: schema.sql, 002_site_reader.sql (read-only site user)
+site/api/               public site API (FastAPI: videos, search, chat) + serves site/web/dist
+site/web/               public site pages (React + Vite)
 frontend/src/           App.tsx, api.ts, types.ts, components.tsx, styles.css, steps/ (one .tsx per step,
                         plus Home, Settings, SocialAccounts), aiTells.ts, textarea.ts
 config.yaml             all tunables; most are on the Settings page (frontend/src/steps/Settings.tsx FIELDS)
 .env                    API keys and social tokens (gitignored)
 data/app.db             SQLite DB (gitignored). Tables: projects, ideas, research_briefs, script_versions,
                         revision_messages, beats, beat_undo, voiceovers, words, style_guides, image_prompts,
-                        prompt_batches, images, shots, publish_meta, shorts, social_posts
+                        prompt_batches, images, shots, publish_meta, shorts, social_posts, project_sources,
+                        site_videos
 projects/<slug>/        per-video media: audio/, prompts/, images/batch_XX/, output/ (gitignored)
 channel_model_transcripts.txt   other channels' transcripts the script style was distilled from.
                         Untracked on purpose; not read at runtime.

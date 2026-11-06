@@ -19,8 +19,8 @@ Replaces the earlier plan (2026-11-03) that started with a local gallery and Voy
 | A | Corpus: download sources, chunk, embed (Gemini), store (Supabase pgvector) | ✅ Done, used for real |
 | B | RAG in research (brief from sources), script and chat | ✅ Done, research used for real |
 | C | "Publish to site": narration chunks with timestamps, thumbnails | ✅ Built (no video published yet) |
-| D | Public site: gallery, semantic search, watch page + chatbot (Gemini Flash-Lite) | Not started |
-| E | Deploy (Supabase, Render/Fly API, Cloudflare Pages site) | Not started |
+| D | Public site: gallery, semantic search, watch page + chatbot (Gemini Flash-Lite) | ✅ Built, tested locally against real Supabase + Gemini |
+| E | Deploy (one Docker service on Render or Fly.io) | Files ready (`site/Dockerfile`, `site/README.md`); not deployed |
 
 ## Decisions (made with the owner, 2026-11-06)
 
@@ -73,24 +73,39 @@ pooler URI (with the database password) into Settings, add a Gemini key from ais
 
 ## Phase D: Public site (separate, read-only)
 
-- [ ] `site/api/` FastAPI: `GET /videos`, `GET /videos/{id}`, `GET /search?q=` (hybrid, best moment per
-      video), `POST /chat` (top ~8 chunks from the video's narration + its sources, Gemini Flash-Lite, cites
-      `[3:42]`, says when the video doesn't cover it, streamed).
-- [ ] Abuse limits: billing-off Google key, per-IP limit (~10 questions/hour) and a daily global cap,
-      question length cap, ~400 output tokens, last 4 turns of history, answer cache. Read-only DB role.
-- [ ] `site/web/` React + Vite: search bar, video grid, watch page with YouTube embed + chat sidebar;
-      timestamp links seek the player.
+- [x] `site/api/` FastAPI: `GET /api/videos`, `GET /api/videos/{id}`, `GET /api/search?q=` (hybrid, best
+      moment per video, weak matches below similarity 0.6 dropped unless a keyword matches), `POST /api/chat`
+      (top 6 narration windows of that video + the window at the viewer's current time + 3 research
+      passages from its sources; Gemini `gemini-flash-lite-latest`; cites `[3:42]` and `[Source: X]`; streamed).
+- [x] Abuse limits: billing-off key; per visitor 10 questions/hour, 30/day; 500/day site-wide; searches
+      60/hour, 300/day, 5,000/day; 500-char questions, 500 output tokens, last 4 turns; answer cache for
+      first questions (per video and minute of the video). Read-only `site_reader` user
+      (`backend/supabase/002_site_reader.sql`). Connection pool (psycopg_pool): pages load in ~0.2 s.
+- [x] `site/web/` React + Vite: search bar, video grid with matching moments, watch page with YouTube embed
+      and chat sidebar (stacks under the video on phones); timestamp buttons seek the player.
+- Decision: the API also serves the pages, so the site is **one service** (no separate Cloudflare Pages
+  site, no cross-origin setup).
 
 ## Phase E: Deploy
 
-- [ ] API on Render or Fly.io free tier, site on Cloudflare Pages, secrets in the host dashboards.
-      Nothing is deployed without the owner's go-ahead.
+- [x] `site/Dockerfile` (builds pages, runs API) and deploy steps in `site/README.md` (Render, free).
+      Docker build not tried yet (Docker Desktop wasn't running).
+- [ ] Owner: run `002_site_reader.sql` with a chosen password, publish at least one video, push to GitHub,
+      create the Render service. Nothing is deployed without the owner's go-ahead.
 
 ---
 
 ## Log
 
 Newest first.
+
+### 2026-11-06: Phase D built and tested locally
+- Built `site/` (API + pages). Tested against the real Supabase and Gemini with a temporary test video
+  made from project 1's narration (removed afterwards). Search found the right moments; the chatbot answered
+  from the narration with clickable timestamps; layout checked at desktop and phone width.
+- Measured search scores: related 0.64-0.72, unrelated 0.51-0.60, so the cutoff is 0.6.
+- Fixed: a React crash (newer Chrome's `scrollIntoView` returns a Promise, so an effect returned it).
+- Next: owner publishes a real video (Publish step), then deploys per `site/README.md`.
 
 ### 2026-11-06: Research used for real; Phase C built
 - Owner connected Supabase and Gemini. Research on project 3 ("The Piece of Tape...") downloaded 14 sources

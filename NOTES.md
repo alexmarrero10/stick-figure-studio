@@ -14,6 +14,9 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Public site built** (`site/`, Phase D): search by meaning, watch page with YouTube player and a Gemini
+  chatbot with clickable timestamps, abuse limits, read-only DB user. Tested locally against real Supabase
+  and Gemini; not deployed. Run it: see CLAUDE.md "Public site". Deploy steps: `site/README.md`.
 - **RAG research used for real** on project 3 (14 sources, 128 passages in Supabase). **Publish to site**
   (Phase C) is built: the Publish step's "Your video site" panel stores the video and its timed narration in
   Supabase `videos` / `video_chunks`. Nothing published yet. Next: Phase D, the public site.
@@ -38,13 +41,13 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Next
 
-1. User: create a Supabase project, run `backend/supabase/schema.sql`, add the Session pooler URI and a
-   Gemini key on Settings, click "Test Gemini and Supabase". Then research a new video with RAG and compare
-   time and quality with the old research. Then Phase C (publish to site) of the plan.
-1. Make the next video with the new script style and zoom, then compare its retention with the first two.
-2. Possibly re-assemble projects 1 and 2 to see the zoom (only if the user wants new versions).
-3. Push to GitHub when the user asks (`alexmarrero10/stick-figure-studio`, private). 9 local commits are unpushed:
-   265a170, c029b03, f893369, 66df7fb, bee4a24, 0b31f28, f76c398, de096c5, plus the commit adding these notes.
+1. User: publish projects 1 and 2 on the site (Publish step, paste their YouTube links), run
+   `backend/supabase/002_site_reader.sql`, then deploy per `site/README.md` (needs a push to GitHub first).
+2. Finish project 3 ("The Piece of Tape...", researched with RAG) with the new script style and zoom, then
+   compare its retention with the first two.
+3. Possibly re-assemble projects 1 and 2 to see the zoom (only if the user wants new versions).
+4. Push to GitHub when the user asks (`alexmarrero10/stick-figure-studio`, private). Many local commits are
+   unpushed (`git log origin/main..main`).
 
 ## Ideas discussed, not started
 

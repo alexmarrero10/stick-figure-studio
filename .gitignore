@@ -12,3 +12,4 @@ projects/*
 .playwright-mcp/
 *.tsbuildinfo
 data/claude_code_workdir/
+site/web/dist/
