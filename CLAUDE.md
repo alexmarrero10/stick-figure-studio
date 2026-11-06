@@ -23,7 +23,8 @@ is the active plan for RAG research and the public site (both built; deployment 
 3. **Beats** (`scenes.py`, `beat_review.py`): split into 2-13 word picture chunks; Claude can review the
    boundaries; manual split/merge/edit with undo.
 4. **Voice** (`voice.py`): ElevenLabs with-timestamps (voice "Josh", `eleven_v4`), chunked and stitched,
-   long pauses trimmed, per-word timings stored.
+   long pauses trimmed, then sped up with FFmpeg `atempo` (`voice.speed`, 1.1 = 10% faster, pitch kept;
+   Eleven v4 has no speed setting) with word timings scaled to the measured length, per-word timings stored.
 5. **Image prompts** (`prompts.py`): style guide, cast/characters/props/places, one prompt per beat in batches
    of 24. The user generates the images **manually in Google Flow** and uploads them.
 6. **Images** (`images.py`): import, ordered by metadata timestamp, then drag or slot-pick to fix.
@@ -63,7 +64,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (152 passing as of 2026-11-06,
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (155 passing as of 2026-11-06,
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.

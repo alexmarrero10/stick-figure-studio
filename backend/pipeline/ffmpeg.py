@@ -52,5 +52,10 @@ def concat_wavs(parts: list[Path], dst: Path) -> None:
     list_file.unlink()
 
 
+def change_speed(src: Path, dst: Path, factor: float) -> None:
+    """Play audio faster (factor > 1) or slower without changing the pitch."""
+    run(["-i", str(src), "-filter:a", f"atempo={factor:.4f}", str(dst)])
+
+
 def wav_to_mp3(src: Path, dst: Path) -> None:
     run(["-i", str(src), "-c:a", "libmp3lame", "-b:a", "192k", str(dst)])

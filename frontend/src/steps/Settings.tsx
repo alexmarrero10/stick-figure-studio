@@ -122,6 +122,13 @@ const FIELDS: {
   { section: "voice", key: "stability", label: "Voice stability (0-1)", type: "number" },
   { section: "voice", key: "similarity_boost", label: "Voice similarity (0-1)", type: "number" },
   { section: "voice", key: "style", label: "Voice style (0-1)", type: "number", help: "Multilingual v2 only; Eleven v4 ignores it" },
+  {
+    section: "voice",
+    key: "speed",
+    label: "Narration speed",
+    type: "number",
+    help: "1.0 = ElevenLabs' natural pace, 1.1 = 10% faster (pitch stays the same). 0.8-1.3. Applies to new voice-overs and previews",
+  },
   { section: "voice", key: "trim_pauses", label: "Trim long pauses", type: "bool" },
   { section: "voice", key: "max_pause_s", label: "Longest pause kept (s)", type: "number" },
   { section: "prompts", key: "batch_size", label: "Prompts per batch", type: "number" },

@@ -2,7 +2,9 @@ import array
 import math
 import wave
 
-from pipeline import voice
+import pytest
+
+from pipeline import ffmpeg, voice
 
 
 def alignment_for(text, char_s=0.05, gaps=None):
@@ -124,3 +126,22 @@ def test_voice_settings_drop_style_for_v4():
     assert v4 == {"stability": 0.5, "similarity_boost": 0.9}
     v2 = voice.voice_settings({"model_id": "eleven_multilingual_v2", "style": 0.4})
     assert v2["style"] == 0.4 and v2["use_speaker_boost"] is True
+
+
+def test_speed_factor_defaults_and_limits():
+    assert voice.speed_factor({}) == 1.0
+    assert voice.speed_factor({"speed": 1.1}) == 1.1
+    assert voice.speed_factor({"speed": 3}) == 1.3 and voice.speed_factor({"speed": 0.2}) == 0.8
+    assert voice.speed_factor({"speed": "fast"}) == 1.0
+
+
+@pytest.mark.skipif(not ffmpeg.available(), reason="ffmpeg not installed")
+def test_speed_up_shortens_audio_and_scales_word_times(tmp_path):
+    src, out = tmp_path / "in.wav", tmp_path / "out.wav"
+    make_wav(src, 11.0)
+    words = [{"text": "a", "start": 1.0, "end": 1.5}, {"text": "b", "start": 10.0, "end": 10.6}]
+    scaled, dur = voice.speed_up(src, out, words, 1.1)
+    assert abs(dur - 10.0) < 0.05 and abs(ffmpeg.duration(out) - dur) < 0.001
+    ratio = dur / 11.0  # timings follow the measured length, so they stay locked to the audio
+    assert scaled[0]["start"] == pytest.approx(1.0 * ratio, abs=0.002)
+    assert scaled[1]["end"] == pytest.approx(10.6 * ratio, abs=0.002) and scaled[1]["end"] <= dur

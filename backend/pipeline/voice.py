@@ -220,6 +220,28 @@ def trim_pauses(wav_in: Path, wav_out: Path, words: list[dict[str, Any]], max_pa
     return shifted, len(out) / rate
 
 
+# --- speed ------------------------------------------------------------------
+
+def speed_factor(cfg: dict[str, Any]) -> float:
+    """How much faster than ElevenLabs' natural pace to play the voice (1.0 = unchanged), kept to 0.8-1.3."""
+    try:
+        f = float(cfg.get("speed", 1.0))
+    except (TypeError, ValueError):
+        f = 1.0
+    return min(1.3, max(0.8, f))
+
+
+def speed_up(wav_in: Path, wav_out: Path, words: list[dict[str, Any]], factor: float) -> tuple[list[dict[str, Any]], float]:
+    """Speed the voice up (pitch unchanged) and scale every word timing to match, so pictures stay in sync.
+    Eleven v3/v4 have no speed setting, so this is done afterwards with FFmpeg."""
+    before = ffmpeg.duration(wav_in)
+    ffmpeg.change_speed(wav_in, wav_out, factor)
+    after = ffmpeg.duration(wav_out)
+    ratio = after / before if before else 1 / factor  # the measured ratio keeps timings exact
+    scaled = [{**w, "start": round(w["start"] * ratio, 3), "end": round(w["end"] * ratio, 3)} for w in words]
+    return scaled, after
+
+
 # --- generation -------------------------------------------------------------
 
 def uses_style(model_id: str) -> bool:
@@ -293,10 +315,17 @@ def preview_text(text: str, seconds: float = 30, wpm: float = 180) -> str:
 
 
 def preview(text: str, out_path: Path, api_key: str, cfg: dict[str, Any]) -> float:
-    """Generate a short sample (no timings, no trimming). Returns its length in seconds."""
+    """Generate a short sample (no timings, no trimming) at the narration speed. Returns its length in seconds."""
     resp, _ = _tts_request(api_key, cfg.get("voice_id", DEFAULT_JOSH_ID), cfg, text, None, None)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_bytes(base64.b64decode(resp["audio_base64"]))
+    factor = speed_factor(cfg)
+    if factor == 1.0:
+        out_path.write_bytes(base64.b64decode(resp["audio_base64"]))
+    else:
+        raw = out_path.with_name(out_path.stem + "_raw.mp3")
+        raw.write_bytes(base64.b64decode(resp["audio_base64"]))
+        ffmpeg.change_speed(raw, out_path, factor)
+        raw.unlink(missing_ok=True)
     return ffmpeg.duration(out_path)
 
 
@@ -346,6 +375,13 @@ def generate(text: str, out_dir: Path, api_key: str, cfg: dict[str, Any],
     else:
         master.write_bytes(joined.read_bytes())
         dur = ffmpeg.duration(master)
+    factor = speed_factor(cfg)
+    if factor != 1.0:
+        progress(f"Speeding up the narration to {factor:g}x", len(chunks) / (len(chunks) + 1))
+        natural = out_dir / "voice_natural.wav"
+        master.replace(natural)
+        words, dur = speed_up(natural, master, words, factor)
+        natural.unlink(missing_ok=True)
     ffmpeg.wav_to_mp3(master, out_dir / "voice.mp3")
     for p in wavs:
         p.unlink(missing_ok=True)
