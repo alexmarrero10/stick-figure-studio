@@ -103,8 +103,9 @@ jobs_router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
 
 @jobs_router.get("")
-def running_jobs(project_id: int, kind: str | None = None) -> list[dict[str, Any]]:
-    """Jobs still running for a project, so a page opened mid-job can pick it back up."""
+def running_jobs(project_id: int | None = None, kind: str | None = None) -> list[dict[str, Any]]:
+    """Jobs still running for a project, so a page opened mid-job can pick it back up. Without a project,
+    every running job (start.ps1 checks this before restarting the server)."""
     return [j for j in jobs.active(project_id) if kind is None or j["kind"] == kind]
 
 

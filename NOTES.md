@@ -14,6 +14,9 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **`start.bat` restarts the app**: it stops a Stick Figure Studio server already on the port (including a
+  `-Dev` reloader), unless `GET /api/jobs` (no project = all projects) shows a running job; then it warns and
+  leaves it alone. Restart this way (or the same check by hand) after backend changes.
 - **RAG research (Phases A + B)**: research can download 10-15 sources (Wikipedia + pages Claude picks),
   chunk and embed them (Gemini) into Supabase pgvector, and write the brief from retrieved passages with no
   web tools. Script and chat requests get source excerpts. Sources are listed on the Script step (remove,

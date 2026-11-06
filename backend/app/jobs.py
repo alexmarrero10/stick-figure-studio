@@ -57,8 +57,10 @@ def get(job_id: str) -> dict[str, Any] | None:
     return _jobs.get(job_id)
 
 
-def active(project_id: int) -> list[dict[str, Any]]:
-    return [j for j in _jobs.values() if j["project_id"] == project_id and j["status"] in ("running", "stopping")]
+def active(project_id: int | None = None) -> list[dict[str, Any]]:
+    """Running jobs for one project, or for all projects when project_id is None."""
+    return [j for j in _jobs.values() if (project_id is None or j["project_id"] == project_id)
+            and j["status"] in ("running", "stopping")]
 
 
 def stop(job_id: str) -> dict[str, Any] | None:

@@ -94,3 +94,19 @@ def test_stop_route(client):
     assert client.post(f"/api/jobs/{job['id']}/stop").json()["status"] == "stopping"
     assert _wait(job)["status"] == "stopped"
     assert client.post("/api/jobs/nope/stop").status_code == 404
+
+
+def test_jobs_list_without_a_project_shows_every_running_job(client):
+    """start.ps1 asks this before restarting the server, so a running job is never killed."""
+    a = jobs.start("list_a", 101, lambda progress: [progress("x", 0.1) or time.sleep(0.01) for _ in range(2000)])
+    b = jobs.start("list_b", 102, lambda progress: [progress("x", 0.1) or time.sleep(0.01) for _ in range(2000)])
+    try:
+        ids = {j["id"] for j in client.get("/api/jobs").json()}
+        assert {a["id"], b["id"]} <= ids
+        assert [j["id"] for j in client.get("/api/jobs?project_id=101").json()] == [a["id"]]
+    finally:
+        jobs.stop(a["id"])
+        jobs.stop(b["id"])
+        _wait(a)
+        _wait(b)
+    assert not {a["id"], b["id"]} & {j["id"] for j in client.get("/api/jobs").json()}

@@ -20,6 +20,9 @@ Double-click `start.bat`, or run:
 .\start.ps1 -Dev     # hot reload for development (UI at http://localhost:5173)
 ```
 
+Running it again restarts the app: it stops the copy that's already running first. If that copy is in the
+middle of a job (research, voice, assembly...), it doesn't stop it and tells you to wait.
+
 The first run creates `.venv`, installs packages, builds the UI, and copies `.env.example` to `.env`.
 Add your ElevenLabs key on the **Settings** page; it is saved to `.env`. With the default Claude Code
 provider, Claude uses your existing `claude` login. If you're logged out, run `claude auth login` once.
