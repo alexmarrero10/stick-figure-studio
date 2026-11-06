@@ -597,4 +597,5 @@ def project_status(project_id: int) -> dict[str, Any]:
         "shots": n_shots,
         "publish": get_publish_meta(project_id) is not None,
         "short": get_short(project_id)["rendered_at"] is not None,
+        "site": bool((get_site_video(project_id) or {}).get("remote_id")),
     }

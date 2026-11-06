@@ -36,6 +36,7 @@ export interface Status {
   shots: number;
   publish: boolean;
   short: boolean;
+  site: boolean;
 }
 
 export interface Project {

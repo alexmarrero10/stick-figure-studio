@@ -137,6 +137,7 @@ def test_site_routes_publish_update_and_unpublish(client, temp_db, monkeypatch):
     assert _wait(job["id"])["status"] == "done"
     view = client.get(f"/api/projects/{pid}/site").json()
     assert view["published"] is True and view["chunks"] >= 3 and view["stale"] is False
+    assert temp_db.project_status(pid)["site"] is True  # the home page chip
     assert view["youtube_id"] == "dQw4w9WgXcQ" and view["summary"] == "Short."
     (video,) = store.videos.values()
     assert video["project_key"] == f"owner:{pid}" and video["duration_s"] == 140.0 and video["title"] == "Tape Title A"
@@ -148,6 +149,7 @@ def test_site_routes_publish_update_and_unpublish(client, temp_db, monkeypatch):
 
     view = client.delete(f"/api/projects/{pid}/site/publish").json()
     assert view["published"] is False and store.videos == {}
+    assert temp_db.project_status(pid)["site"] is False
     assert view["title"] == "Tape Title A"  # the saved fields stay for next time
 
 
