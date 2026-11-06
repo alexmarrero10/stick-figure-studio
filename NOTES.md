@@ -9,7 +9,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 156 backend tests pass; the frontend builds.
+- 157 backend tests pass; the frontend builds.
 - Active plan: `docs/PUBLIC_SITE_PLAN.md` (RAG research built; public site with chatbot next).
 
 ## Recently done
@@ -17,7 +17,8 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 - **Faster narration** (`voice.speed`, set to 1.1 on 2026-11-06): the voice-over is sped up after ElevenLabs
   (FFmpeg atempo, pitch kept) and word timings are scaled to the measured length. Previews use it too.
   Previews now trim pauses and apply the speed too (before, they had untrimmed 0.6-0.8 s sentence gaps).
-  Longest pause kept lowered 0.45 -> 0.3 s. Old voice-overs ran ~177-187 wpm; 1.1x gives ~195-205. Applies to new voice-overs only. At 1.1x the
+  Tried 0.3 s longest pause: the user said it sounded cut off, so it's back to 0.45 s, and trimming now
+  measures where the sound really stops (word end times can be early) so it never clips a word. Old voice-overs ran ~177-187 wpm; 1.1x gives ~195-205. Applies to new voice-overs only. At 1.1x the
   1,550-1,650 word target gives ~8.1 min, close to the 8:00 mid-roll line (consider ~1,750 words).
 - **Speed/token benchmark** (`evals/speed.py`): old research vs RAG on the same topic; the CLI provider can
   record each call's time and token use (`ClaudeCode.usage_log`).

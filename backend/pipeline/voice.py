@@ -183,15 +183,43 @@ def trim_pauses(wav_in: Path, wav_out: Path, words: list[dict[str, Any]], max_pa
         raise VoiceError("trim_pauses expects mono 16-bit wav")
     total = len(samples) / rate
 
+    # ElevenLabs' word times can end a little before the sound does (trailing consonants, breaths), so
+    # measure where the audio really goes quiet and keep the pause from there. Only gaps are scanned.
+    win = max(1, rate // 100)  # 10 ms
+    peak = max((abs(x) for x in samples[::50]), default=0)
+    quiet = max(peak * 0.03, 30)
+
+    def loud(t: float) -> bool:
+        i = int(t * rate)
+        seg = samples[max(0, i):i + win]
+        return bool(seg) and max(abs(x) for x in seg) > quiet
+
+    def sound_end(t: float, limit: float) -> float:  # forward from t while it still sounds
+        while t < limit and loud(t):
+            t += 0.01
+        return min(t, limit)
+
+    def sound_start(t: float, limit: float) -> float:  # backward from t while it still sounds
+        while t > limit and loud(t - 0.01):
+            t -= 0.01
+        return max(t, limit)
+
     cuts: list[tuple[float, float]] = []
-    if words and words[0]["start"] > lead:
-        cuts.append((0.0, words[0]["start"] - lead))
+    if words:
+        first = sound_start(words[0]["start"], 0.0)
+        if first > lead:
+            cuts.append((0.0, first - lead))
     for a, b in zip(words, words[1:]):
-        gap = b["start"] - a["end"]
-        if gap > max_pause:
-            cuts.append((a["end"] + max_pause / 2, b["start"] - max_pause / 2))
-    if words and total - words[-1]["end"] > tail:
-        cuts.append((words[-1]["end"] + tail, total))
+        if b["start"] - a["end"] <= max_pause:
+            continue
+        gap_s = sound_end(a["end"], b["start"])
+        gap_e = sound_start(b["start"], gap_s)
+        if gap_e - gap_s > max_pause:
+            cuts.append((gap_s + max_pause / 2, gap_e - max_pause / 2))
+    if words:
+        last = sound_end(words[-1]["end"], total)
+        if total - last > tail:
+            cuts.append((last + tail, total))
 
     def removed_before(t: float) -> float:
         return sum(min(e, t) - s for s, e in cuts if s < t)

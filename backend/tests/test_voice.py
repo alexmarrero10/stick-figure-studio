@@ -87,6 +87,23 @@ def test_trim_pauses_shortens_gaps_and_shifts_words(tmp_path):
         assert abs(w.getnframes() / w.getframerate() - dur) < 0.001
 
 
+def test_trim_pauses_never_cuts_sound_after_an_early_word_end(tmp_path):
+    src, dst = tmp_path / "in.wav", tmp_path / "out.wav"
+    # The first word's sound runs to 1.3 s, but its timestamp says it ends at 1.0 s.
+    make_wav(src, 5.0, tone_spans=[(0.5, 1.3), (3.0, 3.5)])
+    words = [{"idx": 0, "text": "a", "start": 0.5, "end": 1.0}, {"idx": 1, "text": "b", "start": 3.0, "end": 3.5}]
+    new, dur = voice.trim_pauses(src, dst, words, max_pause=0.45, lead=0.12, tail=0.35)
+
+    def sounding(path):
+        with wave.open(str(path)) as w:
+            a = array.array("h", w.readframes(w.getnframes()))
+        return sum(1 for x in a if abs(x) > 100)
+
+    assert abs(sounding(dst) - sounding(src)) < 0.01 * sounding(src)  # every bit of sound is kept
+    tone_end = 1.3 - (0.5 - 0.12)  # where the first tone now ends
+    assert abs((new[1]["start"] - tone_end) - 0.45) < 0.03  # the pause is measured from the real sound
+
+
 def test_chunks_are_stitched_with_previous_request_ids(monkeypatch):
     sent = []
 
