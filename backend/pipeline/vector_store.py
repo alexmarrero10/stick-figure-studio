@@ -121,6 +121,32 @@ class PgStore:
         by_id = {r["id"]: r for r in rows}
         return [{**by_id[i], "similarity": sims.get(i)} for i in ids if i in by_id]
 
+    # -- published videos (the public site) ---------------------------------
+
+    def publish_video(self, project_key: str, owner: str, video: dict[str, Any], chunks: list[dict[str, Any]]) -> int:
+        """Insert or update a video and replace its narration windows. Returns videos.id."""
+        with self._conn() as c, c.transaction():
+            row = c.execute(
+                "insert into videos (project_key, owner, title, summary, description, youtube_id, thumbnail_url, "
+                "duration_s) values (%s, %s, %s, %s, %s, %s, %s, %s) on conflict (project_key) do update set "
+                "title = excluded.title, summary = excluded.summary, description = excluded.description, "
+                "youtube_id = excluded.youtube_id, thumbnail_url = excluded.thumbnail_url, "
+                "duration_s = excluded.duration_s returning id",
+                (project_key, owner, video["title"], video["summary"], video["description"], video["youtube_id"],
+                 video["thumbnail_url"], video["duration_s"])).fetchone()
+            vid = row["id"]
+            c.execute("delete from video_chunks where video_id = %s", (vid,))
+            with c.cursor() as cur:
+                cur.executemany(
+                    "insert into video_chunks (video_id, ord, start_s, end_s, text, embedding) "
+                    "values (%s, %s, %s, %s, %s, %s::vector)",
+                    [(vid, ch["ord"], ch["start_s"], ch["end_s"], ch["text"], _vec(ch["embedding"])) for ch in chunks])
+        return vid
+
+    def unpublish_video(self, project_key: str) -> None:
+        with self._conn() as c:
+            c.execute("delete from videos where project_key = %s", (project_key,))
+
 
 class MemoryStore:
     """Same interface as PgStore, in memory (for tests and trying things without Supabase)."""
@@ -129,8 +155,25 @@ class MemoryStore:
         self.documents: dict[int, dict[str, Any]] = {}
         self.chunks: dict[int, dict[str, Any]] = {}
         self.links: set[tuple[str, int]] = set()
+        self.videos: dict[int, dict[str, Any]] = {}
+        self.video_chunks: dict[int, list[dict[str, Any]]] = {}
         self._next_doc = 1
         self._next_chunk = 1
+        self._next_video = 1
+
+    def publish_video(self, project_key: str, owner: str, video: dict[str, Any], chunks: list[dict[str, Any]]) -> int:
+        vid = next((v["id"] for v in self.videos.values() if v["project_key"] == project_key), None)
+        if vid is None:
+            vid = self._next_video
+            self._next_video += 1
+        self.videos[vid] = {**video, "id": vid, "project_key": project_key, "owner": owner}
+        self.video_chunks[vid] = [dict(c) for c in chunks]
+        return vid
+
+    def unpublish_video(self, project_key: str) -> None:
+        for vid in [v["id"] for v in self.videos.values() if v["project_key"] == project_key]:
+            del self.videos[vid]
+            self.video_chunks.pop(vid, None)
 
     def ping(self) -> dict[str, Any]:
         return {"documents": len(self.documents), "chunks": len(self.chunks)}

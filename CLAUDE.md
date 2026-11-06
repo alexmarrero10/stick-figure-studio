@@ -59,7 +59,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (148 passing as of 2026-11-06,
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (165 passing as of 2026-11-06,
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
@@ -70,7 +70,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 
 ```
 backend/app/            FastAPI app: main.py, config.py (config.yaml + .env), db.py, jobs.py (background
-                        jobs with stop), storage.py, routes/ (one file per step), migrations/ (001-010 .sql)
+                        jobs with stop), storage.py, routes/ (one file per step), migrations/ (001-011 .sql)
 backend/pipeline/       one module per step (see Pipeline), claude_client.py (API), claude_code.py (CLI),
                         ffmpeg.py, procs.py, social/ (youtube, meta, tiktok)
 backend/tests/          pytest suite + fixtures/

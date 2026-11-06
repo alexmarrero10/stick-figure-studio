@@ -9,11 +9,14 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 148 backend tests pass; the frontend builds.
+- 165 backend tests pass; the frontend builds.
 - Active plan: `docs/PUBLIC_SITE_PLAN.md` (RAG research built; public site with chatbot next).
 
 ## Recently done
 
+- **RAG research used for real** on project 3 (14 sources, 128 passages in Supabase). **Publish to site**
+  (Phase C) is built: the Publish step's "Your video site" panel stores the video and its timed narration in
+  Supabase `videos` / `video_chunks`. Nothing published yet. Next: Phase D, the public site.
 - **`start.bat` restarts the app**: it stops a Stick Figure Studio server already on the port (including a
   `-Dev` reloader), unless `GET /api/jobs` (no project = all projects) shows a running job; then it warns and
   leaves it alone. Restart this way (or the same check by hand) after backend changes.

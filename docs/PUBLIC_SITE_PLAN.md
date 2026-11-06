@@ -16,9 +16,9 @@ Replaces the earlier plan (2026-11-03) that started with a local gallery and Voy
 
 | Phase | What | Status |
 |---|---|---|
-| A | Corpus: download sources, chunk, embed (Gemini), store (Supabase pgvector) | ✅ Built, waiting for keys to try for real |
-| B | RAG in research (brief from sources), script and chat | ✅ Built, waiting for keys to try for real |
-| C | "Publish to site": narration chunks with timestamps, thumbnails | Not started |
+| A | Corpus: download sources, chunk, embed (Gemini), store (Supabase pgvector) | ✅ Done, used for real |
+| B | RAG in research (brief from sources), script and chat | ✅ Done, research used for real |
+| C | "Publish to site": narration chunks with timestamps, thumbnails | ✅ Built (no video published yet) |
 | D | Public site: gallery, semantic search, watch page + chatbot (Gemini Flash-Lite) | Not started |
 | E | Deploy (Supabase, Render/Fly API, Cloudflare Pages site) | Not started |
 
@@ -61,12 +61,15 @@ pooler URI (with the database password) into Settings, add a Gemini key from ais
 
 ## Phase C: Publish videos to the site
 
-- [ ] Migration `011_site.sql`: per project `youtube_url`, `site_summary`, `published_at`.
-- [ ] `pipeline/site_publish.py`: narration chunks from the `words` table (30-45 s windows on sentence ends,
+- [x] Migration `011_site.sql`: local `site_videos` (youtube_url, title, summary, remote_id, chunks, published_at).
+- [x] `pipeline/site_publish.py`: narration windows from the `words` table (30-45 s, ending on sentence ends,
       with start/end seconds), embedded and upserted into `videos` / `video_chunks`.
-- [ ] Thumbnail: ffmpeg frame from `output/video.mp4` to Supabase Storage, or the owner's own image.
-- [ ] Publish step: YouTube URL + summary fields; "Publish to site" / "Update" / "Remove" (confirm first).
-- [ ] Check that word times match the final video (the video's audio is the voiceover).
+- [x] Thumbnail: **YouTube's own** (`i.ytimg.com/vi/<id>/hqdefault.jpg`) instead of Supabase Storage: free,
+      shows the custom thumbnail once uploaded, and needs no storage key.
+- [x] Publish step "Your video site" panel: YouTube link (pre-filled from the Short step), title (title ideas
+      offered), summary (first paragraph of the description); Publish / Update / Remove, each confirmed.
+      Shows "update it" when the voice was re-recorded after publishing.
+- [x] Word times = video times: `assemble.encode` muxes the voiceover from 0 s with no offset.
 
 ## Phase D: Public site (separate, read-only)
 
@@ -88,6 +91,14 @@ pooler URI (with the database password) into Settings, add a Gemini key from ais
 ## Log
 
 Newest first.
+
+### 2026-11-06: Research used for real; Phase C built
+- Owner connected Supabase and Gemini. Research on project 3 ("The Piece of Tape...") downloaded 14 sources
+  (6 Wikipedia, 8 others incl. National Archives and the Nixon Library), 128 passages, 2 skipped; brief 2,756
+  words citing 8 sources.
+- Phase C built and tested (16 new tests, 165 total). Video insert/update/delete checked against the real
+  Supabase with a throwaway row (removed). No real video published yet (needs a YouTube link).
+- Next: Phase D, the public site.
 
 ### 2026-11-06: Phases A and B built
 - Built the corpus and RAG research/script flow (see above). 148 tests pass; the UI builds.

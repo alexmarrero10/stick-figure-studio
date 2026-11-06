@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app import db
 from app.config import ROOT
-from app.routes import assemble, beats, ideas, images, projects, prompts, script, settings, shorts, social, voice
+from app.routes import assemble, beats, ideas, images, projects, prompts, script, settings, shorts, site, social, voice
 from pipeline.claude_client import ClaudeError
 from pipeline.ffmpeg import FFmpegError
 from pipeline.voice import VoiceError
@@ -47,7 +47,7 @@ async def pipeline_error(_: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=502, content={"detail": str(exc)})
 
 
-for r in (settings, projects, ideas, script, beats, voice, prompts, images, assemble, shorts, social):
+for r in (settings, projects, ideas, script, beats, voice, prompts, images, assemble, shorts, social, site):
     app.include_router(r.router)
 app.include_router(projects.jobs_router)
 

@@ -517,6 +517,27 @@ def get_publish_meta(project_id: int) -> dict[str, Any] | None:
     return json.loads(r["content"]) if r else None
 
 
+# --- public site ------------------------------------------------------------
+
+def get_site_video(project_id: int) -> dict[str, Any] | None:
+    with tx() as conn:
+        return _row(conn.execute("SELECT * FROM site_videos WHERE project_id = ?", (project_id,)).fetchone())
+
+
+def save_site_video(project_id: int, **fields: Any) -> dict[str, Any]:
+    """Create or update the site row with the given columns."""
+    allowed = {"youtube_url", "title", "summary", "remote_id", "chunks", "published_at"}
+    fields = {k: v for k, v in fields.items() if k in allowed}
+    with tx() as conn:
+        conn.execute("INSERT INTO site_videos (project_id) VALUES (?) ON CONFLICT (project_id) DO NOTHING",
+                     (project_id,))
+        if fields:
+            sets = ", ".join(f"{k} = ?" for k in fields)
+            conn.execute(f"UPDATE site_videos SET {sets}, updated_at = datetime('now') WHERE project_id = ?",
+                         (*fields.values(), project_id))
+        return _row(conn.execute("SELECT * FROM site_videos WHERE project_id = ?", (project_id,)).fetchone())
+
+
 # --- shorts + social posts --------------------------------------------------
 
 def get_short(project_id: int) -> dict[str, Any]:
