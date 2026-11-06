@@ -126,8 +126,10 @@ def health() -> dict[str, Any]:
         try:
             v = resolve_voice(key, cfg["voice"]["voice_id"], cfg["voice"].get("voice_name", "Josh"))
             out["voice"] = v
-            if v["voice_id"] != cfg["voice"]["voice_id"]:
+            short = v["name"].split(" - ")[0].strip()  # "Brian - Deep, Resonant..." -> "Brian"
+            if v["voice_id"] != cfg["voice"]["voice_id"] or short != cfg["voice"].get("voice_name"):
                 cfg["voice"]["voice_id"] = v["voice_id"]
+                cfg["voice"]["voice_name"] = short  # keep the name in step with the ID typed on Settings
                 save_config(cfg)
         except (VoiceError, Exception) as e:  # network errors included
             out["voice_error"] = str(e)

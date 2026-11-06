@@ -108,7 +108,7 @@ const FIELDS: {
   { section: "script", key: "wpm_estimate", label: "Narration speed (words/min)", type: "number" },
   { section: "beats", key: "min_words", label: "Beat: min words", type: "number", help: "2 words is about 0.5-0.7 s" },
   { section: "beats", key: "max_words", label: "Beat: max words", type: "number", help: "About 3 words per second; 8 gives a new picture every 0.5-3 s" },
-  { section: "voice", key: "voice_id", label: "ElevenLabs voice ID", help: "Josh (Warm, Smooth and Steady) is ZoiZ8fuDWInAcwPXaVeq" },
+  { section: "voice", key: "voice_id", label: "ElevenLabs voice ID", help: "Pick a voice on the Voice step, or paste an ID from ElevenLabs (My Voices, then Copy voice ID)" },
   {
     section: "voice",
     key: "model_id",

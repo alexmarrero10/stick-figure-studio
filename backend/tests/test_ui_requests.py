@@ -58,6 +58,18 @@ def test_settings_report_a_save_that_did_not_stick(client, monkeypatch):
     assert r.status_code == 500 and "didn't keep" in r.json()["detail"]
 
 
+def test_health_keeps_the_voice_name_in_step_with_the_id(client, tmp_path, monkeypatch):
+    from app.routes import settings
+    client.put("/api/settings/config", json={"voice": {"voice_id": "brian-id", "voice_name": "Josh"}})
+    monkeypatch.setattr(settings, "get_key", lambda name: "k" if name == "ELEVENLABS_API_KEY" else "")
+    monkeypatch.setattr(settings, "resolve_voice",
+                        lambda key, vid, name: {"voice_id": vid, "name": "Brian - Deep, Resonant and Comforting"})
+    monkeypatch.setattr(settings.claude_code, "auth_status", lambda: {})
+    assert client.get("/api/settings/health").json()["voice"]["name"].startswith("Brian")
+    on_disk = yaml.safe_load((tmp_path / "config.yaml").read_text(encoding="utf-8"))
+    assert on_disk["voice"] == {**on_disk["voice"], "voice_id": "brian-id", "voice_name": "Brian"}
+
+
 def test_dropdown_choices_cover_the_current_config(client):
     c = client.get("/api/settings/choices").json()
     assert c["effort"] == ["low", "medium", "high", "xhigh", "max"]
