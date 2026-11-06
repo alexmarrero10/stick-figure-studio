@@ -281,3 +281,12 @@ main:has(.script-step) { max-width: 1680px; }
 
 /* Home: a step that is started but not finished. */
 .chip.part { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+
+/* Password field with a show/hide eye button inside it. */
+.secret-input { position: relative; display: block; }
+.secret-input input { width: 100%; padding-right: 40px; box-sizing: border-box; }
+.secret-input button.eye {
+  position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+  background: transparent; border: none; color: var(--muted); padding: 4px 6px; line-height: 0; cursor: pointer;
+}
+.secret-input button.eye:hover:not(:disabled) { background: transparent; color: var(--text); }

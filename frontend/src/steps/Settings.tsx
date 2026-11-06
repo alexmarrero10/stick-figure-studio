@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import { ErrorBox } from "../components";
+import { ErrorBox, SecretInput } from "../components";
 import { Settings } from "../types";
 import SocialAccounts from "./SocialAccounts";
 
@@ -289,10 +289,9 @@ export default function SettingsPage() {
             <label className="grow">
               {name} <span className="muted">{s.keys[name] ? `(current: ${s.keys[name]})` : "(not set)"}</span>
               {KEY_HELP[name] && <small className="muted">{KEY_HELP[name]}</small>}
-              <input
-                type="password"
+              <SecretInput
                 value={keys[name]}
-                onChange={(e) => setKeys({ ...keys, [name]: e.target.value })}
+                onChange={(v) => setKeys({ ...keys, [name]: v })}
                 placeholder="Paste a new key"
               />
             </label>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import { CopyButton, ErrorBox } from "../components";
+import { CopyButton, ErrorBox, SecretInput } from "../components";
 
 type Login = "youtube" | "meta" | "tiktok";
 
@@ -186,10 +186,9 @@ export default function SocialAccounts() {
                 <span>
                   {l.secretLabel} <span className="muted">{s.app_secret ? `(current: ${s.app_secret})` : "(not set)"}</span>
                 </span>
-                <input
-                  type="password"
+                <SecretInput
                   value={form[l.key].secret}
-                  onChange={(e) => setForm({ ...form, [l.key]: { ...form[l.key], secret: e.target.value } })}
+                  onChange={(v) => setForm({ ...form, [l.key]: { ...form[l.key], secret: v } })}
                 />
               </label>
             </div>
