@@ -221,3 +221,9 @@ def test_main_characters_get_a_character_sheet_used_by_every_batch():
     text = prompts.batch_texts("STYLE", batch, 24, refs)[1]
     assert "Use the character reference images" in text and "Richard Nixon (C1)" in text
     assert "character reference" not in prompts.batch_texts("STYLE", batch, 24)[1]
+
+
+def test_style_rules_ask_for_variety_between_similar_characters_and_inside_groups():
+    s = prompts.STYLE_SYSTEM
+    assert "no two characters share the same main clothing color" in s
+    assert "at least three things" in s and "never one look copied for every member" in s

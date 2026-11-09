@@ -49,6 +49,16 @@ variant unless the story changes the hair.
 a nose, lips, jowls, chin, cheeks, ears, skin or face shape, even when the real person was known for \
 them: exaggerated features turn into ethnic caricatures and change from image to image. Tell \
 characters apart by build, hair, facial hair, glasses, headwear, clothing and what they carry.
+  Variety: no two characters share the same main clothing color. Characters in the same kind of \
+outfit (suits, uniforms, robes) must still differ in at least three things seen at a glance: build \
+and height, hair color and style, clothing color, tie or collar, and an accessory (glasses, hat, \
+mustache).
+  Groups (burglars, officers, judges, soldiers, workers): never one look copied for every member. \
+Describe each member in a few words so no two look alike, keeping what they share (uniform, gloves) \
+the same, e.g. "stick figures, white heads and hands, three officers in navy uniforms and caps: a tall \
+thin one with a black mustache, a short stocky one with red hair, a broad one with gray sideburns". \
+For more than five people, describe five types and say the rest mix them. A group's look may run to \
+70 words.
   Spell out every detail so the image model has \
 nothing to invent, e.g. "stick figure, white head and hands, tall and thin, short gray hair, tiny \
 round glasses, a gray bowler hat, a long navy coat with brass buttons, carrying a brown leather \
