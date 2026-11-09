@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any, Callable
 
 from pipeline.claude_client import INT, STR, Claude, arr, cached, obj
-from pipeline.script import to_ascii
 
 OLD_LIMBS = "thin black stick limbs"
 BODY = (
@@ -20,10 +19,6 @@ BODY = (
     "with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands "
     "that are always the same color as the head, never black, unless a character's look gives gloves or mittens"
 )
-
-OLD_TEXT_RULE = "No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
-TEXT_RULE = ("No captions, no speech bubbles, no watermark, and no writing except the one short word, "
-             "phrase or number a scene asks for, drawn big, bold and clearly readable.")
 
 BASE_STYLE = (
     "Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round heads "
@@ -33,7 +28,7 @@ BASE_STYLE = (
     "flat colors for props, clothing and backgrounds ({palette}). The background fills the whole frame "
     "and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show "
     "the room, never a blank white or paper background. Uncluttered composition with one clear focal point, "
-    "16:9 widescreen. " + TEXT_RULE
+    "16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
 )
 
 STYLE_SYSTEM = """You are the art director for a stick-figure explainer channel. Every image in a \
@@ -98,9 +93,8 @@ rocks, one tall dark rock spire on the left".
 - setting_notes: one or two sentences on the overall world (era, climate, time of day) that apply \
 to every image.
 
-Looks are repeated in many images and the image model garbles small text, so no look may contain \
-writing, lettering, titles, mastheads, labels or numbers (a single scene may add one large word or \
-number where it helps): describe newspapers, letters, maps and notes by shape and color only (e.g. "a \
+The image model must never draw text, so no look may contain writing, lettering, titles, mastheads, \
+labels or numbers: describe newspapers, letters, maps and notes by shape and color only (e.g. "a \
 folded cream broadsheet covered in thin gray squiggle lines")."""
 
 LOOK = obj({"name": STR, "look": STR})
@@ -146,16 +140,9 @@ action, a detail being noticed) rather than repeating the same picture.
 - Gives the action, the emotion on the faces and a camera framing. Vary framing across \
 neighbouring beats (wide shot, medium shot, close-up on hands or an object, over-the-shoulder, \
 top-down, silhouette) so cuts feel dynamic, while the place and objects stay the same.
-- Adds text only when a word or number makes the picture clearer: a key year or date, an amount of \
-money, a room or floor number, or a 1-3 word headline or sign, taken from the narration or the \
-script (never invented). At most one piece of text per image, at most 3 words or one number, in \
-capital letters inside quotes, and always big: say it is large and bold and fills a big part of \
-the object it is on, e.g. 'a newspaper whose whole top half is the huge bold headline "NIXON \
-RESIGNS"' or 'a wall calendar filled by the giant bold number "1972"'. The image model garbles \
-small text, so never small print, labels, captions, paragraphs, several signs, logos or real brands.
-- Everything else has no writing: show money as stacks of green bills, other documents as blank \
-paper or gray squiggle lines, screens as glowing rectangles, and speaking as an open mouth and \
-gestures. Never real faces, speech bubbles or thought bubbles.
+- Never asks for written words, signs with lettering, numbers, logos, real brands, real faces, \
+speech bubbles or thought bubbles. Show money as stacks of green bills, documents as blank paper or \
+gray squiggle lines, screens as glowing rectangles, and speaking as an open mouth and gestures.
 - Describes a single still frame: never camera movement such as zooming, panning or tracking.
 - Avoids gore and graphic violence: imply danger with poses, shadows and props.
 
@@ -563,50 +550,6 @@ def regenerate_one(claude: Claude, script: str, guide: dict[str, Any], beats: li
     raise ValueError("Claude did not return a scene for that beat")
 
 
-TEXT_PASS_SYSTEM = """You add big, readable text to a few images of a narrated stick-figure video, only \
-where a word or number makes the picture clearer. Each item has the NARRATION spoken while the image is \
-on screen and its SCENE description.
-
-Pick only scenes where the narration names a key year or date, an amount of money, a room or floor \
-number, or a short headline or sign, AND the scene already shows an object that could carry it (a \
-newspaper, calendar, door, check, sign, tape reel, file folder). Most images need no text: skip the rest.
-
-For each pick give one edit:
-- find: a phrase copied EXACTLY from that scene that describes the object. Never part of a character's \
-description.
-- replace: that phrase rewritten so the object carries the text: 1-3 words or one number, in capital \
-letters inside quotes, described as large and bold and filling a big part of the object, e.g. find "a \
-folded cream newspaper covered in gray squiggle lines", replace "a folded cream newspaper whose whole top \
-half is the huge bold headline \\"NIXON RESIGNS\\"".
-Use only facts from the narration. At most one edit per scene."""
-
-TEXT_SCHEMA = obj({"edits": arr(obj({"idx": INT, "find": STR, "replace": STR}))})
-
-
-def text_edits(claude: Claude, rows: list[dict[str, Any]], group: int = 60,
-               progress: Callable[[str, float], None] = lambda m, f: None) -> dict[int, str]:
-    """For written scenes (rows with idx, narration, scene and looks), add one large word or number where it
-    helps. Returns {idx: new scene}. An edit is dropped if its phrase isn't in the scene exactly once, it
-    adds no quoted text, or it would break a character's or object's look."""
-    out: dict[int, str] = {}
-    by_idx = {r["idx"]: r for r in rows}
-    groups = [rows[i:i + group] for i in range(0, len(rows), group)]
-    for n, g in enumerate(groups, 1):
-        text = "\n\n".join(f"ITEM {r['idx']}\nNARRATION: {r['narration']}\nSCENE: {r['scene']}" for r in g)
-        res = claude.json(cached(TEXT_PASS_SYSTEM), [{"role": "user", "content": text}], TEXT_SCHEMA, effort="medium")
-        for e in res.get("edits", []):
-            r = by_idx.get(e.get("idx"))
-            find, repl = e.get("find", ""), e.get("replace", "")
-            if not r or r["idx"] in out or not find or r["scene"].count(find) != 1 or '"' not in repl:
-                continue
-            new = r["scene"].replace(find, to_ascii(repl), 1)
-            if missing_looks(new, r["looks"]) != missing_looks(r["scene"], r["looks"]):
-                continue
-            out[r["idx"]] = new
-        progress(f"Checked group {n} of {len(groups)}", n / len(groups))
-    return out
-
-
 def patch_scenes(claude: Claude, script: str, guide: dict[str, Any], rows: list[dict[str, Any]], group: int = 20,
                  progress: Callable[[str, float], None] = lambda m, f: None) -> dict[int, str]:
     """Fix written scenes that leave out a look, changing as little as possible. Each row has idx,
@@ -693,9 +636,7 @@ def image_title(number: int, label: str, scene: str) -> str:
 
 
 def with_body_rule(style_prefix: str) -> str:
-    """Style guides made before the arms-and-hands rule get it in place of their old limbs phrase, and
-    ones made before scenes could hold a large word or number get the new text rule."""
-    style_prefix = style_prefix.replace(OLD_TEXT_RULE, TEXT_RULE, 1)
+    """Style guides made before the arms-and-hands rule get it in place of their old limbs phrase."""
     if BODY in style_prefix:
         return style_prefix
     return style_prefix.replace(OLD_LIMBS, BODY, 1)
