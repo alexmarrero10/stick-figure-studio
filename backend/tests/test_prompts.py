@@ -227,3 +227,39 @@ def test_style_rules_ask_for_variety_between_similar_characters_and_inside_group
     s = prompts.STYLE_SYSTEM
     assert "no two characters share the same main clothing color" in s
     assert "at least three things" in s and "never one look copied for every member" in s
+
+
+def test_text_is_allowed_only_big_and_old_style_lines_are_upgraded():
+    assert prompts.OLD_TEXT_RULE not in prompts.BASE_STYLE and "big, bold and clearly readable" in prompts.BASE_STYLE
+    assert prompts.with_body_rule("Style. " + prompts.OLD_TEXT_RULE).endswith(prompts.TEXT_RULE)
+    assert "large and bold" in prompts.SCENE_SYSTEM and "never small print" in prompts.SCENE_SYSTEM
+
+
+class TextFake:
+    def __init__(self, edits):
+        self.edits, self.calls = edits, 0
+
+    def json(self, system, messages, schema, max_tokens=32000, effort=None):
+        self.calls += 1
+        return {"edits": self.edits}
+
+
+def test_text_pass_keeps_only_safe_edits():
+    look = "stick figure, white head and hands, dark navy suit"
+    rows = [
+        {"idx": 0, "narration": "In 1972 it began.", "scene": f"A wall calendar of plain cream paper. {look} looks up.",
+         "looks": [("Nixon", look)]},
+        {"idx": 1, "narration": "He resigned.", "scene": f"A folded cream newspaper. {look} reads it.",
+         "looks": [("Nixon", look)]},
+        {"idx": 2, "narration": "Paid $25,000.", "scene": "A stack of green bills on a desk.", "looks": []},
+        {"idx": 3, "narration": "Then.", "scene": "A desk lamp.", "looks": []},
+    ]
+    fake = TextFake([
+        {"idx": 0, "find": "A wall calendar of plain cream paper",
+         "replace": 'A wall calendar filled by the giant bold number "1972"'},
+        {"idx": 1, "find": f"{look} reads it", "replace": 'stick figure reads "NIXON"'},  # breaks the look
+        {"idx": 2, "find": "not in the scene", "replace": 'a "$25,000" check'},
+        {"idx": 3, "find": "A desk lamp", "replace": "A big desk lamp"},  # no quoted text
+    ])
+    out = prompts.text_edits(fake, rows)
+    assert list(out) == [0] and '"1972"' in out[0] and look in out[0]

@@ -137,6 +137,31 @@ def check_looks(project_id: int) -> dict[str, Any]:
     return jobs.start("prompts", project_id, work)
 
 
+@router.post("/add-text")
+def add_text(project_id: int) -> dict[str, Any]:
+    """Adds one large word or number to the written prompts where it makes the picture clearer (a year on a
+    calendar, a headline). Prompts edited by hand are left alone."""
+    project_or_404(project_id)
+    guide = db.get_style_guide(project_id)
+    if not guide:
+        raise HTTPException(400, "Generate prompts first")
+    c = claude()
+    batch = load_config()["prompts"]["batch_size"]
+
+    def work(progress):
+        rows = [{**p, "narration": p["beat_text"],
+                 "looks": prompts_mod.cast_looks(guide, p["characters"]) + prompts_mod.thing_looks(guide, p["things"])}
+                for p in db.list_prompts(project_id) if not p["edited"]]
+        progress("Finding images where a big word or number would help", 0.02)
+        new = prompts_mod.text_edits(c, rows, progress=lambda m, f: progress(m, 0.02 + 0.95 * f))
+        by_idx = {r["idx"]: r for r in rows}
+        db.set_scenes(project_id, {by_idx[i]["beat_id"]: s for i, s in new.items()})
+        _export(project_id)
+        return {"added": len(new), "batches": sorted({prompts_mod.batch_of(i, batch) for i in new})}
+
+    return jobs.start("prompts", project_id, work)
+
+
 @router.post("/labels")
 def add_labels(project_id: int) -> dict[str, Any]:
     """Give a title to every prompt that has none, leaving the scenes untouched."""

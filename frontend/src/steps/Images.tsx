@@ -128,6 +128,23 @@ export default function ImagesStep({ project, refresh }: StepProps) {
     }
   };
 
+  const addText = async () => {
+    setError(null);
+    setNote(null);
+    try {
+      const j = await run(() => api.post(`/api/projects/${pid}/prompts/add-text`));
+      const r = j.result as { added: number; batches: number[] };
+      setNote(
+        r.added
+          ? `Added a big number or word to ${r.added} prompts. Remake batch${r.batches.length > 1 ? "es" : ""} ${r.batches.join(", ")} in Flow to use them.`
+          : "No prompt needed a number or word.",
+      );
+      await afterPrompts();
+    } catch (e) {
+      fail(e);
+    }
+  };
+
   // Prompts written before image titles existed get theirs automatically, once per visit.
   const untitled = data ? data.prompts.filter((p) => !p.label).length : 0;
   const titling = useRef(false);
@@ -307,6 +324,16 @@ export default function ImagesStep({ project, refresh }: StepProps) {
               title="Finds the recurring objects and place in each image and fixes prompts that leave out their look"
             >
               Check objects + places
+            </button>
+          )}
+          {data.style && data.prompts.length > 0 && (
+            <button
+              className="secondary"
+              onClick={addText}
+              disabled={busy}
+              title="Adds one big, bold word or number to the images where it helps, like a year on a calendar or a headline"
+            >
+              Add big numbers + words
             </button>
           )}
           <button className="secondary" onClick={rescan}>
