@@ -1,18 +1,30 @@
 from pipeline import prompts
 
 
-def test_numbered_prompt_text():
+def test_prompt_text_starts_with_its_title_and_no_number():
     row = {"idx": 30, "scene": "A foggy street with gas lamps.", "label": "Victorian London street"}
     text = prompts.prompt_text("STYLE", row, 24)
-    assert text == "7 - Victorian London street. A foggy street with gas lamps. STYLE"
+    assert text == "Victorian London street. A foggy street with gas lamps. STYLE"
+
+
+def test_titles_are_unique_in_each_batch_and_never_hold_digits():
+    rows = [{"idx": 0, "label": "Oval Office", "scene": "A wide view of a desk by tall windows."},
+            {"idx": 1, "label": "Oval Office", "scene": "A close-up of a telephone on the desk."},
+            {"idx": 2, "label": "Oval Office", "scene": "A close-up of a telephone on the desk."},
+            {"idx": 24, "label": "Oval Office", "scene": "Rain on the windows."},
+            {"idx": 3, "label": "1972 election night", "scene": "Balloons fall."}]
+    t = prompts.batch_titles(rows, 24)
+    assert t[0] == "Oval Office" and t[1] == "Oval Office telephone" and t[2] not in (t[0], t[1])
+    assert t[24] == "Oval Office"  # another batch may reuse it
+    assert t[3] == "election night"
 
 
 def test_fallback_label_and_cleaning():
     assert prompts.clean_label('"Vault door, opening!" 1') == "Vault door opening"
     # Flow keeps only the first 3 words of a title, so titles stop there and never end on "in", "the"...
     assert prompts.clean_label("Night raids in Tikrit") == "Night raids"
-    assert prompts.image_title(14, "Most hunted man alive", "x") == "14 - Most hunted man"
-    assert prompts.image_title(1, "", "The stick figure with the red scarf runs") == "1 - Red scarf runs"
+    assert prompts.image_title("Most hunted man alive", "x") == "Most hunted man"
+    assert prompts.image_title("", "The stick figure with the red scarf runs") == "Red scarf runs"
     scene = "Medium shot of the stick figure with the plaid tartan scarf walking across snowy tundra"
     assert prompts.fallback_label(scene) == "Plaid tartan scarf"
     assert prompts.number_in_batch(0) == 1 and prompts.number_in_batch(23) == 24 and prompts.number_in_batch(24) == 1
@@ -207,19 +219,19 @@ def test_main_characters_get_a_character_sheet_used_by_every_batch():
             + [{"characters": [{"name": "Frank Wills", "variant": "1990s"}]}] * 8
             + [{"characters": [{"name": "Special prosecutor", "variant": ""}]}] * 3)
     refs = prompts.main_characters(guide, rows, min_images=8)
-    assert [r["title"] for r in refs] == ["C1 - Richard Nixon", "C2 - Frank Wills", "C3 - Frank Wills, 1990s"]
+    assert [r["title"] for r in refs] == ["Richard Nixon", "Frank Wills", "Frank Wills alternate look"]
     assert refs[2]["look"].endswith("gray knit cap")  # a variant gets its own reference
     assert prompts.main_characters(guide, rows, min_images=0) == []
 
     sheet = prompts.character_sheet_text("STYLE", refs)
     assert sheet.startswith("INSTRUCTIONS FOR THE CHARACTER SHEET") and "generate 3 character reference" in sheet
-    assert "C1 - Richard Nixon. Character reference of one character only: stick figure" in sheet
+    assert "\n\nRichard Nixon. Character reference of one character only: stick figure" in sheet
     assert "plain light gray background" in sheet and "STYLE" in sheet
     assert prompts.character_sheet_text("STYLE", []) == ""
 
     batch = [{"batch_no": 1, "idx": 0, "scene": "Nixon at his desk", "label": "Desk"}]
     text = prompts.batch_texts("STYLE", batch, 24, refs)[1]
-    assert "Use the character reference images" in text and "Richard Nixon (C1)" in text
+    assert "Use the character reference images" in text and "them: Richard Nixon, Frank Wills" in text
     assert "character reference" not in prompts.batch_texts("STYLE", batch, 24)[1]
 
 

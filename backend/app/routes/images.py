@@ -16,6 +16,7 @@ from app.deps import project_or_404
 from app.routes.projects import rel
 from app.storage import batch_images_dir, images_dir
 from pipeline import images as images_mod
+from pipeline import prompts as prompts_mod
 
 router = APIRouter(prefix="/api/projects/{project_id}/images", tags=["images"])
 
@@ -26,9 +27,26 @@ def _slots(project_id: int, batch_no: int) -> int:
     return max(0, min(batch, n_beats - (batch_no - 1) * batch)) or batch
 
 
+def _titles(project_id: int, batch_no: int) -> dict[int, str]:
+    """{slot number: prompt title} for one batch, as written in the prompts the user pasted into Flow."""
+    batch = load_config()["prompts"]["batch_size"]
+    titles = prompts_mod.batch_titles(db.list_prompts(project_id), batch)
+    return {prompts_mod.number_in_batch(i, batch): t for i, t in titles.items()
+            if prompts_mod.batch_of(i, batch) == batch_no}
+
+
 def _scan(project_id: int, batch_no: int) -> list[str]:
     p = db.get_project(project_id)
-    ordered = images_mod.order_images(batch_images_dir(p["slug"], batch_no))
+    folder = batch_images_dir(p["slug"], batch_no)
+    if folder.exists():  # files named after a prompt title get that slot's number
+        titles = _titles(project_id, batch_no)
+        taken = {images_mod.label_number(f.name) for f in folder.iterdir() if f.is_file()}
+        for f in sorted(folder.iterdir()):
+            n = images_mod.slot_for_title(f.name, titles) if f.is_file() else None
+            if n and n not in taken:
+                images_mod.rename_free(f, images_mod.numbered(f.name, n))
+                taken.add(n)
+    ordered = images_mod.order_images(folder)
     placed, warnings = images_mod.assign_positions(ordered, _slots(project_id, batch_no))
     db.replace_batch_images(project_id, batch_no, placed)
     return warnings + images_mod.tie_warnings([x for x in ordered if not x["number"]])
@@ -47,15 +65,18 @@ async def upload(project_id: int, batch_no: int, files: list[UploadFile] = File(
     filled = {im["position"] + 1 for im in db.list_images(project_id)
               if im["batch_no"] == batch_no and im["position"] < slots}
     guard = images_mod.SlotGuard(folder, filled, slots)
+    titles = _titles(project_id, batch_no)
     times = json.loads(last_modified or "[]")
     for i, f in enumerate(files):
         name = Path(f.filename or f"image_{i}.png").name
         if Path(name).suffix.lower() == ".zip":
             try:
-                images_mod.extract_zip(await f.read(), folder, guard.accept)
+                images_mod.extract_zip(await f.read(), folder, guard.accept,
+                                       lambda n: images_mod.name_by_title(n, titles))
             except zipfile.BadZipFile:
                 raise HTTPException(400, f"{name} is not a valid zip file")
             continue
+        name = images_mod.name_by_title(name, titles)
         if Path(name).suffix.lower() not in images_mod.IMAGE_EXTS or not guard.accept(name):
             continue
         dst = folder / name

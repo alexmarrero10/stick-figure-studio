@@ -184,10 +184,11 @@ def list_prompts(project_id: int) -> dict[str, Any]:
         guide["style_prefix"] = prompts_mod.with_body_rule(guide["style_prefix"])
     items = db.list_prompts(project_id)
     batch = load_config()["prompts"]["batch_size"]
+    titles = prompts_mod.batch_titles(items, batch)
     for it in items:
-        it["title"] = prompts_mod.image_title(prompts_mod.number_in_batch(it["idx"], batch), it["label"], it["scene"])
+        it["title"] = titles[it["idx"]]
         if guide:
-            it["prompt"] = prompts_mod.prompt_text(guide["style_prefix"], it, batch)
+            it["prompt"] = prompts_mod.prompt_text(guide["style_prefix"], it, batch, titles[it["idx"]])
     refs = _refs(guide, items)
     texts = prompts_mod.batch_texts(guide["style_prefix"], items, batch, refs) if guide else {}
     if texts:
@@ -277,7 +278,8 @@ def regenerate(project_id: int, beat_id: int, body: RegenBody) -> dict[str, Any]
     db.upsert_prompts(project_id, [{"beat_id": beat_id, "batch_no": prompts_mod.batch_of(beat["idx"], batch), **res,
                                     "characters": cast, "things": things}])
     _export(project_id)
-    return {**res, "prompt": prompts_mod.prompt_text(guide["style_prefix"], {**res, "idx": beat["idx"]}, batch)}
+    title = prompts_mod.batch_titles(db.list_prompts(project_id), batch).get(beat["idx"])
+    return {**res, "prompt": prompts_mod.prompt_text(guide["style_prefix"], {**res, "idx": beat["idx"]}, batch, title)}
 
 
 @router.get("/characters", response_class=PlainTextResponse)

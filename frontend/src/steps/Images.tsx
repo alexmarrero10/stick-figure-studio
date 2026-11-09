@@ -281,8 +281,8 @@ export default function ImagesStep({ project, refresh }: StepProps) {
         <h2>Image prompts and images</h2>
         <p className="muted small">
           One prompt per beat, {data.batch_size} per batch. Copy a batch into your Flow agent, then drop the images (or
-          the .zip) on the batch below. Each prompt starts with its number and title (e.g. "1 - Victorian London
-          street"), which Flow uses to name the image, so every image lands next to its prompt. Re-uploading a batch only
+          the .zip) on the batch below. Each prompt starts with a short title that is different for every image in the
+          batch (e.g. "Victorian London street"). Flow names the image after it, so every image lands next to its prompt. Re-uploading a batch only
           adds the images that are still missing.
         </p>
         <div className="row">

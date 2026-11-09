@@ -156,7 +156,7 @@ simple enough to read on a phone screen in under a second, and still consistent 
 bible.
 
 Also give each beat a label: a 1-3 word title for the image naming its setting or subject (e.g. \
-"Victorian London street", "Vault door opening"). Plain words only, no punctuation or numbers."""
+"Victorian London street", "Vault door opening"). Plain words only, no punctuation or numbers, and every title different from the others in the same request."""
 
 SCENES_SCHEMA = obj({"scenes": arr(obj({"idx": INT, "label": STR, "scene": STR}))})
 
@@ -590,7 +590,8 @@ DANGLING = set("a an the of on in at to from with and or its their his her".spli
 
 def clean_label(label: str) -> str:
     """Keep labels safe for file names: words only, at most 3 of them, not ending on "of", "the"..."""
-    words = re.sub(r"[^A-Za-z0-9' ]+", " ", label).split()[:LABEL_WORDS]
+    # No digits: a number at the start of a prompt gets drawn into the image.
+    words = re.sub(r"[^A-Za-z' ]+", " ", label).split()[:LABEL_WORDS]
     while len(words) > 1 and words[-1].lower() in DANGLING:
         words.pop()
     return " ".join(words)
@@ -604,11 +605,11 @@ establishing framing frame focus focused stick figure figures""".split())
 
 def fallback_label(scene: str) -> str:
     """A label from the scene's first meaningful words, for prompts that have no title yet."""
-    words = [w for w in re.sub(r"[^A-Za-z0-9' -]+", " ", scene).split() if w.lower() not in FILLER]
+    words = [w for w in re.sub(r"[^A-Za-z' -]+", " ", scene).split() if w.lower() not in FILLER]
     return clean_label(" ".join(words[:LABEL_WORDS]).capitalize()) or "Image"
 
 
-LABELS_SYSTEM = """You title images for a stick-figure video. For each scene description, write a 1-3 word title naming the image's setting or subject (e.g. "Victorian London street", "Vault door opening", "Frozen tundra survey"). Never more than 3 words: Flow keeps only the first 3 words when it names the image file. Never use camera words (shot, close-up, wide, angle) or "stick figure". Plain words only, no punctuation or numbers."""
+LABELS_SYSTEM = """You title images for a stick-figure video. For each scene description, write a 1-3 word title naming the image's setting or subject (e.g. "Victorian London street", "Vault door opening", "Frozen tundra survey"). Never more than 3 words: Flow keeps only the first 3 words when it names the image file. Never use camera words (shot, close-up, wide, angle) or "stick figure". Plain words only, no punctuation or numbers, and every title different from the others in the same request."""
 
 LABELS_SCHEMA = obj({"labels": arr(obj({"idx": INT, "label": STR}))})
 
@@ -630,9 +631,35 @@ def write_labels(claude: Claude, rows: list[dict[str, Any]], group: int = 60,
     return out
 
 
-def image_title(number: int, label: str, scene: str) -> str:
-    """'7 - Victorian London street'. Flow names the downloaded image after the start of the prompt."""
-    return f"{number} - {clean_label(label) or fallback_label(scene)}"
+def image_title(label: str, scene: str) -> str:
+    """'Victorian London street'. Flow names the downloaded image after the start of the prompt, and the
+    import matches that name back to its slot. No number: the image model sometimes drew it in a corner."""
+    return clean_label(label) or fallback_label(scene)
+
+
+def title_key(text: str) -> str:
+    return " ".join(re.sub(r"[^a-z' ]+", " ", text.lower()).split())
+
+
+def batch_titles(rows: list[dict[str, Any]], batch_size: int = 24) -> dict[int, str]:
+    """{idx: title}, unique within each batch so every downloaded file name points to one slot. A repeated
+    title keeps its first two words and takes a word from its own scene ("Oval Office desk")."""
+    out: dict[int, str] = {}
+    used: dict[int, set[str]] = {}
+    for p in sorted(rows, key=lambda r: r["idx"]):
+        seen = used.setdefault(batch_of(p["idx"], batch_size), set())
+        t = image_title(p.get("label") or "", p["scene"])
+        if title_key(t) in seen:
+            base = t.split()[:2]
+            have = {w.lower() for w in base}
+            words = [w for w in re.sub(r"[^A-Za-z' ]+", " ", p["scene"]).split()
+                     if len(w) > 3 and w.lower() not in FILLER and w.lower() not in DANGLING and w.lower() not in have]
+            options = [" ".join(base + [w.lower()]) for w in words] + [" ".join([base[0], a.lower(), b.lower()])
+                                                                        for a, b in zip(words, words[1:])]
+            t = next((o for o in options if title_key(o) not in seen), t)
+        seen.add(title_key(t))
+        out[p["idx"]] = t
+    return out
 
 
 def with_body_rule(style_prefix: str) -> str:
@@ -657,10 +684,10 @@ def number_in_batch(position: int, batch_size: int = 24) -> int:
     return position % batch_size + 1
 
 
-def prompt_text(style_prefix: str, p: dict[str, Any], batch_size: int = 24) -> str:
-    """The full numbered prompt for a stored prompt row (needs idx, scene, label)."""
-    title = image_title(number_in_batch(p["idx"], batch_size), p.get("label", ""), p["scene"])
-    return full_prompt(style_prefix, p["scene"], title)
+def prompt_text(style_prefix: str, p: dict[str, Any], batch_size: int = 24, title: str | None = None) -> str:
+    """The full titled prompt for a stored prompt row (needs idx, scene, label). Pass the title from
+    batch_titles so it is unique in its batch."""
+    return full_prompt(style_prefix, p["scene"], title or image_title(p.get("label") or "", p["scene"]))
 
 
 # --- character sheet (made in Flow before batch 1) ---------------------------
@@ -687,9 +714,14 @@ def main_characters(guide: dict[str, Any] | None, prompts: list[dict[str, Any]],
         out.append({"name": ch["name"], "variant": variant, "images": n,
                     "look": v["look"] if v else character_look(ch)})
     out.sort(key=lambda r: (-r["images"], r["name"], r["variant"]))
-    for i, r in enumerate(out, 1):
+    used: set[str] = set()
+    for r in out:  # names without digits (a number can end up drawn in the picture), each one unique
         label = r["name"] + (f", {r['variant']}" if r["variant"] else "")
-        r["title"] = f"C{i} - " + re.sub(r"[.\n]+", " ", label).strip()
+        title = " ".join(w for w in re.sub(r"[.,\n]+", " ", label).split() if not re.search(r"\d", w))
+        while title.lower() in used:
+            title += " alternate look"
+        used.add(title.lower())
+        r["title"] = title
     return out
 
 
@@ -698,8 +730,8 @@ def character_sheet_text(style_prefix: str, refs: list[dict[str, Any]]) -> str:
     if not refs:
         return ""
     head = (f"INSTRUCTIONS FOR THE CHARACTER SHEET (do not make an image for this paragraph). Before any batch, "
-            f"generate {len(refs)} character reference images, one for each numbered prompt below, in order. Name "
-            f"each image exactly with its prompt's number and title, the words before the first period, for example "
+            f"generate {len(refs)} character reference images, one for each prompt below, in order. Name "
+            f"each image exactly with its prompt's title, the words before the first period, for example "
             f"\"{refs[0]['title']}\". These are the main characters of the video. In every later batch, whenever a "
             f"prompt describes one of them, use that character's reference image so they look exactly the same: "
             f"same hair, clothes, colors, build and face.")
@@ -707,7 +739,7 @@ def character_sheet_text(style_prefix: str, refs: list[dict[str, Any]]) -> str:
             f"straight and facing the viewer, arms relaxed at the sides, centered, on a plain light gray background "
             f"(for this reference image only, instead of a scene). {with_body_rule(style_prefix)}" for r in refs]
     foot = (f"REMINDER (do not make an image for this paragraph): name all {len(refs)} images exactly with their "
-            f"prompt's number and title (e.g. \"{refs[0]['title']}\"), never with names of your own.")
+            f"prompt's title (e.g. \"{refs[0]['title']}\"), never with names or numbers of your own.")
     return "\n\n".join([head, *body, foot]) + "\n"
 
 
@@ -715,17 +747,17 @@ def batch_header(batch_no: int, n_batches: int, count: int, refs: list[dict[str,
     """A note for the Flow agent at the top of each batch. The same agent makes every batch, so it
     is told to keep matching the images it has already made."""
     text = (f"INSTRUCTIONS FOR BATCH {batch_no} OF {n_batches} (do not make an image for this paragraph). "
-            f"Generate {count} images, one for each numbered prompt below, in order, one image per prompt. "
-            f"Name each image exactly with its prompt's number and title, the words before the first period, "
-            f"for example \"1 - Victorian London street\"; never make up your own names, and keep that number "
-            f"with its image. ")
+            f"Generate {count} images, one for each prompt below, in order, one image per prompt. "
+            f"Name each image exactly with its prompt's title, the words before the first period, for example "
+            f"\"Victorian London street\"; never make up your own names and never add numbers. Never draw the title "
+            f"or any number in the image. ")
     if batch_no > 1:
         text += "These images continue the same video as the earlier batches you made. "
     text += ("Keep every recurring character, object and place looking exactly the same in every image: "
              "the prompts repeat the same description for each one, so follow those descriptions closely and "
              "match how you drew them before. Keep the same art style throughout.")
     if refs:
-        names = ", ".join(f"{r['title'].split(' - ', 1)[1]} ({r['title'].split(' - ', 1)[0]})" for r in refs)
+        names = ", ".join(r["title"] for r in refs)
         text += (f" Use the character reference images from the character sheet for these characters whenever a "
                  f"prompt describes them: {names}.")
     return text
@@ -735,8 +767,9 @@ def batch_texts(style_prefix: str, prompts: list[dict[str, Any]], batch_size: in
                 refs: list[dict[str, Any]] | None = None) -> dict[int, str]:
     """{batch number: the text to paste into Flow}: the agent note, then one prompt per paragraph."""
     batches: dict[int, list[str]] = {}
+    titles = batch_titles(prompts, batch_size)
     for p in prompts:
-        batches.setdefault(p["batch_no"], []).append(prompt_text(style_prefix, p, batch_size))
+        batches.setdefault(p["batch_no"], []).append(prompt_text(style_prefix, p, batch_size, titles[p["idx"]]))
     total = max(batches, default=0)
     return {n: "\n\n".join([batch_header(n, total, len(items), refs), *items, batch_footer(len(items))]) + "\n"
             for n, items in sorted(batches.items())}
@@ -745,8 +778,8 @@ def batch_texts(style_prefix: str, prompts: list[dict[str, Any]], batch_size: in
 def batch_footer(count: int) -> str:
     """Repeats the naming rule after the last prompt: Flow's agent sometimes names a whole batch itself."""
     return (f"REMINDER (do not make an image for this paragraph): name all {count} images exactly with their "
-            f"prompt's number and title, the words before the first period (e.g. \"1 - Victorian London street\"), "
-            f"never with names of your own.")
+            f"prompt's title, the words before the first period (e.g. \"Victorian London street\"), never with "
+            f"names or numbers of your own.")
 
 
 def write_batch_files(folder: Path, style_prefix: str, prompts: list[dict[str, Any]], batch_size: int = 24,

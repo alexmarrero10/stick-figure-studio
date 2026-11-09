@@ -168,9 +168,9 @@ def test_generate_route_stores_props_and_batch_text(client, temp_db, monkeypatch
     text2 = data["batch_texts"]["2"]
     assert text2.startswith("INSTRUCTIONS FOR BATCH 2 OF 2")
     assert "continue the same video" in text2
-    assert "\n\n1 - Scene 24. Beat 24: a three-masted ship" in text2
+    assert "\n\nScene. Beat 24: a three-masted ship" in text2  # titles have no numbers
     assert text2.count("\n\n") == 7  # header + 6 prompts + naming reminder
-    assert text2.rstrip().endswith("never with names of your own.")
+    assert text2.rstrip().endswith("never with names or numbers of your own.")
 
 
 
@@ -251,3 +251,29 @@ def test_ask_claude_for_a_thumbnail_keeps_the_suggested_ones(client, temp_db, mo
     # Regenerating the pack keeps the owner's own thumbnails; removing one drops it.
     assert len(client.post(f"/api/projects/{pid}/publish").json()["custom_thumbnails"]) == 1
     assert client.delete(f"/api/projects/{pid}/publish/thumbnails/0").json()["custom_thumbnails"] == []
+
+
+def test_images_named_after_their_prompt_title_land_in_that_slot(client, temp_db):
+    pid = project_with_beats(temp_db, 6)
+    beats = temp_db.list_beats(pid)
+    labels = ["Ship in ice", "Snowy camp", "Ship in ice", "Sled dogs", "Frozen sea", "Night sky"]
+    temp_db.upsert_prompts(pid, [{"beat_id": b["id"], "batch_no": 1, "scene": f"A scene about {lbl.lower()} and lanterns.",
+                                  "label": lbl, "characters": None, "things": None} for b, lbl in zip(beats, labels)])
+    titles = client.get(f"/api/projects/{pid}/prompts").json()["prompts"]
+    assert [t["title"] for t in titles][:3] == ["Ship in ice", "Snowy camp", "Ship in scene"]  # made unique
+    # Flow downloads in any order, with its own spacing and copy numbers.
+    r = upload(client, pid, 1, [("files", ("b1.zip", make_zip(
+        ["Sled_dogs.png", "Ship in scene (1).png", "Ship in ice.png", "Snowy camp 7f3a.png", "random.png"]),
+        "application/zip"))])
+    assert filled(r)[:5] == ["1 - Ship in ice.png", "2 - Snowy camp 7f3a.png", "3 - Ship in scene (1).png",
+                             "4 - Sled_dogs.png", "random.png"]
+
+
+def test_slot_for_title_needs_one_clear_match():
+    from pipeline import images as images_mod
+    titles = {1: "Oval Office", 2: "Oval Office desk", 3: "Night raid"}
+    assert images_mod.slot_for_title("Oval Office.png", titles) == 1
+    assert images_mod.slot_for_title("oval_office_desk (2).jpg", titles) == 2
+    assert images_mod.slot_for_title("Night raid extra words.png", titles) == 3
+    assert images_mod.slot_for_title("Oval.png", titles) is None  # could be 1 or 2
+    assert images_mod.slot_for_title("7 - Oval Office.png", titles) is None  # numbered files keep their number

@@ -1,8 +1,9 @@
 """Order imported Google Flow images.
 
-Prompts are titled "7 - Victorian London street", and Flow names each download after that title,
-so a leading number in the file name puts the image straight into slot 7 of its batch. Images
-without a number are ordered by creation time embedded in the file (EXIF, PNG text chunks, XMP),
+Prompts are titled "Victorian London street" (unique within a batch), and Flow names each download
+after that title, so the import matches the file name to its slot and puts the slot number in front.
+Older downloads named "7 - Victorian London street" use that number directly. Images matching
+neither are ordered by creation time embedded in the file (EXIF, PNG text chunks, XMP),
 then file modified time, then natural filename order, and fill the slots that are left.
 """
 from __future__ import annotations
@@ -74,10 +75,11 @@ class SlotGuard:
         return True
 
 
-def extract_zip(data: bytes, folder: Path, accept: Callable[[str], bool] = lambda name: True) -> list[str]:
+def extract_zip(data: bytes, folder: Path, accept: Callable[[str], bool] = lambda name: True,
+                rename: Callable[[str], str] = lambda name: name) -> list[str]:
     """Write the images inside a zip into folder, flattening any subfolders. Each file keeps the
-    time stored in the zip as its modified time. accept(name) can veto a file. Returns the saved
-    file names."""
+    time stored in the zip as its modified time. rename(name) gives the name to save it under, and
+    accept(name) can veto a file. Returns the saved file names."""
     saved: list[str] = []
     with zipfile.ZipFile(io.BytesIO(data)) as z:
         for info in z.infolist():
@@ -85,6 +87,7 @@ def extract_zip(data: bytes, folder: Path, accept: Callable[[str], bool] = lambd
             if (info.is_dir() or name.startswith(".") or "__MACOSX" in info.filename
                     or Path(name).suffix.lower() not in IMAGE_EXTS):
                 continue
+            name = rename(name)
             if not accept(name):
                 continue
             dst = folder / name
@@ -156,6 +159,34 @@ def numbered(name: str, number: int | None) -> str:
     m = LABEL_NUMBER.match(name)
     rest = (name[m.end():] if m else name).lstrip(" -_.)") or "image" + Path(name).suffix
     return f"{number} - {rest}" if number else rest
+
+
+def _words(text: str) -> str:
+    return " ".join(re.sub(r"[^a-z' ]+", " ", text.lower().replace("_", " ")).split())
+
+
+def slot_for_title(name: str, titles: dict[int, str]) -> int | None:
+    """The 1-based slot whose prompt title this file is named after ("Oval Office desk.png", "Oval_Office_desk
+    (1).jpg", "Oval Office desk 7f3a.png"), or None. Files that already start with a number keep it."""
+    if label_number(name):
+        return None
+    stem = re.sub(r"\s*\(\d+\)$", "", Path(name).stem)
+    k = _words(stem)
+    if not k:
+        return None
+    keys = {n: _words(t) for n, t in titles.items() if _words(t)}
+    exact = [n for n, t in keys.items() if t == k]
+    if len(exact) == 1:
+        return exact[0]
+    # Flow may cut a long name short or add something after it.
+    near = [n for n, t in keys.items() if k.startswith(t + " ") or t.startswith(k + " ")]
+    return near[0] if len(near) == 1 else None
+
+
+def name_by_title(name: str, titles: dict[int, str]) -> str:
+    """The file name with its slot number in front when it matches a prompt title, so it lands in that slot."""
+    n = slot_for_title(name, titles)
+    return numbered(name, n) if n else name
 
 
 def rename_free(path: Path, name: str) -> Path:
