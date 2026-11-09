@@ -59,7 +59,10 @@ outfit (suits, uniforms, robes) must still differ in at least three things seen 
 and height, hair color and style, clothing color, tie or collar, and an accessory (glasses, hat, \
 mustache).
   Groups (burglars, officers, judges, soldiers, workers): never one look copied for every member. \
-Describe each member in a few words so no two look alike, keeping what they share (uniform, gloves) \
+Members may wear exactly the same clothes (a team in matching suits, officers in one uniform), but \
+each one's head must look a little different: hair color and style, facial hair (mustache, beard, \
+sideburns, stubble), glasses, eyebrows, and build or height. Never vary noses, lips or face shape. \
+Describe each member in a few words so no two look alike, keeping what they share (clothes, gloves) \
 the same, e.g. "stick figures, white heads and hands, three officers in navy uniforms and caps: a tall \
 thin one with a black mustache, a short stocky one with red hair, a broad one with gray sideburns". \
 For more than five people, describe five types and say the rest mix them. A group's look may run to \

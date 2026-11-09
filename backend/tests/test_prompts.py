@@ -227,6 +227,7 @@ def test_style_rules_ask_for_variety_between_similar_characters_and_inside_group
     s = prompts.STYLE_SYSTEM
     assert "no two characters share the same main clothing color" in s
     assert "at least three things" in s and "never one look copied for every member" in s
+    assert "may wear exactly the same clothes" in s and "Never vary noses" in s
 
 
 def test_text_is_allowed_only_big_and_old_style_lines_are_upgraded():
