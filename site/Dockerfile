@@ -12,9 +12,9 @@ RUN npm run build
 FROM python:3.12-slim
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1 TRUST_PROXY=1
-COPY api/requirements.txt api/requirements.txt
-RUN pip install --no-cache-dir -r api/requirements.txt
-COPY api/ api/
+COPY requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+COPY server/ server/
 COPY --from=web /web/dist web/dist
 # Hosts set PORT; 8080 when run by hand.
-CMD ["sh", "-c", "uvicorn app:app --app-dir api --host 0.0.0.0 --port ${PORT:-8080} --proxy-headers --forwarded-allow-ips='*'"]
+CMD ["sh", "-c", "uvicorn app:app --app-dir server --host 0.0.0.0 --port ${PORT:-8080} --proxy-headers --forwarded-allow-ips='*'"]

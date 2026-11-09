@@ -13,7 +13,7 @@ Settings come from environment variables (on the host's dashboard; locally from 
   TRUST_PROXY=1         behind the host's proxy, read the visitor's address from X-Forwarded-For
   GEMINI_CHAT_MODEL     default gemini-flash-lite-latest
 
-Run locally:  .venv/Scripts/python -m uvicorn app:app --app-dir site/api --port 8790
+Run locally:  .venv/Scripts/python -m uvicorn app:app --app-dir site/server --port 8790
 """
 from __future__ import annotations
 
@@ -82,7 +82,7 @@ def gemini() -> Gemini:
 
 
 def visitor(request: Request) -> str:
-    if os.environ.get("TRUST_PROXY") == "1":
+    if os.environ.get("TRUST_PROXY") == "1" or os.environ.get("VERCEL"):  # behind a proxy that sets it
         fwd = request.headers.get("x-forwarded-for", "")
         if fwd:
             return fwd.split(",")[0].strip()

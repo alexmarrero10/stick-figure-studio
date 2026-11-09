@@ -14,3 +14,4 @@ projects/*
 data/claude_code_workdir/
 site/web/dist/
 evals/reports/
+site/public/

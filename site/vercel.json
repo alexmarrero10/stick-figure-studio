@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd web && npm ci --no-audit --no-fund && npx vite build --outDir ../public --emptyOutDir",
+  "functions": {
+    "index.py": {
+      "maxDuration": 60,
+      "excludeFiles": "{web/**,public/**,server/tests/**,**/__pycache__/**}"
+    }
+  }
+}

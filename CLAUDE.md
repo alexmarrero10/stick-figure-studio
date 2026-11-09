@@ -4,7 +4,7 @@ A local web app that takes a true-history story from idea to finished video for 
 **NextDoorHistorian** (narrated stick-figure explainers, ~8.5-9 min, plus vertical Shorts).
 Single user, runs on their Windows PC. The studio is never deployed. A separate read-only **public site**
 (`site/`, see `site/README.md`) shows published videos with semantic search and a Gemini chatbot; it's built
-but not deployed yet.
+for Vercel (root directory `site`) but not deployed yet.
 
 Current status, recent work and open issues are in **NOTES.md**. Read it at the start of a session.
 `PROGRESS.md` holds the older stage-by-stage build log and architecture notes; `docs/PUBLIC_SITE_PLAN.md`
@@ -70,8 +70,8 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
 - **Public site:** `cd site/web && npm run build`, then
-  `.venv\Scripts\python.exe -m uvicorn app:app --app-dir site/api --port 8790` (reuses the root `.env`).
-  Tests: `cd site/api && ../../.venv/Scripts/python -m pytest -q` (16 passing). Self-contained: it doesn't
+  `.venv\Scripts\python.exe -m uvicorn app:app --app-dir site/server --port 8790` (reuses the root `.env`).
+  Tests: `cd site/server && ../../.venv/Scripts/python -m pytest -q` (16 passing). Self-contained: it doesn't
   import the backend (it has its own copies of the embedding call and hybrid search), so it deploys alone.
 - **RAG evals** (`evals/README.md`): `make_questions.py` once, then `retrieval.py`, `answers.py`,
   `guardrails.py` score the real site code on real data; reports in `evals/reports/` (gitignored).
@@ -88,7 +88,8 @@ backend/pipeline/       one module per step (see Pipeline), claude_client.py (AP
                         ffmpeg.py, procs.py
 backend/tests/          pytest suite + fixtures/
 backend/supabase/       SQL the user runs in Supabase: schema.sql, 002_site_reader.sql (read-only site user)
-site/api/               public site API (FastAPI: videos, search, chat) + serves site/web/dist
+site/server/            public site API (FastAPI: videos, search, chat) + serves site/web/dist
+site/index.py, vercel.json  Vercel hosting (pages built to site/public on the CDN; never name the folder api/)
 site/web/               public site pages (React + Vite)
 evals/                  RAG evals (questions in data/, scripts per layer, reports/ gitignored)
 frontend/src/           App.tsx, api.ts, types.ts, components.tsx, styles.css, steps/ (one .tsx per step,

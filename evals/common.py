@@ -15,7 +15,7 @@ from typing import Any, Callable
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "evals" / "data"
 REPORTS = ROOT / "evals" / "reports"
-sys.path.insert(0, str(ROOT / "site" / "api"))
+sys.path.insert(0, str(ROOT / "site" / "server"))
 sys.path.insert(0, str(ROOT / "backend"))
 
 from dotenv import load_dotenv  # noqa: E402
@@ -26,12 +26,12 @@ _site = None
 
 
 def site():
-    """The public site's app module (site/api/app.py), loaded under its own name so it doesn't clash with
+    """The public site's app module (site/server/app.py), loaded under its own name so it doesn't clash with
     the studio's `app` package. The evals call its find_videos / gather / chat_contents directly, so they
     measure exactly what visitors get, without the visitor rate limits."""
     global _site
     if _site is None:
-        spec = importlib.util.spec_from_file_location("site_app", ROOT / "site" / "api" / "app.py")
+        spec = importlib.util.spec_from_file_location("site_app", ROOT / "site" / "server" / "app.py")
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         _site = mod

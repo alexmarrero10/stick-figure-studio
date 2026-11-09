@@ -130,11 +130,11 @@ function Watch({ id, t }: { id: number; t: number }) {
     getJSON<Video>(`/api/videos/${id}`)
       .then((v) => {
         setVideo(v);
-        document.title = `${v.title} | NextDoorHistorian`;
+        document.title = v.title;
       })
       .catch((e) => setError(e.message));
     return () => {
-      document.title = "NextDoorHistorian";
+      document.title = "History videos";
     };
   }, [id]);
 
@@ -194,17 +194,15 @@ export default function App() {
   return (
     <>
       <header className="top">
-        <a href="#/" className="brand" aria-label="NextDoorHistorian home">
+        <a href="#/" className="brand" aria-label="Home">
           <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
             <circle cx="16" cy="8" r="5" fill="none" stroke="currentColor" strokeWidth="2.5" />
             <path d="M16 13v10M16 23l-6 7M16 23l6 7M8 17h16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
           </svg>
-          <span>NextDoorHistorian</span>
         </a>
         <SearchBar initial={route.page === "home" ? route.q : ""} />
       </header>
       {route.page === "watch" ? <Watch id={route.id} t={route.t} /> : <Home q={route.q} />}
-      <footer className="foot">Stories by NextDoorHistorian. Every video is researched from cited sources.</footer>
     </>
   );
 }

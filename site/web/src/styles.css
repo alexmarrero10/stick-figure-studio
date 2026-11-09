@@ -135,7 +135,6 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
 .chat form input { flex: 1; }
 .fineprint { margin: 0; padding: 0 16px 10px; font-size: 12px; color: var(--muted); }
 
-.foot { text-align: center; color: var(--muted); font-size: 14px; padding: 32px 16px; }
 
 @media (max-width: 900px) {
   .watch.with-chat { grid-template-columns: minmax(0, 1fr); }
