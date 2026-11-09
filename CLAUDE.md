@@ -65,7 +65,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (164 passing as of 2026-11-06,
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (165 passing as of 2026-11-08,
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
@@ -113,6 +113,9 @@ channel_model_transcripts.txt   other channels' transcripts the script style was
 - **Frame-exact video:** every shot is encoded with an exact frame count, so picture stays locked to the words.
   Zoom uses FFmpeg `zoompan` on a 2x-upscaled frame and must keep the exact frame count. Shorts don't zoom.
 - Scripts are ASCII only (`script.to_ascii`) and avoid hard-to-pronounce names (ElevenLabs stumbles).
+- **Faces are never described** (no nose, lips, jowls...: every face is dot eyes, eyebrows, line mouth, no nose;
+  `prompts.without_face_features` strips them). Described features became ethnic caricatures. Hair is pinned down
+  exactly (color, length, texture, how it sits) since it is what makes a character recognizable.
 
 ## Script style (in `script.py` SCRIPT_SYSTEM; REVISE_SYSTEM inherits it)
 

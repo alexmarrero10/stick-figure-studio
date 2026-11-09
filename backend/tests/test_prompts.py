@@ -177,3 +177,20 @@ def test_patch_scenes_keeps_the_fix_only_when_every_look_is_there():
     out = prompts.patch_scenes(fake, "script", STAGED, [row])
     assert out == {0: "Soldiers lift a coiled tan rope among rows of dark green orange trees at night."}
     assert "missing looks (copy each, not the name): the rope = a coiled tan rope" in fake.asks[-1]
+
+
+def test_looks_never_describe_facial_features():
+    nixon = ("stick figure, white head and hands, medium height, dark brown wavy hair combed straight back, "
+             "heavy dark eyebrows, prominent rounded nose, big jowls, no hat, long-sleeved dark navy suit")
+    out = prompts.add_head_colors([{"name": "Nixon", "look": nixon,
+                                    "variants": [{"when": "1974", "look": nixon + ", thin lips"}]}])[0]
+    for look in (out["look"], out["variants"][0]["look"]):
+        assert "nose" not in look and "jowls" not in look and "lips" not in look
+        assert "dark brown wavy hair combed straight back" in look and "heavy dark eyebrows" in look
+    # Words that only contain a feature word are kept.
+    kept = "stick figure, white head and hands, gray earmuffs, years older, a clipboard"
+    assert prompts.without_face_features(kept) == kept
+    # Every face is drawn the same way, with no nose, and the rules tell Claude to pin hair down.
+    assert "no nose" in prompts.BASE_STYLE and "flat solid-color" in prompts.BASE_STYLE
+    assert "Never describe \\na nose" not in prompts.STYLE_SYSTEM and "Never describe a nose" in prompts.STYLE_SYSTEM
+    assert "one exact color" in prompts.STYLE_SYSTEM

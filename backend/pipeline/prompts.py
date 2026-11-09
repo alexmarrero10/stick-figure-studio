@@ -23,7 +23,8 @@ BODY = (
 BASE_STYLE = (
     "Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round heads "
     "(white unless a character's look gives a skin tone) with simple expressive faces (dot eyes, "
-    "eyebrows, line mouth) drawn the same way for everyone, " + BODY + ", "
+    "eyebrows, line mouth, no nose) drawn exactly the same way for everyone, hair drawn as one flat "
+    "solid-color shape, " + BODY + ", "
     "flat colors for props, clothing and backgrounds ({palette}). The background fills the whole frame "
     "and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show "
     "the room, never a blank white or paper background. Uncluttered composition with one clear focal point, "
@@ -39,7 +40,16 @@ navy blue, mustard yellow, sage green").
 - characters: every recurring person or group, at most 8. For each, a `look` of 20-40 words that \
 fully fixes how the stick figure is drawn, starting with "stick figure" and its head color: build \
 (tall, short, stocky), hair and facial hair, headwear, clothing with its colors and whether its \
-sleeves are long or short, and one item they carry. Spell out every detail so the image model has \
+sleeves are long or short, and one item they carry.
+  Hair is what makes a character recognizable, so pin it down completely: one exact color ("dark \
+brown", "steel gray", never just "dark" or "varied"), length, texture and how it sits, e.g. "short \
+dark brown wavy hair combed straight back, receding at the temples". Use the same hair words in every \
+variant unless the story changes the hair.
+  Faces are the same simple face for everyone (dot eyes, eyebrows, line mouth, no nose). Never describe \
+a nose, lips, jowls, chin, cheeks, ears, skin or face shape, even when the real person was known for \
+them: exaggerated features turn into ethnic caricatures and change from image to image. Tell \
+characters apart by build, hair, facial hair, glasses, headwear, clothing and what they carry.
+  Spell out every detail so the image model has \
 nothing to invent, e.g. "stick figure, white head and hands, tall and thin, short gray hair, tiny \
 round glasses, a gray bowler hat, a long navy coat with brass buttons, carrying a brown leather \
 briefcase". Each look must be easy to tell apart from the others at a glance. Never aim for a real \
@@ -166,14 +176,27 @@ def with_head_color(look: str) -> str:
     return f"{m.group(1)}, {tone}, {look[m.end():]}"
 
 
+_FACE = re.compile(r"\b(nose|noses|nostrils?|lips?|jowls?|jowly|chins?|cheeks?|cheekbones?|ears?|"
+                   r"complexion|jaw|jawline|face shape|(?:round|long|thin|wide|narrow|square|oval) face)\b", re.I)
+
+
+def without_face_features(look: str) -> str:
+    """Drops any part of a look that describes the face itself (nose, lips, jowls...). Every face is drawn
+    the same simple way: described features become caricatures, which can read as ethnic stereotypes, and
+    they change from image to image. Hair, facial hair, eyebrows and glasses stay."""
+    return ", ".join(p for p in re.split(r",\s*", look or "") if not _FACE.search(p))
+
+
 def add_head_colors(characters: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Cleans every look before it is saved: a fixed head color, and no facial features."""
     out = []
     for c in characters:
         c = {**c}
         if c.get("look"):
-            c["look"] = with_head_color(c["look"])
+            c["look"] = with_head_color(without_face_features(c["look"]))
         if c.get("variants"):
-            c["variants"] = [{**v, "look": with_head_color(v["look"])} for v in c["variants"]]
+            c["variants"] = [{**v, "look": with_head_color(without_face_features(v["look"]))}
+                             for v in c["variants"]]
         out.append(c)
     return out
 
