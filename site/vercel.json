@@ -1,10 +1,27 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd web && npm ci --no-audit --no-fund && npx vite build --outDir ../public --emptyOutDir",
-  "functions": {
-    "index.py": {
-      "maxDuration": 60,
-      "excludeFiles": "{web/**,public/**,server/tests/**,**/__pycache__/**}"
+  "services": {
+    "server": {
+      "root": ".",
+      "framework": "fastapi",
+      "entrypoint": "index:app",
+      "functions": {
+        "index.py": {
+          "maxDuration": 60,
+          "excludeFiles": "{web/**,public/**,server/tests/**,**/__pycache__/**}"
+        }
+      }
+    },
+    "web": {
+      "root": "web",
+      "framework": "vite",
+      "installCommand": "npm ci --no-audit --no-fund",
+      "buildCommand": "npx vite build",
+      "outputDirectory": "dist"
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": { "service": "server" } },
+    { "source": "/(.*)", "destination": { "service": "web" } }
+  ]
 }

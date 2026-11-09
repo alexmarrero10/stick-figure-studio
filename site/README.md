@@ -52,9 +52,10 @@ Tests: `cd site/server && ../../.venv/Scripts/python -m pytest -q`
 Not done yet. Nothing is deployed until you do these steps.
 
 1. Push the repo to GitHub (the studio's `.env`, database and media are gitignored).
-2. On vercel.com: **Add New → Project**, import the repo, and set **Root Directory** to `site`. Vercel
-   finds the FastAPI app (`index.py`) and uses `vercel.json`, which builds the pages into `public/` (served
-   from Vercel's CDN) and sends `/api/...` to the app.
+2. On vercel.com: **Add New → Project**, import the repo, and set **Root Directory** to `site`.
+   `vercel.json` sets up two Vercel services: `server` (the FastAPI app, `index.py`) gets `/api/...`, and
+   `web` (the pages, built with Vite and served from Vercel's CDN) gets everything else. No bindings: the
+   pages call `/api/...` from the visitor's browser.
 3. **Environment variables** (Project → Settings → Environment Variables):
    - `GEMINI_API_KEY`: your free-tier key (billing off)
    - `SITE_DATABASE_URL`: the Supabase pooler address with `site_reader.<project-ref>` and its password.

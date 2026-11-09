@@ -1,6 +1,6 @@
 """Vercel entry point. The site's FastAPI app lives in server/ (not api/: Vercel would turn every file in
-an api/ folder into its own function). Vercel serves the built pages from public/ on its CDN and sends
-everything else (/api/...) to this app."""
+an api/ folder into its own function). vercel.json runs this as the "server" service and sends
+/api/... here; the pages are the separate "web" service."""
 import sys
 from pathlib import Path
 
