@@ -37,6 +37,8 @@ interface PromptsResp {
   batch_size: number;
   done_batches: number[];
   batch_texts: Record<string, string>;
+  main_characters: { title: string; name: string; variant: string; images: number }[];
+  character_sheet: string;
 }
 
 interface Img {
@@ -372,6 +374,29 @@ export default function ImagesStep({ project, refresh }: StepProps) {
           )}
           {data.style.setting_notes && <p className="small muted">{data.style.setting_notes}</p>}
         </details>
+      )}
+
+      {data.character_sheet && (
+        <div className="panel">
+          <h3 className="small">First: make the main characters in Flow (before batch 1)</h3>
+          <p className="small muted">
+            These characters appear in many pictures, so Flow makes one reference image of each first and then
+            reuses it in every batch. Characters seen only a few times just use their description.
+          </p>
+          <ul className="small">
+            {data.main_characters.map((c) => (
+              <li key={c.title}>
+                <strong>{c.title}</strong> <span className="muted">({c.images} pictures)</span>
+              </li>
+            ))}
+          </ul>
+          <div className="dropzone-row">
+            <CopyButton text={data.character_sheet} label="Copy the character sheet for Flow" />
+            <a className="button secondary small" href={`/api/projects/${pid}/prompts/characters`} target="_blank" rel="noreferrer">
+              characters.txt
+            </a>
+          </div>
+        </div>
       )}
 
       {(data.prompts.length > 0 || batches.length > 0) && (

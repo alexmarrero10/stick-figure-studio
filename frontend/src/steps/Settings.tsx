@@ -132,6 +132,13 @@ const FIELDS: {
   { section: "voice", key: "trim_pauses", label: "Trim long pauses", type: "bool" },
   { section: "voice", key: "max_pause_s", label: "Longest pause kept (s)", type: "number" },
   { section: "prompts", key: "batch_size", label: "Prompts per batch", type: "number" },
+  {
+    section: "prompts",
+    key: "reference_min_images",
+    label: "Character sheet: pictures needed",
+    type: "number",
+    help: "Characters in at least this many pictures get a reference image in Flow before batch 1. 0 turns it off",
+  },
   { section: "shots", key: "cut_lead_s", label: "Cut lead (s)", help: "Picture appears this long before its first word", type: "number" },
   { section: "shots", key: "min_shot_s", label: "Shortest shot (s)", type: "number", help: "Shorter pictures merge into a neighbour" },
   { section: "video", key: "fps", label: "Frame rate", type: "number" },

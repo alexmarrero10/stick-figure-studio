@@ -39,7 +39,14 @@ def _export(project_id: int) -> list[str]:
     if not guide:
         return []
     batch = load_config()["prompts"]["batch_size"]
-    return prompts_mod.write_batch_files(prompts_dir(p["slug"]), guide["style_prefix"], db.list_prompts(project_id), batch)
+    items = db.list_prompts(project_id)
+    return prompts_mod.write_batch_files(prompts_dir(p["slug"]), guide["style_prefix"], items, batch,
+                                         _refs(guide, items))
+
+
+def _refs(guide: dict[str, Any] | None, items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Main characters that get a reference image in Flow before batch 1 (0 in Settings turns it off)."""
+    return prompts_mod.main_characters(guide, items, int(load_config()["prompts"].get("reference_min_images", 8)))
 
 
 class GenBody(BaseModel):
@@ -181,11 +188,15 @@ def list_prompts(project_id: int) -> dict[str, Any]:
         it["title"] = prompts_mod.image_title(prompts_mod.number_in_batch(it["idx"], batch), it["label"], it["scene"])
         if guide:
             it["prompt"] = prompts_mod.prompt_text(guide["style_prefix"], it, batch)
-    texts = prompts_mod.batch_texts(guide["style_prefix"], items, batch) if guide else {}
+    refs = _refs(guide, items)
+    texts = prompts_mod.batch_texts(guide["style_prefix"], items, batch, refs) if guide else {}
     if texts:
         _export(project_id)  # keep batch_XX.txt the same as what the Copy button gives
+    sheet = prompts_mod.character_sheet_text(guide["style_prefix"], refs) if guide else ""
     return {"style": guide, "prompts": items, "beats": len(db.list_beats(project_id)),
-            "batch_size": batch, "done_batches": db.done_batches(project_id), "batch_texts": texts}
+            "batch_size": batch, "done_batches": db.done_batches(project_id), "batch_texts": texts,
+            "main_characters": [{k: r[k] for k in ("title", "name", "variant", "images")} for r in refs],
+            "character_sheet": sheet}
 
 
 class DoneBody(BaseModel):
@@ -267,6 +278,15 @@ def regenerate(project_id: int, beat_id: int, body: RegenBody) -> dict[str, Any]
                                     "characters": cast, "things": things}])
     _export(project_id)
     return {**res, "prompt": prompts_mod.prompt_text(guide["style_prefix"], {**res, "idx": beat["idx"]}, batch)}
+
+
+@router.get("/characters", response_class=PlainTextResponse)
+def character_sheet(project_id: int) -> str:
+    p = project_or_404(project_id)
+    f = prompts_dir(p["slug"]) / "characters.txt"
+    if not f.exists():
+        raise HTTPException(404, "No main characters in this video")
+    return f.read_text(encoding="utf-8")
 
 
 @router.get("/batch/{batch_no}", response_class=PlainTextResponse)

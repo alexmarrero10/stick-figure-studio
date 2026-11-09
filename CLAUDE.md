@@ -27,7 +27,9 @@ is the active plan for RAG research and the public site (both built; deployment 
    long pauses trimmed, then sped up with FFmpeg `atempo` (`voice.speed`, 1.1 = 10% faster, pitch kept;
    Eleven v4 has no speed setting) with word timings scaled to the measured length, per-word timings stored.
 5. **Image prompts** (`prompts.py`): style guide, cast/characters/props/places, one prompt per beat in batches
-   of 24. The user generates the images **manually in Google Flow** and uploads them.
+   of 24. The user generates the images **manually in Google Flow** and uploads them. Characters in 8+ pictures
+   (`prompts.reference_min_images`) first get a **character sheet** (`characters.txt`, C1, C2...) that every batch
+   tells Flow to reuse.
 6. **Images** (`images.py`): import, ordered by metadata timestamp, then drag or slot-pick to fix.
 7. **Shots + Assemble** (`shots.py`, `assemble.py`, `fcpxml.py`, `captions.py`): shots locked to word timings,
    FFmpeg renders `output/video.mp4`, plus `timeline.fcpxml` and `captions.srt`. Shots of 3 s or longer
@@ -65,7 +67,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (165 passing as of 2026-11-08,
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (166 passing as of 2026-11-08,
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
@@ -157,7 +159,8 @@ who/what/when/where/why for a newcomer.
   unrelated file is added or deleted (a commit once deleted `docs/PUBLIC_SITE_PLAN.md` by accident).
 - **Never kill running jobs** when restarting the server.
 - **No Google Flow browser automation** unless the user confirms it for that task.
-- **Don't build:** posting to social apps (removed 2026-11-06 at the user's request), YouTube draft upload, a character sheet feature, or image filename-based matching.
+- **Don't build:** posting to social apps (removed 2026-11-06 at the user's request), YouTube draft upload, or image filename-based matching. (A character sheet was on this list; the user asked
+  for one on 2026-11-08 and it's built.)
 - Don't commit `channel_model_transcripts.txt` (other channels' content).
 - Leave the user's own uncommitted `config.yaml` edits alone unless asked.
 - When the user says they're just brainstorming ("don't execute anything"), only discuss.

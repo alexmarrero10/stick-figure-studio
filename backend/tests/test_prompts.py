@@ -194,3 +194,30 @@ def test_looks_never_describe_facial_features():
     assert "no nose" in prompts.BASE_STYLE and "flat solid-color" in prompts.BASE_STYLE
     assert "Never describe \\na nose" not in prompts.STYLE_SYSTEM and "Never describe a nose" in prompts.STYLE_SYSTEM
     assert "one exact color" in prompts.STYLE_SYSTEM
+
+
+def test_main_characters_get_a_character_sheet_used_by_every_batch():
+    guide = {"characters": [
+        {"name": "Richard Nixon", "look": "stick figure, white head and hands, short dark brown wavy hair", "variants": []},
+        {"name": "Frank Wills", "look": "stick figure, white head and hands, navy guard cap",
+         "variants": [{"when": "1990s", "look": "stick figure, white head and hands, gray knit cap"}]},
+        {"name": "Special prosecutor", "look": "stick figure, white head and hands, bow tie", "variants": []}]}
+    rows = ([{"characters": [{"name": "Richard Nixon", "variant": ""}]}] * 10
+            + [{"characters": [{"name": "Frank Wills", "variant": ""}]}] * 9
+            + [{"characters": [{"name": "Frank Wills", "variant": "1990s"}]}] * 8
+            + [{"characters": [{"name": "Special prosecutor", "variant": ""}]}] * 3)
+    refs = prompts.main_characters(guide, rows, min_images=8)
+    assert [r["title"] for r in refs] == ["C1 - Richard Nixon", "C2 - Frank Wills", "C3 - Frank Wills, 1990s"]
+    assert refs[2]["look"].endswith("gray knit cap")  # a variant gets its own reference
+    assert prompts.main_characters(guide, rows, min_images=0) == []
+
+    sheet = prompts.character_sheet_text("STYLE", refs)
+    assert sheet.startswith("INSTRUCTIONS FOR THE CHARACTER SHEET") and "generate 3 character reference" in sheet
+    assert "C1 - Richard Nixon. Character reference of one character only: stick figure" in sheet
+    assert "plain light gray background" in sheet and "STYLE" in sheet
+    assert prompts.character_sheet_text("STYLE", []) == ""
+
+    batch = [{"batch_no": 1, "idx": 0, "scene": "Nixon at his desk", "label": "Desk"}]
+    text = prompts.batch_texts("STYLE", batch, 24, refs)[1]
+    assert "Use the character reference images" in text and "Richard Nixon (C1)" in text
+    assert "character reference" not in prompts.batch_texts("STYLE", batch, 24)[1]

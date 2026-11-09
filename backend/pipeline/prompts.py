@@ -650,7 +650,55 @@ def prompt_text(style_prefix: str, p: dict[str, Any], batch_size: int = 24) -> s
     return full_prompt(style_prefix, p["scene"], title)
 
 
-def batch_header(batch_no: int, n_batches: int, count: int) -> str:
+# --- character sheet (made in Flow before batch 1) ---------------------------
+
+def main_characters(guide: dict[str, Any] | None, prompts: list[dict[str, Any]],
+                    min_images: int = 8) -> list[dict[str, Any]]:
+    """Characters (and their variants) drawn in at least `min_images` pictures, most frequent first.
+    These get a reference image in Flow; characters seen only a few times keep just their description."""
+    if not guide or min_images <= 0:
+        return []
+    counts: dict[tuple[str, str], int] = {}
+    for p in prompts:
+        for c in p.get("characters") or []:
+            key = (c.get("name", ""), c.get("variant") or "")
+            counts[key] = counts.get(key, 0) + 1
+    out = []
+    for (name, variant), n in counts.items():
+        ch = _find(guide["characters"], "name", name)
+        if not ch or n < min_images:
+            continue
+        v = _find(ch.get("variants") or [], "when", variant) if variant else None
+        if variant and not v:
+            continue
+        out.append({"name": ch["name"], "variant": variant, "images": n,
+                    "look": v["look"] if v else character_look(ch)})
+    out.sort(key=lambda r: (-r["images"], r["name"], r["variant"]))
+    for i, r in enumerate(out, 1):
+        label = r["name"] + (f", {r['variant']}" if r["variant"] else "")
+        r["title"] = f"C{i} - " + re.sub(r"[.\n]+", " ", label).strip()
+    return out
+
+
+def character_sheet_text(style_prefix: str, refs: list[dict[str, Any]]) -> str:
+    """The text to paste into Flow before batch 1: one reference picture per main character."""
+    if not refs:
+        return ""
+    head = (f"INSTRUCTIONS FOR THE CHARACTER SHEET (do not make an image for this paragraph). Before any batch, "
+            f"generate {len(refs)} character reference images, one for each numbered prompt below, in order. Name "
+            f"each image exactly with its prompt's number and title, the words before the first period, for example "
+            f"\"{refs[0]['title']}\". These are the main characters of the video. In every later batch, whenever a "
+            f"prompt describes one of them, use that character's reference image so they look exactly the same: "
+            f"same hair, clothes, colors, build and face.")
+    body = [f"{r['title']}. Character reference of one character only: {r['look'].rstrip('.')}. Full body, standing "
+            f"straight and facing the viewer, arms relaxed at the sides, centered, on a plain light gray background "
+            f"(for this reference image only, instead of a scene). {with_body_rule(style_prefix)}" for r in refs]
+    foot = (f"REMINDER (do not make an image for this paragraph): name all {len(refs)} images exactly with their "
+            f"prompt's number and title (e.g. \"{refs[0]['title']}\"), never with names of your own.")
+    return "\n\n".join([head, *body, foot]) + "\n"
+
+
+def batch_header(batch_no: int, n_batches: int, count: int, refs: list[dict[str, Any]] | None = None) -> str:
     """A note for the Flow agent at the top of each batch. The same agent makes every batch, so it
     is told to keep matching the images it has already made."""
     text = (f"INSTRUCTIONS FOR BATCH {batch_no} OF {n_batches} (do not make an image for this paragraph). "
@@ -663,16 +711,21 @@ def batch_header(batch_no: int, n_batches: int, count: int) -> str:
     text += ("Keep every recurring character, object and place looking exactly the same in every image: "
              "the prompts repeat the same description for each one, so follow those descriptions closely and "
              "match how you drew them before. Keep the same art style throughout.")
+    if refs:
+        names = ", ".join(f"{r['title'].split(' - ', 1)[1]} ({r['title'].split(' - ', 1)[0]})" for r in refs)
+        text += (f" Use the character reference images from the character sheet for these characters whenever a "
+                 f"prompt describes them: {names}.")
     return text
 
 
-def batch_texts(style_prefix: str, prompts: list[dict[str, Any]], batch_size: int = 24) -> dict[int, str]:
+def batch_texts(style_prefix: str, prompts: list[dict[str, Any]], batch_size: int = 24,
+                refs: list[dict[str, Any]] | None = None) -> dict[int, str]:
     """{batch number: the text to paste into Flow}: the agent note, then one prompt per paragraph."""
     batches: dict[int, list[str]] = {}
     for p in prompts:
         batches.setdefault(p["batch_no"], []).append(prompt_text(style_prefix, p, batch_size))
     total = max(batches, default=0)
-    return {n: "\n\n".join([batch_header(n, total, len(items)), *items, batch_footer(len(items))]) + "\n"
+    return {n: "\n\n".join([batch_header(n, total, len(items), refs), *items, batch_footer(len(items))]) + "\n"
             for n, items in sorted(batches.items())}
 
 
@@ -683,13 +736,17 @@ def batch_footer(count: int) -> str:
             f"never with names of your own.")
 
 
-def write_batch_files(folder: Path, style_prefix: str, prompts: list[dict[str, Any]], batch_size: int = 24) -> list[str]:
-    """Write batch_XX.txt files, ready to paste into Flow."""
+def write_batch_files(folder: Path, style_prefix: str, prompts: list[dict[str, Any]], batch_size: int = 24,
+                      refs: list[dict[str, Any]] | None = None) -> list[str]:
+    """Write characters.txt (when there are main characters) and batch_XX.txt files, ready to paste into Flow."""
     folder.mkdir(parents=True, exist_ok=True)
-    for old in folder.glob("batch_*.txt"):
+    for old in [*folder.glob("batch_*.txt"), *folder.glob("characters.txt")]:
         old.unlink()
     names = []
-    for n, text in batch_texts(style_prefix, prompts, batch_size).items():
+    if refs:
+        (folder / "characters.txt").write_text(character_sheet_text(style_prefix, refs), encoding="utf-8")
+        names.append("characters.txt")
+    for n, text in batch_texts(style_prefix, prompts, batch_size, refs).items():
         name = f"batch_{n:02d}.txt"
         (folder / name).write_text(text, encoding="utf-8")
         names.append(name)
