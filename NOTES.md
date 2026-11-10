@@ -1,4 +1,4 @@
-# Notes: current state (updated 2026-11-06)
+# Notes: current state (updated 2026-11-10)
 
 Read CLAUDE.md first for how the project works and the rules. This file is what's happening now.
 
@@ -9,10 +9,25 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 157 backend tests pass; the frontend builds.
-- Active plan: `docs/PUBLIC_SITE_PLAN.md` (RAG research built; public site with chatbot next).
+- 170 backend tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`, not pushed).
+- Active plan: `docs/PUBLIC_SITE_PLAN.md` (RAG research and public site built; Vercel deploy next).
+- Project 3 is Watergate ("The Piece of Tape..."), currently at the image step (221 prompts).
 
 ## Recently done
+
+- **Image file naming (55fb5ab, 2026-11-10):** prompts start with a short title and **no number** (the
+  numbered "7 - Title" made Flow draw numbers in image corners). `prompts.batch_titles` keeps titles unique per
+  batch; the import (`images.slot_for_title`) matches Flow's file name to the slot. Titles stay 3 words since
+  Flow keeps only ~3 words of the name. Old numbered files still work.
+- **Big text in prompts was tried and reverted** (765b396 -> 8221380): numbers appeared in corners. Don't redo.
+- **Character look rules:** faces never described (no nose etc.; caricature risk), hair pinned exactly
+  (1c58f2f); every character looks different, group members may share clothes but differ in hair/facial
+  hair/glasses/build (148da63, 1c91316); character sheet for characters in 8+ pictures, made before batch 1
+  (6d5a8b0).
+- **Public site:** channel name and footer removed, Vercel setup (07c8649); later split into two Vercel services
+  (b4fd7de) and the chatbot now answers wider-topic questions (bbb32fd). Not deployed.
+- **docs/RAG_EXPLAINED.md:** study guide on how the RAG works (for the user's resume).
+- **Voice:** Brian at 1.2x; Settings shows the real voice name (cc99488).
 
 - **Check facts** button on the Script step (`fact_check.py`, `POST /script/factcheck`): checks names, dates,
   numbers and quotes; wrong ones come back as fixes in the chat, unconfirmed ones are listed. With RAG it
@@ -87,11 +102,14 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 ## Next
 
 1. User: (projects 1 and 2 are published on the site) run
-   `backend/supabase/002_site_reader.sql`, then deploy per `site/README.md` (needs a push to GitHub first).
-2. Finish project 3 ("The Piece of Tape...", researched with RAG) with the new script style and zoom, then
-   compare its retention with the first two.
-3. Possibly re-assemble projects 1 and 2 to see the zoom (only if the user wants new versions).
-4. Push to GitHub when the user asks (`alexmarrero10/stick-figure-studio`, private). Many local commits are
+   `backend/supabase/002_site_reader.sql`, then deploy per `site/README.md` (needs a push to GitHub first,
+   with the v1.0.0 tag).
+2. Finish project 3 (Watergate): user recopies batches (old copies had numbers), makes images in Flow.
+   Open question to the user: should Frank Wills (Black security guard) get a brown head?
+3. Full speed test (`evals/speed.py --ways rag,full,old`) paused on 2026-11-09 for the user's usage limits;
+   rerun when they say so.
+4. Possibly re-assemble projects 1 and 2 to see the zoom (only if the user wants new versions).
+5. Push to GitHub when the user asks (`alexmarrero10/stick-figure-studio`, private). Many local commits are
    unpushed (`git log origin/main..main`).
 
 ## Ideas discussed, not started
