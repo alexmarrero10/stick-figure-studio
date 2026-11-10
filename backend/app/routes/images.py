@@ -27,12 +27,17 @@ def _slots(project_id: int, batch_no: int) -> int:
     return max(0, min(batch, n_beats - (batch_no - 1) * batch)) or batch
 
 
-def _titles(project_id: int, batch_no: int) -> dict[int, str]:
-    """{slot number: prompt title} for one batch, as written in the prompts the user pasted into Flow."""
+def _all_titles(project_id: int) -> dict[int, dict[int, str]]:
+    """{batch: {slot number: prompt title}}, as written in the prompts the user pasted into Flow."""
     batch = load_config()["prompts"]["batch_size"]
-    titles = prompts_mod.batch_titles(db.list_prompts(project_id), batch)
-    return {prompts_mod.number_in_batch(i, batch): t for i, t in titles.items()
-            if prompts_mod.batch_of(i, batch) == batch_no}
+    out: dict[int, dict[int, str]] = {}
+    for i, t in prompts_mod.batch_titles(db.list_prompts(project_id), batch).items():
+        out.setdefault(prompts_mod.batch_of(i, batch), {})[prompts_mod.number_in_batch(i, batch)] = t
+    return out
+
+
+def _titles(project_id: int, batch_no: int) -> dict[int, str]:
+    return _all_titles(project_id).get(batch_no, {})
 
 
 def _scan(project_id: int, batch_no: int) -> list[str]:
@@ -87,6 +92,64 @@ async def upload(project_id: int, batch_no: int, files: list[UploadFile] = File(
     warnings = _scan(project_id, batch_no)
     return {"images": list_images(project_id), "warnings": warnings,
             "added": len(guard.added), "skipped": len(guard.skipped)}
+
+
+@router.post("/upload-all")
+async def upload_all(project_id: int, files: list[UploadFile] = File(...),
+                     last_modified: str = Form("[]")) -> dict[str, Any]:
+    """Bulk upload: one zip holding every batch's Flow download (zips or folders inside it), several
+    zips, or loose images. Each image goes to the batch whose prompt title it is named after
+    (images.plan_group); slots already filled are skipped, as in a single-batch upload."""
+    p = project_or_404(project_id)
+    titles = _all_titles(project_id)
+    if not titles:
+        raise HTTPException(400, "Make the image prompts first, so images can be matched to their batches.")
+    imgs = db.list_images(project_id)
+    guards: dict[int, images_mod.SlotGuard] = {}
+    unplaced: list[str] = []
+    times = json.loads(last_modified or "[]")
+
+    def place(label: str, items: list[images_mod.ImageEntry]) -> None:
+        for (name, read, t), b in zip(items, images_mod.plan_group(label, [n for n, _, _ in items], titles)):
+            if b is None:
+                unplaced.append(name)
+                continue
+            if b not in guards:
+                slots = _slots(project_id, b)
+                filled = {im["position"] + 1 for im in imgs if im["batch_no"] == b and im["position"] < slots}
+                guards[b] = images_mod.SlotGuard(batch_images_dir(p["slug"], b), filled, slots)
+            name = images_mod.name_by_title(name, titles[b])
+            if not guards[b].accept(name):
+                continue
+            folder = batch_images_dir(p["slug"], b)
+            folder.mkdir(parents=True, exist_ok=True)
+            dst = folder / name
+            dst.write_bytes(read())
+            if t:
+                try:
+                    os.utime(dst, (t, t))
+                except (OverflowError, OSError):
+                    pass
+
+    for i, f in enumerate(files):
+        name = Path(f.filename or f"image_{i}.png").name
+        if Path(name).suffix.lower() == ".zip":
+            try:
+                with zipfile.ZipFile(f.file) as z:
+                    for label, items in images_mod.zip_groups(z, Path(name).stem):
+                        place(label, items)
+            except zipfile.BadZipFile:
+                raise HTTPException(400, f"{name} is not a valid zip file")
+        elif Path(name).suffix.lower() in images_mod.IMAGE_EXTS:
+            data = await f.read()
+            t = float(times[i]) / 1000 if i < len(times) and times[i] else None
+            place("", [(name, lambda data=data: data, t)])
+    warnings: list[str] = []
+    for b in sorted(guards):
+        warnings += _scan(project_id, b)
+    return {"images": list_images(project_id), "warnings": warnings,
+            "added": {b: len(g.added) for b, g in sorted(guards.items()) if g.added},
+            "skipped": sum(len(g.skipped) for g in guards.values()), "unplaced": unplaced}
 
 
 @router.post("/{batch_no}/clear")

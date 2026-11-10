@@ -277,3 +277,54 @@ def test_slot_for_title_needs_one_clear_match():
     assert images_mod.slot_for_title("Night raid extra words.png", titles) == 3
     assert images_mod.slot_for_title("Oval.png", titles) is None  # could be 1 or 2
     assert images_mod.slot_for_title("7 - Oval Office.png", titles) is None  # numbered files keep their number
+
+
+WORDS = ("apple bridge candle desert eagle forest garden harbor island jungle kettle lantern meadow "
+         "orchard palace quarry river saddle temple valley wagon yacht zebra anchor beacon cellar "
+         "dagger ember falcon goblet").split()
+
+
+def test_bulk_upload_sorts_each_flow_download_into_its_batch(client, temp_db):
+    pid = project_with_beats(temp_db, 30)  # batch 1: 24 slots, batch 2: 6
+    beats = temp_db.list_beats(pid)
+    labels = [f"Old {w}" for w in WORDS[:30]]
+    labels[25] = labels[3]  # batch 2 slot 2 has the same title as batch 1 slot 4
+    temp_db.upsert_prompts(pid, [{"beat_id": b["id"], "batch_no": 1 + i // 24, "scene": f"A {lbl.lower()} scene.",
+                                  "label": lbl, "characters": None, "things": None}
+                                 for i, (b, lbl) in enumerate(zip(beats, labels))])
+
+    def inner(names):
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as z:
+            for n in names:
+                z.writestr(n, png_bytes())
+        return buf.getvalue()
+
+    outer = io.BytesIO()
+    with zipfile.ZipFile(outer, "w") as z:
+        # batch 2's download as a zip: "Old desert" is in both batches, "random" matches nothing
+        z.writestr("all/flow (2).zip", inner(["Old_dagger.png", "Old desert.png", "random.png"]))
+        for lbl in labels[:24]:  # batch 1's download as a folder
+            z.writestr(f"all/first/{lbl}.png", png_bytes())
+        z.writestr("Mystery.png", png_bytes())  # no title, no batch
+    r = client.post(f"/api/projects/{pid}/images/upload-all",
+                    files=[("files", ("everything.zip", outer.getvalue(), "application/zip"))]).json()
+    assert r["added"] == {"1": 24, "2": 3}
+    assert r["unplaced"] == ["Mystery.png"]
+    assert filled(r)[3] == "4 - Old desert.png"
+    b2 = filled(r, 2)
+    assert b2[:3] == ["random.png", "2 - Old desert.png", "3 - Old_dagger.png"]  # random fills a free slot
+
+    # Doing it again adds nothing.
+    again = client.post(f"/api/projects/{pid}/images/upload-all",
+                        files=[("files", ("everything.zip", outer.getvalue(), "application/zip"))]).json()
+    assert again["added"] == {} and again["skipped"] == 27
+
+
+def test_plan_group_uses_the_batch_name_when_titles_dont_match():
+    from pipeline import images as images_mod
+    titles = {1: {1: "Night raid"}, 2: {1: "Oval Office"}, 3: {1: "Night raid"}}
+    assert images_mod.plan_group("batch_02", ["a.png", "b.png"], titles) == [2, 2]
+    assert images_mod.plan_group("x", ["Oval Office.png", "c.png"], titles) == [2, 2]
+    assert images_mod.plan_group("x", ["Night raid.png"], titles) == [None]  # in two batches
+    assert images_mod.plan_group("batch 3", ["Night raid.png"], titles) == [3]

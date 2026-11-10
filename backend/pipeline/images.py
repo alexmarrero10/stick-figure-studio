@@ -14,7 +14,7 @@ import re
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Iterator
 
 from PIL import Image
 
@@ -187,6 +187,79 @@ def name_by_title(name: str, titles: dict[int, str]) -> str:
     """The file name with its slot number in front when it matches a prompt title, so it lands in that slot."""
     n = slot_for_title(name, titles)
     return numbered(name, n) if n else name
+
+
+# (file name, read its bytes, time stored in the zip or None)
+ImageEntry = tuple[str, Callable[[], bytes], "float | None"]
+
+
+def _zip_time(info: zipfile.ZipInfo) -> float | None:
+    try:
+        return datetime(*info.date_time).timestamp()
+    except (ValueError, OverflowError):
+        return None
+
+
+def zip_groups(z: zipfile.ZipFile, label: str, depth: int = 0) -> Iterator[tuple[str, list[ImageEntry]]]:
+    """The images in a zip, grouped the way Flow downloads come: every zip inside it (one batch's download)
+    and every folder of images is its own group. Inner zips are only open while their group is in use."""
+    by_dir: dict[str, list[ImageEntry]] = {}
+    for info in z.infolist():
+        path = info.filename.replace("\\", "/")
+        name = Path(path).name
+        if info.is_dir() or name.startswith(".") or "__MACOSX" in path:
+            continue
+        suffix = Path(name).suffix.lower()
+        if suffix == ".zip" and depth < 3:
+            try:
+                with zipfile.ZipFile(io.BytesIO(z.read(info))) as inner:
+                    yield from zip_groups(inner, Path(name).stem, depth + 1)
+            except zipfile.BadZipFile:
+                continue
+        elif suffix in IMAGE_EXTS:
+            by_dir.setdefault(str(Path(path).parent), []).append(
+                (name, lambda info=info: z.read(info), _zip_time(info)))
+    for folder, items in by_dir.items():
+        yield (label if folder in ("", ".") else f"{label}/{folder}"), items
+
+
+BATCH_IN_NAME = re.compile(r"batch[\s_-]*0*(\d{1,3})(?!\d)", re.I)
+
+
+def plan_group(label: str, names: list[str], titles_by_batch: dict[int, dict[int, str]]) -> list[int | None]:
+    """Which batch each image of one group belongs in, or None when it can't be told. An image named after
+    a prompt title that only one batch has goes there. The rest go to the group's batch: the one most of
+    its images match (it must hold at least half the matched ones, so a zip of every batch thrown together
+    doesn't dump strays in one place), else a batch number in the zip or folder name ("batch_03")."""
+    def matches(name: str) -> list[int]:
+        bare = numbered(name, None)  # old "7 - Title" files match by their title too
+        return [b for b, t in titles_by_batch.items() if slot_for_title(bare, t)]
+
+    hits = [matches(n) for n in names]
+    counts: dict[int, int] = {}
+    for h in hits:
+        for b in h:
+            counts[b] = counts.get(b, 0) + 1
+    matched = sum(1 for h in hits if h)
+    group: int | None = None
+    if counts:
+        best = max(counts.values())
+        top = [b for b, c in counts.items() if c == best]
+        if len(top) == 1 and best * 2 >= matched:
+            group = top[0]
+    if group is None:
+        m = BATCH_IN_NAME.search(label)
+        if m and int(m.group(1)) in titles_by_batch:
+            group = int(m.group(1))
+    out: list[int | None] = []
+    for h in hits:
+        if len(h) == 1:
+            out.append(h[0])
+        elif group is not None and (not h or group in h):
+            out.append(group)
+        else:
+            out.append(None)
+    return out
 
 
 def rename_free(path: Path, name: str) -> Path:

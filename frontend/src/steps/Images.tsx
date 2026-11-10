@@ -60,6 +60,13 @@ interface Batch {
 
 type ImagesResp = { batches: Batch[] };
 type UploadResp = { images: ImagesResp; warnings: string[]; added: number; skipped: number };
+type BulkResp = {
+  images: ImagesResp;
+  warnings: string[];
+  added: Record<string, number>;
+  skipped: number;
+  unplaced: string[];
+};
 
 export default function ImagesStep({ project, refresh }: StepProps) {
   const pid = project.id;
@@ -179,6 +186,38 @@ export default function ImagesStep({ project, refresh }: StepProps) {
       setNote(
         `Added ${r.added} image${r.added === 1 ? "" : "s"}` +
           (r.skipped ? `, skipped ${r.skipped} whose slot or file name is already filled.` : "."),
+      );
+      refresh();
+    } catch (e) {
+      fail(e);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // One zip with every batch's download inside (or several zips): each image goes to its own batch.
+  const uploadAll = async (files: FileList | File[]) => {
+    const list = Array.from(files).filter((f) => /\.(png|jpe?g|webp|zip)$/i.test(f.name));
+    if (!list.length) return;
+    setUploading(true);
+    setError(null);
+    setNote(null);
+    const fd = new FormData();
+    list.forEach((f) => fd.append("files", f));
+    fd.append("last_modified", JSON.stringify(list.map((f) => f.lastModified)));
+    try {
+      const r = await api.post<BulkResp>(`/api/projects/${pid}/images/upload-all`, fd);
+      setBatches(r.images.batches);
+      setWarnings(r.warnings || []);
+      const parts = Object.entries(r.added).map(([b, n]) => `batch ${b}: ${n}`);
+      const total = Object.values(r.added).reduce((a, n) => a + n, 0);
+      setNote(
+        `Added ${total} image${total === 1 ? "" : "s"}${parts.length ? ` (${parts.join(", ")})` : ""}.` +
+          (r.skipped ? ` Skipped ${r.skipped} whose slot or file name is already filled.` : "") +
+          (r.unplaced.length
+            ? ` Couldn't tell which batch ${r.unplaced.length} belong in, so they weren't added: ` +
+              `${r.unplaced.slice(0, 5).join(", ")}${r.unplaced.length > 5 ? "…" : ""}. Add those to their batch below.`
+            : ""),
       );
       refresh();
     } catch (e) {
@@ -318,6 +357,36 @@ export default function ImagesStep({ project, refresh }: StepProps) {
             </a>
           )}
         </div>
+        {data.prompts.length > 0 && (
+          <div
+            className={`dropzone ${uploading ? "busy" : ""}`}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (e.dataTransfer.files.length) uploadAll(e.dataTransfer.files);
+            }}
+          >
+            <div className="dropzone-row">
+              <label className="button secondary small">
+                {uploading ? "Uploading…" : "Bulk upload: all batches at once"}
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,.zip,application/zip"
+                  hidden
+                  onChange={(e) => {
+                    if (e.target.files) uploadAll(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              <span className="muted small">
+                One .zip with every batch's Flow download inside (zips or folders), or several zips at once. Each image
+                goes to its batch by its title.
+              </span>
+            </div>
+          </div>
+        )}
         <JobProgress job={job} />
         <ErrorBox error={error} onClose={() => setError(null)} />
         {!data.beats && <div className="warning">Build the beats first.</div>}

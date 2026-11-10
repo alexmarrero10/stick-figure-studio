@@ -32,7 +32,7 @@ is the active plan for RAG research and the public site (both built; deployment 
    tells Flow to reuse.
 6. **Images** (`images.py`): import. Prompts start with a title unique in its batch and **no number** (numbers
    got drawn into the pictures); Flow names files after it and the import matches the name to its slot. Unmatched
-   files go by metadata timestamp, then drag or slot-pick to fix. Old "7 - Title" files still use the number.
+   files go by metadata timestamp, then drag or slot-pick to fix. Old "7 - Title" files still use the number. **Bulk upload** (`POST images/upload-all`) takes one zip of every batch's download and sorts images by title (`images.plan_group`).
 7. **Shots + Assemble** (`shots.py`, `assemble.py`, `fcpxml.py`, `captions.py`): shots locked to word timings,
    FFmpeg renders `output/video.mp4`, plus `timeline.fcpxml` and `captions.srt`. Shots of 3 s or longer
    slowly zoom in (`video.zoom_min_seconds`, `video.zoom_per_second`, capped at 12%). The same job also
@@ -69,7 +69,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (170 passing as of 2026-11-09,
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (172 passing as of 2026-11-10,
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
