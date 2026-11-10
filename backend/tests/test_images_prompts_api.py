@@ -328,3 +328,12 @@ def test_plan_group_uses_the_batch_name_when_titles_dont_match():
     assert images_mod.plan_group("x", ["Oval Office.png", "c.png"], titles) == [2, 2]
     assert images_mod.plan_group("x", ["Night raid.png"], titles) == [None]  # in two batches
     assert images_mod.plan_group("batch 3", ["Night raid.png"], titles) == [3]
+
+
+def test_plan_group_settles_titles_shared_by_batches_from_zip_order():
+    from pipeline import images as images_mod
+    titles = {1: {1: "Back", 2: "Guard", 3: "Night raid"}, 2: {1: "Back", 2: "Guard spots tape", 3: "Sunrise"}}
+    # One flat Flow zip, newest batch first, with Flow's hex suffixes.
+    names = ["Sunrise_0a1b2c3d.jpg", "Back_11111111.jpg", "Guard_spots_tape_9f9f9f9f.jpg",
+             "Night_raid_22222222.jpg", "Back_33333333.jpg", "Guard_44444444.jpg"]
+    assert images_mod.plan_group("download", names, titles) == [2, 2, 2, 1, 1, 1]

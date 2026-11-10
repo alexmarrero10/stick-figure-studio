@@ -9,7 +9,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 172 backend tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`, not pushed).
+- 173 backend tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`, not pushed).
 - Active plan: `docs/PUBLIC_SITE_PLAN.md` (RAG research and public site built; Vercel deploy next).
 - Project 3 is Watergate ("The Piece of Tape..."), currently at the image step (221 prompts).
 
@@ -17,7 +17,8 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 - **Bulk image upload (2026-11-10):** one zip holding every batch's Flow download (inner zips or folders), or several
   zips, on the Images step. Each image goes to the batch it matches by title; unmatched images in a download go
-  to that download's batch; ones that can't be placed are listed, not added.
+  to that download's batch. In one flat zip, a title two batches share is settled by zip order (Flow lists
+  newest batch first, batch by batch). Dry run on Watergate's real 221-image zip: all 221 placed. Unplaced ones are listed.
 
 - **Image file naming (55fb5ab, 2026-11-10):** prompts start with a short title and **no number** (the
   numbered "7 - Title" made Flow draw numbers in image corners). `prompts.batch_titles` keeps titles unique per

@@ -165,22 +165,28 @@ def _words(text: str) -> str:
     return " ".join(re.sub(r"[^a-z' ]+", " ", text.lower().replace("_", " ")).split())
 
 
-def slot_for_title(name: str, titles: dict[int, str]) -> int | None:
-    """The 1-based slot whose prompt title this file is named after ("Oval Office desk.png", "Oval_Office_desk
-    (1).jpg", "Oval Office desk 7f3a.png"), or None. Files that already start with a number keep it."""
+def _slot_match(name: str, titles: dict[int, str]) -> tuple[int | None, bool]:
+    """(slot, matched the whole title exactly). See slot_for_title."""
     if label_number(name):
-        return None
+        return None, False
     stem = re.sub(r"\s*\(\d+\)$", "", Path(name).stem)
+    stem = re.sub(r"[_ ][0-9a-f]{8}$", "", stem)  # Flow adds "_fc70064b"
     k = _words(stem)
     if not k:
-        return None
+        return None, False
     keys = {n: _words(t) for n, t in titles.items() if _words(t)}
     exact = [n for n, t in keys.items() if t == k]
     if len(exact) == 1:
-        return exact[0]
+        return exact[0], True
     # Flow may cut a long name short or add something after it.
     near = [n for n, t in keys.items() if k.startswith(t + " ") or t.startswith(k + " ")]
-    return near[0] if len(near) == 1 else None
+    return (near[0] if len(near) == 1 else None), False
+
+
+def slot_for_title(name: str, titles: dict[int, str]) -> int | None:
+    """The 1-based slot whose prompt title this file is named after ("Oval Office desk.png", "Oval_Office_desk
+    (1).jpg", "Oval_Office_desk_fc70064b.jpg"), or None. Files that already start with a number keep it."""
+    return _slot_match(name, titles)[0]
 
 
 def name_by_title(name: str, titles: dict[int, str]) -> str:
@@ -227,18 +233,26 @@ BATCH_IN_NAME = re.compile(r"batch[\s_-]*0*(\d{1,3})(?!\d)", re.I)
 
 
 def plan_group(label: str, names: list[str], titles_by_batch: dict[int, dict[int, str]]) -> list[int | None]:
-    """Which batch each image of one group belongs in, or None when it can't be told. An image named after
-    a prompt title that only one batch has goes there. The rest go to the group's batch: the one most of
-    its images match (it must hold at least half the matched ones, so a zip of every batch thrown together
-    doesn't dump strays in one place), else a batch number in the zip or folder name ("batch_03")."""
-    def matches(name: str) -> list[int]:
-        bare = numbered(name, None)  # old "7 - Title" files match by their title too
-        return [b for b, t in titles_by_batch.items() if slot_for_title(bare, t)]
+    """Which batch each image of one group (names in zip order) belongs in, or None when it can't be told.
 
-    hits = [matches(n) for n in names]
+    1. An image named after a prompt title that only one batch has goes there (exact title matches beat
+       partial ones: "Guard spots tape" is batch 9's title, not batch 2's "Guard").
+    2. A title several batches share goes to the batch of its nearest placed neighbours in the zip (Flow
+       lists a download batch by batch), else the group's batch, as long as that slot is still free.
+    3. An image matching no title goes to the group's batch: the one most of its images match (holding at
+       least half the matched ones, so a zip of every batch thrown together doesn't dump strays in one
+       place), else a batch number in the zip or folder name ("batch_03"), else the batch both its
+       neighbours are in."""
+    def candidates(name: str) -> list[tuple[int, int]]:
+        bare = numbered(name, None)  # old "7 - Title" files match by their title too
+        found = [(b, *_slot_match(bare, t)) for b, t in titles_by_batch.items()]
+        exact = [(b, s) for b, s, ex in found if s and ex]
+        return exact or [(b, s) for b, s, _ in found if s]
+
+    hits = [candidates(n) for n in names]
     counts: dict[int, int] = {}
     for h in hits:
-        for b in h:
+        for b, _ in h:
             counts[b] = counts.get(b, 0) + 1
     matched = sum(1 for h in hits if h)
     group: int | None = None
@@ -251,14 +265,33 @@ def plan_group(label: str, names: list[str], titles_by_batch: dict[int, dict[int
         m = BATCH_IN_NAME.search(label)
         if m and int(m.group(1)) in titles_by_batch:
             group = int(m.group(1))
-    out: list[int | None] = []
-    for h in hits:
-        if len(h) == 1:
-            out.append(h[0])
-        elif group is not None and (not h or group in h):
-            out.append(group)
-        else:
-            out.append(None)
+
+    out: list[int | None] = [None] * len(names)
+    used: set[tuple[int, int]] = set()
+    for i, h in enumerate(hits):
+        if len(h) == 1 and h[0] not in used:
+            out[i] = h[0][0]
+            used.add(h[0])
+
+    def neighbours(i: int) -> list[int]:
+        before = next((out[j] for j in range(i - 1, -1, -1) if out[j] is not None), None)
+        after = next((out[j] for j in range(i + 1, len(out)) if out[j] is not None), None)
+        return [b for b in (before, after) if b is not None]
+
+    for i, h in enumerate(hits):
+        if out[i] is not None:
+            continue
+        near = neighbours(i)
+        if h:
+            free = [c for c in h if c not in used]
+            pick = next((c for b in [*near, group] for c in free if c[0] == b), None)
+            if pick:
+                out[i] = pick[0]
+                used.add(pick)
+        elif group is not None:
+            out[i] = group
+        elif len(near) == 2 and near[0] == near[1]:
+            out[i] = near[0]
     return out
 
 
