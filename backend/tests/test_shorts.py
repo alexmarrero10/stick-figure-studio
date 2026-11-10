@@ -206,8 +206,8 @@ def test_short_render_is_vertical_and_cuts_at_59_seconds(tmp_path):
         assert L["text_y"] > L["img_top"] + L["img_h"]
         left = f.crop((0, L["text_y"] - 30, 540, L["text_y"] + 30)).convert("L")
         right = f.crop((900, L["text_y"] - 30, 1080, L["text_y"] + 30)).convert("L")
-        assert left.getextrema()[0] < 80 and right.getextrema()[0] > 200
-        assert f.getpixel((540, 40)) == (247, 244, 236)  # the rest is background
+        assert left.getextrema()[1] > 200 and right.getextrema()[1] < 60  # white name on black
+        assert f.getpixel((540, 40)) == (0, 0, 0)  # the rest is black background
 
 
 # --- 4b. Assemble makes the Short too ------------------------------------------------

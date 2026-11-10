@@ -15,6 +15,9 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Short background is black** with a white channel name (`shorts.background`, `shorts.text_color`, both on
+  Settings). Applies on the next Assemble.
+
 - **Bulk image upload (2026-11-10):** one zip holding every batch's Flow download (inner zips or folders), or several
   zips, on the Images step. Each image goes to the batch it matches by title; unmatched images in a download go
   to that download's batch. In one flat zip, a title two batches share is settled by zip order (Flow lists

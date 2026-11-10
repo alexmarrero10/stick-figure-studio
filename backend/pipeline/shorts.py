@@ -2,7 +2,7 @@
 
 The Short reuses the main video's shots and voice from the start up to the cliffhanger sentence
 that ends between `min_seconds` and `max_seconds` (50-70 by default), and stops right there. Each 16:9 picture is trimmed a little at the sides, scaled to the phone's width and
-centred on the paper-coloured background; the channel name sits just under it, on the left.
+centred on a black background (shorts.background); the channel name sits just under it, on the left.
 """
 from __future__ import annotations
 
@@ -137,7 +137,7 @@ def render_frame(image: str | None, cfg: dict[str, Any], bg: str, channel: str, 
         while size > 28 and d.textlength(channel, font=font) > L["w"] - 2 * L["text_x"]:
             size -= 4
             font = _font(size)
-        d.text((L["text_x"], L["text_y"]), channel, fill=_hex_to_rgb(cfg.get("text_color", "#1A1A1A")),
+        d.text((L["text_x"], L["text_y"]), channel, fill=_hex_to_rgb(cfg.get("text_color", "#FFFFFF")),
                font=font, anchor="lm")
     canvas.save(dst)
 
@@ -157,7 +157,7 @@ def render(shots: list[dict[str, Any]], audio: Path, out: Path, video_cfg: dict[
     frames_dir = work_dir / "frames"
     frames_dir.mkdir(parents=True)
     channel = short_cfg.get("channel_name", "") or ""
-    bg = video_cfg.get("background", "#F7F4EC")
+    bg = short_cfg.get("background", "#000000")  # its own color, not the main video's paper color
 
     frame_for: dict[str | None, Path] = {}
     for s in shots:

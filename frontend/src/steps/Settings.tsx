@@ -167,6 +167,8 @@ const FIELDS: {
   { section: "shorts", key: "channel_name", label: "Channel name on the Short", help: "Just the name, e.g. NextDoorHistorian; the @ is added under the video" },
   { section: "shorts", key: "min_seconds", label: "Shortest Short (s)", type: "number", help: "The Short ends on the best cliffhanger between these two lengths" },
   { section: "shorts", key: "max_seconds", label: "Longest Short (s)", type: "number", help: "With no sentence ending in between, it cuts off here" },
+  { section: "shorts", key: "background", label: "Short background color", help: "Around the picture, e.g. #000000 for black" },
+  { section: "shorts", key: "text_color", label: "Channel name color", help: "e.g. #FFFFFF for white" },
 ];
 
 const KEY_HELP: Record<string, string> = {

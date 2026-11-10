@@ -36,7 +36,7 @@ is the active plan for RAG research and the public site (both built; deployment 
 7. **Shots + Assemble** (`shots.py`, `assemble.py`, `fcpxml.py`, `captions.py`): shots locked to word timings,
    FFmpeg renders `output/video.mp4`, plus `timeline.fcpxml` and `captions.srt`. Shots of 3 s or longer
    slowly zoom in (`video.zoom_min_seconds`, `video.zoom_per_second`, capped at 12%). The same job also
-   renders the vertical Short (`shorts.py`, `output/short.mp4`): 50-70 s, ending on the best cliffhanger
+   renders the vertical Short (`shorts.py`, `output/short.mp4`): 50-70 s, black background (`shorts.background`), ending on the best cliffhanger
    (Claude picks it once per voice-over), channel name under the pictures. If the Short fails, the video is kept.
 8. **Publish** (`publish.py`): titles, description with chapters and sources, tags, thumbnail prompts.
 9. **Your video site** (`site_publish.py`, UI step 7, `Site.tsx`): stores the video and its narration in
