@@ -345,3 +345,9 @@ def test_script_prompt_follows_the_channel_style():
         assert idea in s, idea
     assert "invite a subscribe" not in s  # the ending is a bookend or a question now, not a subscribe plea
     assert "CHANNEL STYLE" in script.REVISE_SYSTEM  # revisions keep the same style
+
+
+def test_script_retells_clumsy_quotes_in_plain_words():
+    from pipeline import script
+    assert "two persons" in script.SCRIPT_SYSTEM and "one by one" in script.SCRIPT_SYSTEM
+    assert "sound natural said aloud" in script.REVISE_SYSTEM or "sound natural said aloud" in script.SCRIPT_SYSTEM

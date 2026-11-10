@@ -280,6 +280,10 @@ WRITING FOR THE EAR AND THE EYE
 an image a stick figure can act out (a man counting cash, a car skidding, two people shaking hands).
 - Use real names, dates and numbers from the research. Do not invent quotes; if you paraphrase \
 someone, say so ("he later said something like...").
+- Only quote words that sound natural said aloud today. When a real quote has odd or clumsy wording \
+("one person, then two persons, then three persons came out"), tell it in your own plain words \
+instead ("the men came out one at a time"). Never count people as "1 person, 2 persons"; say \
+"one man", "two of them", "five men", "one by one".
 - Never state disputed claims as fact. Treat sensitive events with respect. Keep it advertiser-friendly: \
 no graphic violence or gore, no sexual content, no profanity.
 
