@@ -95,3 +95,27 @@ def test_zoomed_segment_keeps_exact_frames_and_moves_in(tmp_path):
     # The plain still that follows doesn't move.
     still_a, still_b = _frame_at(out, 150, tmp_path / "c.png"), _frame_at(out, 209, tmp_path / "d.png")
     assert still_a.getpixel((22, 180)) < 100 and still_b.getpixel((22, 180)) < 100
+
+
+def test_zoom_moves_smoothly_without_shaking(tmp_path):
+    """A dot near the corner must drift outward a little every frame, never back (zoompan's whole-pixel
+    crops made it jump back and forth)."""
+    W, H, N = 640, 360, 90
+    frame = tmp_path / "dot.png"
+    im = Image.new("RGB", (W, H), "white")
+    ImageDraw.Draw(im).ellipse((94, 64, 106, 76), fill="black")
+    im.save(frame)
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-loop", "1", "-framerate", "30", "-i", str(frame),
+                          "-frames:v", str(N), "-vf", assemble.zoom_filter(N, 0.1, (W, H), 30) +
+                          ",crop=120:100:40:20,format=gray", "-f", "rawvideo", "-"],
+                         capture_output=True, check=True).stdout
+    size = 120 * 100
+    xs = []
+    for k in range(len(raw) // size):
+        f = raw[k * size:(k + 1) * size]
+        total = sum(255 - b for b in f)
+        xs.append(sum((255 - b) * (i % 120) for i, b in enumerate(f)) / total)
+    assert len(xs) == N
+    steps = [b - a for a, b in zip(xs, xs[1:])]
+    assert all(s < 0 for s in steps)  # always moving outward (left), never back
+    assert max(steps) - min(steps) < 0.15  # and at an even pace

@@ -102,12 +102,15 @@ def render(shots: list[dict[str, Any]], audio: Path, out: Path, cfg: dict[str, A
 
 
 def zoom_filter(n_frames: int, zoom: float, size: tuple[int, int], fps: int) -> str:
-    """A slow, centered zoom-in from 1.0 to 1 + zoom over the shot. The frame is upscaled 2x first so
-    zoompan's whole-pixel steps land on half pixels of the output and the motion doesn't wobble."""
+    """A slow, centered zoom-in from 1.0 to 1 + zoom over the shot. Uses `perspective` (sub-pixel, cubic)
+    rather than zoompan: zoompan crops on whole pixels, so the picture jittered back and forth (measured:
+    a point stepped -0.47..+0.16 px per frame with zoompan, a steady -0.30..-0.39 px with this)."""
     w, h = size
-    return (f"scale={w * 2}:{h * 2}:flags=lanczos,"
-            f"zoompan=z='1+{zoom:.4f}*on/{max(1, n_frames - 1)}':x='iw/2-iw/zoom/2':y='ih/2-ih/zoom/2'"
-            f":d=1:s={w}x{h}:fps={fps}")
+    # a = how far each edge moves in, as a share of the frame: (1 - 1/zoom_now) / 2
+    a = f"((1-1/(1+{zoom:.4f}*on/{max(1, n_frames - 1)}))/2)"
+    return (f"scale={w}:{h}:flags=lanczos,"
+            f"perspective=x0='W*{a}':y0='H*{a}':x1='W*(1-{a})':y1='H*{a}'"
+            f":x2='W*{a}':y2='H*(1-{a})':x3='W*(1-{a})':y3='H*(1-{a})':interpolation=cubic:eval=frame")
 
 
 def encode(stills: list[tuple], audio: Path, out: Path, fps: int, crf: str, work_dir: Path,
