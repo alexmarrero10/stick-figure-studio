@@ -108,7 +108,8 @@ def test_chat_streams_an_answer_from_narration_and_sources(client):
     assert "".join(e.get("text", "") for e in ev).strip() == "He found tape at [3:42]."
     assert ev[-1] == {"type": "done", "cached": False}
     system, contents = site.app.state.gemini.prompts[0]
-    assert "Do not use outside knowledge" in system
+    assert "Answer from the material given below first" in system
+    assert "general history knowledge, but say so" in system  # topic questions beyond the video, labeled
     prompt = contents[-1]["parts"][0]["text"]
     assert "[3:42] He finds tape on the door latch." in prompt  # timestamps from the narration
     assert "[0:00] Frank Wills walks his rounds." in prompt

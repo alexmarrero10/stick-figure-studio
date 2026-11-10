@@ -29,12 +29,15 @@ either the passage that holds the right answer, or "UNANSWERABLE" when the video
 
 For each item give:
 - grounded: "yes" if every factual claim in the answer is supported by the passages, "partly" if some \
-claims are not, "no" if the main claims are not. Saying "the video doesn't cover that" counts as grounded.
+claims are not, "no" if the main claims are not. Saying "the video doesn't cover that" counts as grounded, \
+and so do claims the answer clearly labels as general knowledge (e.g. "the video and its sources don't \
+cover that, but from general history: ...") as long as they aren't false.
 - correct: for answerable questions, "yes" if it answers the question in line with the expected \
 passage, "partly" if incomplete or slightly off, "no" if wrong or it wrongly said the video doesn't \
 cover it. "n/a" for unanswerable questions.
 - handled_unanswerable: for UNANSWERABLE items, "yes" if it said the video doesn't cover it (it may add \
-related facts that ARE in the passages), "no" if it gave an answer not found in the passages. "n/a" otherwise.
+related facts from the passages, or a general-knowledge answer clearly labeled as such), "no" if it \
+presented an answer not found in the passages as if the video or its sources said it. "n/a" otherwise.
 - note: one short sentence on the main problem, or "" if none."""
 
 JUDGE_SCHEMA = obj({"grades": arr(obj({"id": INT, "grounded": STR, "correct": STR,
