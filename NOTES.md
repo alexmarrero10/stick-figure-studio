@@ -9,17 +9,28 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 179 backend tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`, not pushed). All commits
-  are pushed to `origin/main` as of 2026-11-11.
+- 179 backend tests and 18 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
+  not pushed). The studio redesign commit (2026-11-11) and the notes commit before it are local, not pushed.
 - **Public site is live: https://stick-figure-studio.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`).
   Vercel redeploys automatically on every push to `main`; check a build with
   `gh api repos/alexmarrero10/stick-figure-studio/commits/<sha>/status`. No Vercel CLI installed.
   Projects 1, 2 and 3 (Watergate) are published on it.
-- Project 3 is Watergate ("How Did the Watergate Files Take Down Nixon?"), at the image step (221 prompts, no
-  images uploaded yet). Bulk upload of the user's `Downloads\download.zip` (221 images) was dry-run checked:
-  every image lands in its slot.
+- Project 3 is Watergate ("The Piece of Tape That Brought Down a President"): all 221 images in, assembled,
+  published to the site.
 
 ## Recently done
+
+- **Studio redesign (2026-11-11)** in the public site's look (navy ink, cool paper, red marker for the current
+  step, yellow highlighter for the playing beat, Bricolage Grotesque + Atkinson Hyperlegible, dark mode). New
+  top bar with the stick-figure mark, a connected step track (done = navy check, needs attention = yellow,
+  current = red ring, `aria-current="step"`), line icons (`Icon` in `components.tsx`) instead of text arrows,
+  quieter project chips. Only CSS class styling changed in the steps; behavior is the same.
+- **Studio browser tests** (`frontend/e2e/`, Playwright with the Edge that ships with Windows):
+  `cd frontend && npm run test:e2e` builds, serves the build with `vite preview` on port 4179 and runs 18 tests
+  against a **fake backend** (`e2e/mock.ts` answers every `/api` call from `e2e/fixtures.json`), so they never
+  touch the real server, app.db, config.yaml or .env. A test fails on any page error or any API call with no
+  answer. Refresh the data with `node e2e/record-fixtures.mjs 1` while the studio runs (GET only; trims long
+  lists, replaces keys with fakes, strips local folder names). New step = add its GET paths to the recorder.
 
 - **Site chatbot answers beyond the video directly** (no "the video doesn't cover that, but..."); the
   evals judge (`evals/answers.py`) grades that way too. New tests: 3 offline in `site/server/tests` (each

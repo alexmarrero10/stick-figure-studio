@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import { ErrorBox, SecretInput } from "../components";
+import { ErrorBox, SecretInput, Icon } from "../components";
 import { Settings } from "../types";
 
 const FIELDS: {
@@ -304,7 +304,7 @@ export default function SettingsPage() {
           <ul className="small">
             {[ragCheck.gemini, ragCheck.database].map((r, i) => (
               <li key={i} className={r.ok ? "good" : "bad"}>
-                {r.ok ? "✓" : "✗"} {r.message}
+                <Icon name={r.ok ? "check" : "x"} size={14} /> {r.message}
               </li>
             ))}
           </ul>

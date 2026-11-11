@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { api, fmtTime, streamSSE } from "../api";
 import { StepProps } from "../App";
 import { findTells } from "../aiTells";
-import { ErrorBox, JobProgress, useJob } from "../components";
+import { ErrorBox, JobProgress, useJob, Icon } from "../components";
 import { ChatMessage, Edit, FORMAT_LABELS, ScriptVersion, VideoFormat } from "../types";
 import { locateText } from "../textarea";
 
@@ -439,7 +439,7 @@ export default function ScriptStep({ project, refresh }: StepProps) {
                 Save
               </button>
               <a className="button" href={`#/p/${pid}/beats`}>
-                Next: beats →
+                Next: beats <Icon name="next" />
               </a>
             </div>
           </div>
@@ -551,7 +551,7 @@ function Chat({
       <div className="row between">
         <h2>Ask Claude to change the script</h2>
         <button className="link" onClick={onClose}>
-          Close ✕
+          <Icon name="x" /> Close
         </button>
       </div>
       <div className="messages">

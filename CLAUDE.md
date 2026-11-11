@@ -46,7 +46,8 @@ is the plan for RAG research and the public site (both built and deployed).
 
 - **Backend:** Python 3.11+, FastAPI, uvicorn, SQLite (raw `sqlite3`, numbered SQL migrations), Pillow,
   httpx, PyYAML, python-dotenv. FFmpeg on PATH does all rendering.
-- **Frontend:** React 18 + TypeScript + Vite 5. No UI library, no router library, plain CSS (`styles.css`).
+- **Frontend:** React 18 + TypeScript + Vite 5. No UI library, no router library, plain CSS (`styles.css`,
+  same look as the public site: tokens at the top, Bricolage Grotesque + Atkinson Hyperlegible from Google Fonts).
 - **Claude:** two providers with the same interface (`stream_text` / `complete` / `json`):
   - `claude_code` (default): runs the local `claude -p` CLI on the user's **Claude Pro subscription**.
     The user has no API key. `ANTHROPIC_API_KEY` is stripped from the subprocess env so it never bills the API.
@@ -73,6 +74,9 @@ All commands from the project root (Windows; PowerShell or Git Bash).
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
+- **Studio browser tests:** `cd frontend && npm run test:e2e` (builds, then 18 Playwright tests in `e2e/`
+  on Windows' Edge against a fake backend from `e2e/fixtures.json`; never the real server or data, ~10 s).
+  Run after any UI change. Refresh fixtures with `node e2e/record-fixtures.mjs 1` (studio running).
 - **Public site:** `cd site/web && npm run build`, then
   `.venv\Scripts\python.exe -m uvicorn app:app --app-dir site/server --port 8790` (reuses the root `.env`).
   Tests: `cd site/server && ../../.venv/Scripts/python -m pytest -q` (19 passing). Self-contained: it doesn't

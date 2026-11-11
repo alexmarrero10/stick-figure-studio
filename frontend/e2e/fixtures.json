@@ -1,0 +1,2464 @@
+{
+ "/api/projects": [
+  {
+   "id": 3,
+   "slug": "the-piece-of-tape-that-brought-down-a-president",
+   "title": "The Piece of Tape That Brought Down a President",
+   "idea_id": 23,
+   "created_at": "2026-11-06 07:07:06",
+   "updated_at": "2026-11-10 23:37:34",
+   "format": "story",
+   "archived": 0,
+   "status": {
+    "research": true,
+    "script": true,
+    "script_words": 1645,
+    "beats": 221,
+    "beats_stale": false,
+    "voice": true,
+    "voice_stale": false,
+    "prompts": 221,
+    "prompts_missing": 0,
+    "images": 221,
+    "images_filled": 221,
+    "images_complete": true,
+    "shots": 221,
+    "publish": true,
+    "short": true,
+    "site": true
+   }
+  },
+  {
+   "id": 2,
+   "slug": "how-a-hand-drawn-family-tree-found-saddam-in-a-hole",
+   "title": "How a Hand-Drawn Family Tree Found Saddam in a Hole",
+   "idea_id": 22,
+   "created_at": "2026-11-02 04:31:18",
+   "updated_at": "2026-11-03 23:07:22",
+   "format": "story",
+   "archived": 0,
+   "status": {
+    "research": true,
+    "script": true,
+    "script_words": 1840,
+    "beats": 238,
+    "beats_stale": false,
+    "voice": true,
+    "voice_stale": false,
+    "prompts": 238,
+    "prompts_missing": 0,
+    "images": 238,
+    "images_filled": 238,
+    "images_complete": true,
+    "shots": 238,
+    "publish": true,
+    "short": true,
+    "site": true
+   }
+  },
+  {
+   "id": 1,
+   "slug": "the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste",
+   "title": "The Inuit Knew Where Franklin's Lost Ships Were. No One Listened",
+   "idea_id": 1,
+   "created_at": "2026-10-12 22:06:05",
+   "updated_at": "2026-10-28 23:13:36",
+   "format": "story",
+   "archived": 0,
+   "status": {
+    "research": true,
+    "script": true,
+    "script_words": 1463,
+    "beats": 153,
+    "beats_stale": false,
+    "voice": true,
+    "voice_stale": false,
+    "prompts": 153,
+    "prompts_missing": 0,
+    "images": 153,
+    "images_filled": 153,
+    "images_complete": true,
+    "shots": 151,
+    "publish": true,
+    "short": true,
+    "site": true
+   }
+  }
+ ],
+ "/api/ideas?saved=true": [],
+ "/api/settings": {
+  "config": {
+   "claude": {
+    "provider": "claude_code",
+    "code_model": "opus",
+    "code_fallback_model": "sonnet",
+    "model": "claude-opus-5-5",
+    "effort": "high",
+    "use_fallbacks": true,
+    "web_search": true,
+    "research_depth": "thorough"
+   },
+   "script": {
+    "target_words_min": 1550,
+    "target_words_max": 1650,
+    "wpm_estimate": 180
+   },
+   "beats": {
+    "min_words": 2,
+    "max_words": 13
+   },
+   "voice": {
+    "voice_id": "nPczCjzI2devNBz1zQrb",
+    "voice_name": "Brian",
+    "model_id": "eleven_v4",
+    "output_format": "mp3_44100_128",
+    "chunk_chars": 4000,
+    "stability": 0.5,
+    "similarity_boost": 0.9,
+    "style": 0,
+    "trim_pauses": true,
+    "max_pause_s": 0.45,
+    "speed": 1.2
+   },
+   "prompts": {
+    "batch_size": 24,
+    "reference_min_images": 8
+   },
+   "shots": {
+    "cut_lead_s": 0.08,
+    "min_shot_s": 0.5,
+    "tail_s": 0.6
+   },
+   "video": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "crf": 18,
+    "background": "#F7F4EC",
+    "zoom_min_seconds": 3,
+    "zoom_per_second": 0.015
+   },
+   "publish": {
+    "general_tags": [
+     "animation",
+     "history",
+     "education",
+     "stick figure animation",
+     "history explained",
+     "documentary",
+     "true story"
+    ]
+   },
+   "shorts": {
+    "channel_name": "NextDoorHistorian",
+    "min_seconds": 50,
+    "max_seconds": 70,
+    "width": 1080,
+    "height": 1920,
+    "image_aspect": 1.5,
+    "margin": 24,
+    "text_color": "#FFFFFF",
+    "text_size": 46,
+    "background": "#000000"
+   },
+   "social": {
+    "meta_graph_version": "v24.0",
+    "youtube_privacy": "public",
+    "tiktok_privacy": "PUBLIC_TO_EVERYONE"
+   },
+   "rag": {
+    "enabled": true,
+    "docs_min": 10,
+    "docs_max": 15,
+    "chunk_words": 300,
+    "overlap_words": 50,
+    "brief_chunks": 30,
+    "script_chunks": 10,
+    "use_shared": true,
+    "owner": "owner"
+   }
+  },
+  "keys": {
+   "ANTHROPIC_API_KEY": null,
+   "ELEVENLABS_API_KEY": "test…1234",
+   "GEMINI_API_KEY": "test…1234",
+   "SUPABASE_DB_URL": "test…1234",
+   "SITE_DATABASE_URL": null
+  }
+ },
+ "/api/settings/health": {
+  "version": "1.0.0",
+  "ffmpeg": true,
+  "claude_provider": "claude_code",
+  "claude_code": {
+   "installed": true,
+   "logged_in": true,
+   "method": "claude.ai",
+   "error": null
+  },
+  "anthropic_key": false,
+  "elevenlabs_key": true,
+  "voice": {
+   "voice_id": "nPczCjzI2devNBz1zQrb",
+   "name": "Brian - Deep, Resonant and Comforting"
+  },
+  "voice_error": null
+ },
+ "/api/settings/voices": [
+  {
+   "voice_id": "pNInz6obpgDQGcFmaJgB",
+   "name": "Adam - Dominant, Firm",
+   "use_case": "social_media",
+   "description": "A bright tenor pitch that immediately cuts through. The delivery is brash and openly confident, speaking with unwavering certainty and a slightly aggressive self-assurance."
+  },
+  {
+   "voice_id": "Xb7hH8MSUJpSbSDYk0k2",
+   "name": "Alice - Clear, Engaging Educator",
+   "use_case": "informative_educational",
+   "description": "Clear and engaging, friendly woman with a British accent suitable for e-learning."
+  },
+  {
+   "voice_id": "hpp4J3VqNfWAUOO0d1Us",
+   "name": "Bella - Professional, Bright, Warm",
+   "use_case": "informative_educational",
+   "description": "This voice is warm, bright, and professional, characterized by a Standard American accent and a polished, narrative quality. It features a medium-high pitch with crisp diction and a deliberate, rhythmic pace that makes it highly intelligible and engaging for long-form listening."
+  },
+  {
+   "voice_id": "pqHfZKP75CvOlQylNhV4",
+   "name": "Bill - Wise, Mature, Balanced",
+   "use_case": "advertisement",
+   "description": "Friendly and comforting voice ready to narrate your stories."
+  },
+  {
+   "voice_id": "nPczCjzI2devNBz1zQrb",
+   "name": "Brian - Deep, Resonant and Comforting",
+   "use_case": "social_media",
+   "description": "Middle-aged man with a resonant and comforting tone. Great for narrations and advertisements."
+  },
+  {
+   "voice_id": "N2lVS1w4EtoT3dr4eOWO",
+   "name": "Callum - Husky Trickster",
+   "use_case": "characters_animation",
+   "description": "Deceptively gravelly, yet unsettling edge."
+  },
+  {
+   "voice_id": "IKne3meq5aSn9XLyUdCD",
+   "name": "Charlie - Deep, Confident, Energetic",
+   "use_case": "conversational",
+   "description": "A young Australian male with a confident and energetic voice."
+  },
+  {
+   "voice_id": "iP95p4xoKVk53GoZ742B",
+   "name": "Chris - Charming, Down-to-Earth",
+   "use_case": "conversational",
+   "description": "Natural and real, this down-to-earth voice is great across many use-cases."
+  },
+  {
+   "voice_id": "J6QyEgpWnUhfFeU38ghG",
+   "name": "Craig",
+   "use_case": "characters_animation",
+   "description": "the storyteller with a captivating and inviting tone."
+  },
+  {
+   "voice_id": "onwK4e9ZLuTAKqWW03F9",
+   "name": "Daniel - Steady Broadcaster",
+   "use_case": "informative_educational",
+   "description": "A strong voice perfect for delivering a professional broadcast or news story."
+  },
+  {
+   "voice_id": "Z2fsAwk7IblvPhYzfslC",
+   "name": "Davis - Casual Deeper American Male",
+   "use_case": "narrative_story",
+   "description": "Natural sounding late 20's American Male."
+  },
+  {
+   "voice_id": "cjVigY5qzO86Huf0OWal",
+   "name": "Eric - Smooth, Trustworthy",
+   "use_case": "conversational",
+   "description": "A smooth tenor pitch from a man in his 40s - perfect for agentic use cases."
+  }
+ ],
+ "/api/projects/1": {
+  "id": 1,
+  "slug": "the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste",
+  "title": "The Inuit Knew Where Franklin's Lost Ships Were. No One Listened",
+  "idea_id": 1,
+  "created_at": "2026-10-12 22:06:05",
+  "updated_at": "2026-10-28 23:13:36",
+  "format": "story",
+  "archived": 0,
+  "idea": {
+   "id": 1,
+   "project_id": 1,
+   "title": "The Inuit Knew Where Franklin's Lost Ships Were. No One Listened",
+   "hook": "In 1854, a Scottish doctor named John Rae came home from the Arctic with a silver fork bearing Sir John Franklin's family crest, and a story from the Inuit that Victorian England flatly refused to believe.",
+   "why_it_works": "Most Franklin videos stop at \"129 men vanished.\" This one starts from a newer question: why did it take 170 years to find ships whose location Inuit witnesses had been describing all along? The video builds from Charles Dickens publicly attacking Rae and the Inuit, through dozens of failed searches, to the payoff: Inuit historian Louie Kamookak's oral-history research helping point searchers to HMS Erebus in 2014, and Inuk ranger Sammy Kogvik's memory of a mast sticking out of the sea ice leading straight to HMS Terror in 2016. The cannibalism evidence should be mentioned once, briefly and respectfully, and never shown.",
+   "category": "exploration / mystery",
+   "era": "1845–1859 (the expedition and the early searches), with the payoff in 2014–2016 (the wrecks found) and a 2024 epilogue (James Fitzjames identified through DNA)",
+   "documentation": "This is a real story with very strong sources: Rae's 1854 Admiralty report and Dickens's essays in Household Words, McClintock's 1859 recovery of the Victory Point note, Parks Canada's records of the 2014 Erebus and 2016 Terror finds, and Dorothy Harley Eber's and Louie Kamookak's published collections of Inuit oral testimony. Check names and dates for the 2014–2016 searches against Parks Canada and Arctic Research Foundation material before scripting.",
+   "source": "user",
+   "saved": 0,
+   "created_at": "2026-10-12 22:05:36",
+   "format": "story"
+  },
+  "status": {
+   "research": true,
+   "script": true,
+   "script_words": 1463,
+   "beats": 153,
+   "beats_stale": false,
+   "voice": true,
+   "voice_stale": false,
+   "prompts": 153,
+   "prompts_missing": 0,
+   "images": 153,
+   "images_filled": 153,
+   "images_complete": true,
+   "shots": 151,
+   "publish": true,
+   "short": true,
+   "site": true
+  },
+  "jobs": []
+ },
+ "/api/projects/1/research": {
+  "id": 1,
+  "project_id": 1,
+  "content": "## Summary\nIn 1845 Sir John Franklin took HMS *Erebus* and HMS *Terror* and 129 men into the Canadian Arctic to look for the Northwest Passage. None of them came home. In 1854 John Rae, an Orkney-born doctor working for the Hudson's Bay Company, brought back relics he had bought from Inuit, including a silver fork with Franklin's crest. He also brought their account that the last survivors had starved and turned to cannibalism. Lady Jane Franklin and Charles Dickens attacked the account and the Inuit who gave it. A note found in 1859 confirmed the timeline, and scientific work since the 1990s has confirmed the cannibalism. Inuit testimony collected over 160 years was later used to help find *Erebus* in 2014. An Inuk Ranger's memory led straight to *Terror* in 2016.\n\n## Timeline\n- **19 May 1845**: *Erebus* and *Terror* leave Greenhithe on the Thames. About 134 men sail. Five are sent home from Greenland, which leaves 129.\n- **Late July 1845**: Whalers see the ships in Baffin Bay. Nobody outside the expedition ever sees them again. (Sources give dates from 26 to 31 July.)\n- **Winter 1845–46**: The expedition winters at Beechey Island, where three men die and are buried. Searchers find the graves on 27 August 1850.\n- **12 Sept 1846**: The ships become stuck in the ice off northwest King William Island.\n- **28 May 1847**: Gore and Des Voeux leave a note in a cairn that ends \"All well.\"\n- **11 June 1847**: Sir John Franklin dies.\n- **22 April 1848**: The crews abandon the ships. O…",
+  "sources": [
+   {
+    "title": "https://www.rmg.co.uk/collections/objects/rmgc-object-2292",
+    "url": "https://www.rmg.co.uk/collections/objects/rmgc-object-2292"
+   },
+   {
+    "title": "https://www.rmg.co.uk/collections/objects/rmgc-object-2379",
+    "url": "https://www.rmg.co.uk/collections/objects/rmgc-object-2379"
+   },
+   {
+    "title": "https://www.archive.org/download/melancholyfateof00raej/melancholyfateof00raej_bw.pdf",
+    "url": "https://www.archive.org/download/melancholyfateof00raej/melancholyfateof00raej_bw.pdf"
+   },
+   {
+    "title": "https://arctonauts.com/?p=1922",
+    "url": "https://arctonauts.com/?p=1922"
+   },
+   {
+    "title": "https://canadianmysteries.ca/sites/franklin/archive/text/DickensHouseholdWords1_en.htm",
+    "url": "https://canadianmysteries.ca/sites/franklin/archive/text/DickensHouseholdWords1_en.htm"
+   },
+   {
+    "title": "https://www.djo.org.uk/indexes/articles/the-lost-arctic-voyagers.html",
+    "url": "https://www.djo.org.uk/indexes/articles/the-lost-arctic-voyagers.html"
+   },
+   {
+    "title": "https://parks.canada.ca/lhn-nhs/nu/epaveswrecks/culture/histoire-history/suivant-next",
+    "url": "https://parks.canada.ca/lhn-nhs/nu/epaveswrecks/culture/histoire-history/suivant-next"
+   },
+   {
+    "title": "https://parks.canada.ca/lhn-nhs/nu/epaveswrecks/culture/archeologie-archeology/decouvertes-discoveries/erebus",
+    "url": "https://parks.canada.ca/lhn-nhs/nu/epaveswrecks/culture/archeologie-archeology/decouvertes-discoveries/erebus"
+   },
+   {
+    "title": "https://www.parks.canada.ca/lhn-nhs/nu/epaveswrecks/culture/inuit/qaujimajatuqangit",
+    "url": "https://www.parks.canada.ca/lhn-nhs/nu/epaveswrecks/culture/inuit/qaujimajatuqangit"
+   },
+   {
+    "title": "https://www.historymuseum.ca/blog/a-very-special-piece-of-paper/",
+    "url": "https://www.historymuseum.ca/blog/a-very-special-piece-of-paper/"
+   },
+   {
+    "title": "https://canadianmysteries.ca/sites/franklin/archive/text/McClintockFox_en.htm",
+    "url": "https://canadianmysteries.ca/sites/franklin/archive/text/McClintockFox_en.htm"
+   },
+   {
+    "title": "https://nunatsiaq.com/stories/article/65674ship_director_and_inuk_ranger_tell_the_tale_of_terror/",
+    "url": "https://nunatsiaq.com/stories/article/65674ship_director_and_inuk_ranger_tell_the_tale_of_terror/"
+   }
+  ],
+  "created_at": "2026-10-12 22:10:27"
+ },
+ "/api/projects/1/sources": {
+  "rag": true,
+  "sources": []
+ },
+ "/api/projects/1/script": {
+  "id": 4,
+  "project_id": 1,
+  "text": "Picture this. London, autumn of eighteen fifty-four. A Scottish doctor named John Rae opens a bundle of Arctic relics and lifts out a small silver fork. On the back of the handle is a family crest. It belongs to Sir John Franklin, the famous explorer who sailed into the Arctic nine years earlier with two ships and one hundred and twenty-nine men, and was never seen again. Rae didn't find that fork in the snow. He bought it from Inuit hunters. And they told him a story that Victorian England flatly refused to believe.\n\nHere's the strange part. Those ships stayed lost for nearly one hundred and seventy years, even though the Inuit had been describing what happened, and roughly where, the whole time. So why did it take so long? To answer that, we have to go back to the beginning.\n\nOn May nineteenth, eighteen forty-five, HMS Erebus and HMS Terror sailed down the River Thames. Their mission was to find the Northwest Passage, a sea route over the top of North America. They were two sturdy ships, packed with supplies and led by one of Britain's most celebrated explorers. In late July, whalers in Baffin Bay spotted them. After that, nobody outside the expedition ever saw them again.\n\nYears passed with no word. Britain sent ship after ship to search. Franklin's wife, Lady Jane Franklin, pushed harder than anyone. Searchers found three graves on tiny Beechey Island, where the crews had spent their first winter. But the ships, and the men who sailed them, were simply gone.\n\nJohn Rae was…",
+  "source": "generated",
+  "instruction": null,
+  "word_count": 1463,
+  "created_at": "2026-10-12 22:21:11"
+ },
+ "/api/projects/1/script/versions": [
+  {
+   "id": 4,
+   "source": "generated",
+   "instruction": null,
+   "word_count": 1463,
+   "created_at": "2026-10-12 22:21:11"
+  },
+  {
+   "id": 3,
+   "source": "ai_revision",
+   "instruction": "Can we change the script to make it flow better. Make it something that would be easy for a middle schooler to understand",
+   "word_count": 1748,
+   "created_at": "2026-10-12 22:19:32"
+  },
+  {
+   "id": 2,
+   "source": "manual",
+   "instruction": null,
+   "word_count": 1635,
+   "created_at": "2026-10-12 22:14:45"
+  },
+  {
+   "id": 1,
+   "source": "generated",
+   "instruction": "make it interesting and something that will be captivating for viewers",
+   "word_count": 1632,
+   "created_at": "2026-10-12 22:13:27"
+  }
+ ],
+ "/api/projects/1/script/chat": [
+  {
+   "id": 1,
+   "project_id": 1,
+   "role": "user",
+   "content": "Can we change the script to make it flow better. Make it something that would be easy for a middle schooler to understand",
+   "edits": null,
+   "created_at": "2026-10-12 22:19:26"
+  },
+  {
+   "id": 2,
+   "project_id": 1,
+   "role": "assistant",
+   "content": "I've rewritten the harder parts so a middle schooler can follow along and the story moves more smoothly. All the facts and the order of events stay the same. Here's what changed:\n\n- **Hard words are now plain words.** \"Relics,\" \"informants,\" \"testimony,\" \"folklore\" and \"archive\" have been swapped for simple language. \"Admiralty chart\" is now \"Navy map,\" and \"operations director\" is now \"the man in charge of the trip.\"\n- **Quick explanations where kids might get stuck:**\n  - who the Inuit are\n  - what \"Inuk\" means\n  - why the Northwest Passage mattered\n  - what The Times was\n  - what Rae's phrase \"driven to the last resource\" meant, said gently\n  - what Dickens's word \"covetous\" means\n- **Fixed things that sound confusing out loud.** \"Ten thousand pound reward\" could sound like a weight, so it's now \"ten thousand pounds in prize money.\" Schwatka's distance now gives miles as well as kilometers. I also took out the repeated \"Rae fought back. Rae had…\"\n- **Smoother flow:** a few small transitions, and shorter sentences in the busier paragraphs.\n\nThe script is about 60 words longer, which adds roughly 20 seconds of narration.",
+   "edits": [
+    {
+     "find": "He'd bought it from Inuit hunters, and they'd told him a story along with it.",
+     "replace": "He'd bought it from Inuit hunters, the people who have lived in the Arctic for thousands of years. And they'd told him a story along with it.",
+     "reason": "Explain who the Inuit are",
+     "ok": true,
+     "error": null
+    },
+    {
+     "find": "England refused to believe that story. For the next hundred and sixty years Franklin's two ships stayed lost, even though Inuit witnesses kept describing where they were. So why did so few people listen?",
+     "replace": "England refused to believe that story. And for the next hundred and sixty years, Franklin's two ships stayed lost, even though Inuit families kept telling people where they were. So why did almost nobody listen?",
+     "reason": "Simpler wording, smoother hook",
+     "ok": true,
+     "error": null
+    },
+    {
+     "find": "Their mission was to find the Northwest Passage, the frozen shortcut over the top of North America.",
+     "replace": "Their mission was to find the Northwest Passage, a sea route through the frozen islands at the top of North America. Whoever found it would have a shortcut from Europe to Asia.",
+     "reason": "Explain why the mission mattered",
+     "ok": true,
+     "error": null
+    },
+    {
+     "find": "At Pelly Bay he met an Inuk hunter named In-nook-poo-zhee-jook. Rae noticed something on the man's cap. It was a band from a Royal Navy officer's cap.",
+     "replace": "At Pelly Bay he met an Inuk hunter, which means one Inuit man, named In-nook-poo-zhee-jook. Rae noticed something strange on the man's cap. It was a band taken from a Royal Navy officer's cap.",
+     "reason": "Explain 'Inuk', clearer image",
+     "ok": true,
+     "error": null
+    },
+    {
+     "find": "Rae followed the trail of stories. Other Inuit traded him relics: forks and spoons marked with officers' initials, including those of Captain Francis Crozier, who commanded Terror. And Franklin's fork.",
+     "replace": "Rae followed the stories from camp to camp. Other Inuit traded him objects from the lost ships. There were forks and spoons marked with officers' initials, including those of Captain Francis Crozier, the captain of Terror. And, of course, Franklin's fork.",
+     "reason": "Replace 'relics', remove colon list, simpler wording",
+     "ok": true,
+     "error": null
+    },
+    {
+     "find": "Their account went like this.",
+     "replace": "Here's what they told him.",
+     "reason": "Plainer transition",
+     "ok": true,
+     "error": null
+    },
+    {
+     "find": "Rae's informants hadn't seen the place themselves. They were passing on what others had told them.",
+     "replace": "The people talking to Rae hadn't seen the place themselves. They were passing on what other hunters had told them.",
+     "reason": "Replace 'informants'",
+     "ok": true,
+     "error": null
+    },
+    {
+     "find": "Then Rae wrote the line that would wreck his reputation. From the state of the bodies, he reported, the starving men had been \"driven to the last resource.\" Cannibalism.",
+     "replace": "Then Rae wrote the line that would ruin his good name. From what the Inuit described, he reported, the starving men had been \"driven to the last resource.\" In plain words, some of them had eaten the dead to stay alive.",
+     "reason": "Explain the old phrase gently for young viewers",
+     "ok": true,
+     "error": null
+    },
+    {
+     "find": "Rae's report ran in The Times. Lady Franklin was horrified. She rejected it and criticized Rae.",
+     "replace": "Rae's report was printed in The Times, one of London's biggest newspapers. Lady Franklin was horrified. She refused to believe it and turned against Rae.",
+     "reason": "Simpler wording, context for The Times",
+     "ok": true,
+     "error": null
+    },
+    {
+     "find": "Dickens argued that the story was highly improbable and that British sailors would never sink so low.",
+     "replace": "Dickens argued that the story was almost impossible, and that British sailors would never do such a thing.",
+     "reason": "Simpler wording",
+     "ok": true,
+     "error": null
+    },
+    {
+     "find": "He wrote, \"We believe every savage to be in his heart covetous, treacherous and cruel.\" He called their testimony \"the vague babble of savages.\"",
+     "replace": "He wrote, \"We believe every savage to be in his heart covetous, treacherous and cruel.\" In other words, greedy, sneaky and cruel. He called what the Inuit said \"the vague babble of savages.\"",
+     "reason": "Explain hard words in the quote",
+     "ok": true,
+     "error": null
+    },
+    {
+     "find": "Rae fought back. Rae had already written in his report that there was no reason to think the Inuit had used any violence, and in late December Household Words printed his reply defending them. He received the ten thousand pound reward for learning the expedition's fate. But unlike other famous Arctic explorers of his day, he was never knighted. No document says why.",
+     "replace": "Rae fought back. In his report, he had already said there was no reason to think the Inuit had hurt anyone. And in late December, Dickens's own magazine printed Rae's reply defending them. Rae did collect ten thousand pounds in prize money for finding out what happened to the expedition. But unlike other famous Arctic explorers of his day, he was never made a knight. No record explains why.",
+     "reason": "Remove repetition, avoid 'pound' sounding like weight, simpler wording",
+     "ok": true,
+     "error": null
+    }
+   ],
+   "created_at": "2026-10-12 22:19:26"
+  }
+ ],
+ "/api/projects/1/beats": [
+  {
+   "id": 1,
+   "project_id": 1,
+   "script_version_id": 4,
+   "idx": 0,
+   "word_start": 0,
+   "word_end": 6,
+   "text": "Picture this. London, autumn of eighteen fifty-four.",
+   "est_seconds": 2.33,
+   "start": 0,
+   "end": 4.08
+  },
+  {
+   "id": 2,
+   "project_id": 1,
+   "script_version_id": 4,
+   "idx": 1,
+   "word_start": 7,
+   "word_end": 25,
+   "text": "A Scottish doctor named John Rae opens a bundle of Arctic relics and lifts out a small silver fork.",
+   "est_seconds": 6.33,
+   "start": 4.16,
+   "end": 10.56
+  },
+  {
+   "id": 3,
+   "project_id": 1,
+   "script_version_id": 4,
+   "idx": 2,
+   "word_start": 26,
+   "word_end": 35,
+   "text": "On the back of the handle is a family crest.",
+   "est_seconds": 3.33,
+   "start": 10.6,
+   "end": 13.12
+  },
+  {
+   "id": 4,
+   "project_id": 1,
+   "script_version_id": 4,
+   "idx": 3,
+   "word_start": 36,
+   "word_end": 44,
+   "text": "It belongs to Sir John Franklin, the famous explorer",
+   "est_seconds": 3,
+   "start": 13.2,
+   "end": 16.4
+  },
+  {
+   "id": 5,
+   "project_id": 1,
+   "script_version_id": 4,
+   "idx": 4,
+   "word_start": 45,
+   "word_end": 61,
+   "text": "who sailed into the Arctic nine years earlier with two ships and one hundred and twenty-nine men,",
+   "est_seconds": 5.67,
+   "start": 16.48,
+   "end": 21.6
+  },
+  {
+   "id": 6,
+   "project_id": 1,
+   "script_version_id": 4,
+   "idx": 5,
+   "word_start": 62,
+   "word_end": 66,
+   "text": "and was never seen again.",
+   "est_seconds": 1.67,
+   "start": 21.64,
+   "end": 23.52
+  },
+  {
+   "id": 7,
+   "project_id": 1,
+   "script_version_id": 4,
+   "idx": 6,
+   "word_start": 67,
+   "word_end": 80,
+   "text": "Rae didn't find that fork in the snow. He bought it from Inuit hunters.",
+   "est_seconds": 4.67,
+   "start": 23.6,
+   "end": 27.813
+  },
+  {
+   "id": 8,
+   "project_id": 1,
+   "script_version_id": 4,
+   "idx": 7,
+   "word_start": 81,
+   "word_end": 93,
+   "text": "And they told him a story that Victorian England flatly refused to believe.",
+   "est_seconds": 4.33,
+   "start": 27.867,
+   "end": 32.08
+  },
+  {
+   "id": 9,
+   "project_id": 1,
+   "script_version_id": 4,
+   "idx": 8,
+   "word_start": 94,
+   "word_end": 97,
+   "text": "Here's the strange part.",
+   "est_seconds": 1.33,
+   "start": 32.16,
+   "end": 33.52
+  },
+  {
+   "id": 10,
+   "project_id": 1,
+   "script_version_id": 4,
+   "idx": 9,
+   "word_start": 98,
+   "word_end": 108,
+   "text": "Those ships stayed lost for nearly one hundred and seventy years,",
+   "est_seconds": 3.67,
+   "start": 33.6,
+   "end": 37.24
+  },
+  {
+   "id": 11,
+   "project_id": 1,
+   "script_version_id": 4,
+   "idx": 10,
+   "word_start": 109,
+   "word_end": 117,
+   "text": "even though the Inuit had been describing what happened,",
+   "est_seconds": 3,
+   "start": 37.28,
+   "end": 39.733
+  },
+  {
+   "id": 12,
+   "project_id": 1,
+   "script_version_id": 4,
+   "idx": 11,
+   "word_start": 118,
+   "word_end": 123,
+   "text": "and roughly where, the whole time.",
+   "est_seconds": 2,
+   "start": 39.787,
+   "end": 42.24
+  }
+ ],
+ "/api/projects/1/beats/undo": {
+  "steps": 0
+ },
+ "/api/projects/1/voice": {
+  "id": 1,
+  "project_id": 1,
+  "script_version_id": 4,
+  "audio_path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\audio\\voice.wav",
+  "duration_s": 496.84,
+  "warnings": [],
+  "created_at": "2026-10-20 22:33:18",
+  "audio_url": "/api/projects/1/file?path=audio/voice.mp3",
+  "stale": false,
+  "word_count": 1463,
+  "chars": 8522
+ },
+ "/api/projects/1/voice/preview": {
+  "audio_url": "/api/projects/1/file?path=audio/preview.mp3&t=1791954229"
+ },
+ "/api/projects/1/prompts": {
+  "style": {
+   "id": 1,
+   "project_id": 1,
+   "style_prefix": "Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep crimson, mustard gold, slate gray). The background fills the whole frame and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show the room, never a blank white or paper background. Uncluttered composition with one clear focal point, 16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark.",
+   "characters": [
+    {
+     "name": "John Rae",
+     "marker": "plaid tartan scarf"
+    },
+    {
+     "name": "Sir John Franklin",
+     "marker": "black Royal Navy bicorne hat with gold trim"
+    },
+    {
+     "name": "Lady Jane Franklin",
+     "marker": "black bonnet with a short veil"
+    },
+    {
+     "name": "Charles Dickens",
+     "marker": "tall black top hat and a feather quill pen"
+    },
+    {
+     "name": "Inuit hunters and elders (In-nook-poo-zhee-jook, Inukpujijuk, others)",
+     "marker": "fur-trimmed parka hood"
+    },
+    {
+     "name": "Louie Kamookak",
+     "marker": "round glasses and a notebook held under one arm"
+    },
+    {
+     "name": "Sammy Kogvik",
+     "marker": "red Canadian Ranger ball cap"
+    },
+    {
+     "name": "Parks Canada archaeologists and searchers (Harris, Moore, Schimnowski, Hobson's search team)",
+     "marker": "bright orange life vest"
+    }
+   ],
+   "setting_notes": "The recurring places are the Arctic and Victorian London. The Arctic is flat white ice and snow under pale skies, with low rocky islands, stone piles called cairns, and two tall-masted wooden ships stuck in pack ice. Later scenes there show small towns like Gjoa Haven and dark water with a sonar screen. London is drawn simply: gray brick streets, a newspaper office, and the stone arches of Westminster Abbey.",
+   "created_at": "2026-10-20 22:40:35",
+   "props": [],
+   "locations": []
+  },
+  "prompts": [
+   {
+    "beat_id": 1,
+    "project_id": 1,
+    "batch_no": 1,
+    "scene": "Wide establishing shot of a foggy Victorian London street in autumn: gray brick buildings, gas lamps glowing, orange leaves blowing across cobblestones, a horse-drawn carriage in the distance. Small stick figures in coats and top hats hurry past under a pale overcast sky. Moody, quiet atmosphere.",
+    "edited": 0,
+    "label": "Foggy Victorian London street",
+    "characters": null,
+    "things": null,
+    "idx": 0,
+    "beat_text": "Picture this. London, autumn of eighteen fifty-four.",
+    "word_start": 0,
+    "word_end": 6,
+    "title": "Foggy Victorian London",
+    "prompt": "Foggy Victorian London. Wide establishing shot of a foggy Victorian London street in autumn: gray brick buildings, gas lamps glowing, orange leaves blowing across cobblestones, a horse-drawn carriage in the distance. Small stick figures in coats and top hats hurry past under a pale overcast sky. Moody, quiet atmosphere. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep crimson, mustard gold, slate gray). The background fills the whole frame and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show the room, never a blank white or paper background. Uncluttered composition with one clear focal point, 16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
+   },
+   {
+    "beat_id": 2,
+    "project_id": 1,
+    "batch_no": 1,
+    "scene": "Medium shot inside a candlelit London study. The stick figure with the plaid tartan scarf sits at a wooden desk, untying a rough bundle of fur and cloth spilling Arctic relics, and carefully lifts out a small shiny silver fork, his face curious and serious.",
+    "edited": 0,
+    "label": "Candlelit study relics",
+    "characters": null,
+    "things": null,
+    "idx": 1,
+    "beat_text": "A Scottish doctor named John Rae opens a bundle of Arctic relics and lifts out a small silver fork.",
+    "word_start": 7,
+    "word_end": 25,
+    "title": "Candlelit study relics",
+    "prompt": "Candlelit study relics. Medium shot inside a candlelit London study. The stick figure with the plaid tartan scarf sits at a wooden desk, untying a rough bundle of fur and cloth spilling Arctic relics, and carefully lifts out a small shiny silver fork, his face curious and serious. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep crimson, mustard gold, slate gray). The background fills the whole frame and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show the room, never a blank white or paper background. Uncluttered composition with one clear focal point, 16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
+   },
+   {
+    "beat_id": 3,
+    "project_id": 1,
+    "batch_no": 1,
+    "scene": "Extreme close-up of stick-figure fingers turning over the small silver fork, revealing an ornate engraved family crest shape on the back of the handle with no letters, glinting in warm candlelight. Background of the desk softly blurred.",
+    "edited": 0,
+    "label": "Engraved silver fork crest",
+    "characters": null,
+    "things": null,
+    "idx": 2,
+    "beat_text": "On the back of the handle is a family crest.",
+    "word_start": 26,
+    "word_end": 35,
+    "title": "Engraved silver fork",
+    "prompt": "Engraved silver fork. Extreme close-up of stick-figure fingers turning over the small silver fork, revealing an ornate engraved family crest shape on the back of the handle with no letters, glinting in warm candlelight. Background of the desk softly blurred. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep crimson, mustard gold, slate gray). The background fills the whole frame and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show the room, never a blank white or paper background. Uncluttered composition with one clear focal point, 16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
+   },
+   {
+    "beat_id": 4,
+    "project_id": 1,
+    "batch_no": 1,
+    "scene": "Portrait-style medium shot of the stick figure with the black Royal Navy bicorne hat with gold trim, standing proudly in a naval coat with a telescope under one arm, chin raised, confident smile, against a backdrop of a heroic painted ocean and ship flags.",
+    "edited": 0,
+    "label": "Proud naval commander portrait",
+    "characters": null,
+    "things": null,
+    "idx": 3,
+    "beat_text": "It belongs to Sir John Franklin, the famous explorer",
+    "word_start": 36,
+    "word_end": 44,
+    "title": "Proud naval commander",
+    "prompt": "Proud naval commander. Portrait-style medium shot of the stick figure with the black Royal Navy bicorne hat with gold trim, standing proudly in a naval coat with a telescope under one arm, chin raised, confident smile, against a backdrop of a heroic painted ocean and ship flags. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep crimson, mustard gold, slate gray). The background fills the whole frame and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show the room, never a blank white or paper background. Uncluttered composition with one clear focal point, 16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
+   },
+   {
+    "beat_id": 5,
+    "project_id": 1,
+    "batch_no": 1,
+    "scene": "Wide shot of two tall-masted wooden sailing ships heading into a vast white Arctic sea of ice floes. On the deck of the lead ship, the stick figure with the black Royal Navy bicorne hat with gold trim points forward, surrounded by a crowd of tiny sailor stick figures.",
+    "edited": 0,
+    "label": "Ships entering Arctic ice",
+    "characters": null,
+    "things": null,
+    "idx": 4,
+    "beat_text": "who sailed into the Arctic nine years earlier with two ships and one hundred and twenty-nine men,",
+    "word_start": 45,
+    "word_end": 61,
+    "title": "Ships entering Arctic",
+    "prompt": "Ships entering Arctic. Wide shot of two tall-masted wooden sailing ships heading into a vast white Arctic sea of ice floes. On the deck of the lead ship, the stick figure with the black Royal Navy bicorne hat with gold trim points forward, surrounded by a crowd of tiny sailor stick figures. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep crimson, mustard gold, slate gray). The background fills the whole frame and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show the room, never a blank white or paper background. Uncluttered composition with one clear focal point, 16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
+   },
+   {
+    "beat_id": 6,
+    "project_id": 1,
+    "batch_no": 1,
+    "scene": "Extreme wide shot of an empty, endless white Arctic horizon under a pale sky, the two tall-masted ships reduced to faint silhouettes vanishing into swirling snow and mist. Lonely, eerie, silent mood.",
+    "edited": 0,
+    "label": "Ships vanishing into mist",
+    "characters": null,
+    "things": null,
+    "idx": 5,
+    "beat_text": "and was never seen again.",
+    "word_start": 62,
+    "word_end": 66,
+    "title": "Ships vanishing into",
+    "prompt": "Ships vanishing into. Extreme wide shot of an empty, endless white Arctic horizon under a pale sky, the two tall-masted ships reduced to faint silhouettes vanishing into swirling snow and mist. Lonely, eerie, silent mood. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep crimson, mustard gold, slate gray). The background fills the whole frame and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show the room, never a blank white or paper background. Uncluttered composition with one clear focal point, 16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
+   },
+   {
+    "beat_id": 7,
+    "project_id": 1,
+    "batch_no": 1,
+    "scene": "Medium shot on snowy Arctic ground: the stick figure with the plaid tartan scarf hands over a small bundle of trade goods to a stick figure with a fur-trimmed parka hood, who offers the silver fork in an open mitten. Both look calm and respectful. Igloos in background.",
+    "edited": 0,
+    "label": "Arctic trade exchange",
+    "characters": null,
+    "things": null,
+    "idx": 6,
+    "beat_text": "Rae didn't find that fork in the snow. He bought it from Inuit hunters.",
+    "word_start": 67,
+    "word_end": 80,
+    "title": "Arctic trade exchange",
+    "prompt": "Arctic trade exchange. Medium shot on snowy Arctic ground: the stick figure with the plaid tartan scarf hands over a small bundle of trade goods to a stick figure with a fur-trimmed parka hood, who offers the silver fork in an open mitten. Both look calm and respectful. Igloos in background. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep crimson, mustard gold, slate gray). The background fills the whole frame and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show the room, never a blank white or paper background. Uncluttered composition with one clear focal point, 16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
+   },
+   {
+    "beat_id": 8,
+    "project_id": 1,
+    "batch_no": 1,
+    "scene": "Split composition: on the left, stick figures with fur-trimmed parka hoods tell a story with gestures beside a campfire; on the right, a crowd of Victorian stick figures in top hats and bonnets turn away, arms crossed, noses raised, frowning in disbelief.",
+    "edited": 0,
+    "label": "Inuit stories dismissed",
+    "characters": null,
+    "things": null,
+    "idx": 7,
+    "beat_text": "And they told him a story that Victorian England flatly refused to believe.",
+    "word_start": 81,
+    "word_end": 93,
+    "title": "Inuit stories dismissed",
+    "prompt": "Inuit stories dismissed. Split composition: on the left, stick figures with fur-trimmed parka hoods tell a story with gestures beside a campfire; on the right, a crowd of Victorian stick figures in top hats and bonnets turn away, arms crossed, noses raised, frowning in disbelief. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep crimson, mustard gold, slate gray). The background fills the whole frame and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show the room, never a blank white or paper background. Uncluttered composition with one clear focal point, 16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
+   },
+   {
+    "beat_id": 9,
+    "project_id": 1,
+    "batch_no": 1,
+    "scene": "Close-up of a single unrolled blank Arctic chart on a wooden table, a magnifying glass resting on it, a question-mark shaped curl of frost drifting over it. Dim mysterious lighting with deep shadows creating intrigue.",
+    "edited": 0,
+    "label": "Blank Arctic chart mystery",
+    "characters": null,
+    "things": null,
+    "idx": 8,
+    "beat_text": "Here's the strange part.",
+    "word_start": 94,
+    "word_end": 97,
+    "title": "Blank Arctic chart",
+    "prompt": "Blank Arctic chart. Close-up of a single unrolled blank Arctic chart on a wooden table, a magnifying glass resting on it, a question-mark shaped curl of frost drifting over it. Dim mysterious lighting with deep shadows creating intrigue. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep crimson, mustard gold, slate gray). The background fills the whole frame and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show the room, never a blank white or paper background. Uncluttered composition with one clear focal point, 16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
+   },
+   {
+    "beat_id": 10,
+    "project_id": 1,
+    "batch_no": 1,
+    "scene": "Visual metaphor: a giant hourglass looms over a frozen Arctic seascape, its sand pouring slowly, while beneath the ice two tiny shadowy ship shapes lie hidden. Wide shot, cold blue tones, sense of immense time passing.",
+    "edited": 0,
+    "label": "Hourglass over frozen sea",
+    "characters": null,
+    "things": null,
+    "idx": 9,
+    "beat_text": "Those ships stayed lost for nearly one hundred and seventy years,",
+    "word_start": 98,
+    "word_end": 108,
+    "title": "Hourglass over frozen",
+    "prompt": "Hourglass over frozen. Visual metaphor: a giant hourglass looms over a frozen Arctic seascape, its sand pouring slowly, while beneath the ice two tiny shadowy ship shapes lie hidden. Wide shot, cold blue tones, sense of immense time passing. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep crimson, mustard gold, slate gray). The background fills the whole frame and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show the room, never a blank white or paper background. Uncluttered composition with one clear focal point, 16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
+   },
+   {
+    "beat_id": 11,
+    "project_id": 1,
+    "batch_no": 1,
+    "scene": "Medium shot of a group of stick figures with fur-trimmed parka hoods sitting in a snow house lit by a seal-oil lamp, an elder gesturing expressively while children and hunters listen intently, mimicking men dragging a boat with hand motions.",
+    "edited": 0,
+    "label": "Elder storytelling in snow house",
+    "characters": null,
+    "things": null,
+    "idx": 10,
+    "beat_text": "even though the Inuit had been describing what happened,",
+    "word_start": 109,
+    "word_end": 117,
+    "title": "Elder storytelling",
+    "prompt": "Elder storytelling. Medium shot of a group of stick figures with fur-trimmed parka hoods sitting in a snow house lit by a seal-oil lamp, an elder gesturing expressively while children and hunters listen intently, mimicking men dragging a boat with hand motions. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep crimson, mustard gold, slate gray). The background fills the whole frame and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show the room, never a blank white or paper background. Uncluttered composition with one clear focal point, 16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
+   },
+   {
+    "beat_id": 12,
+    "project_id": 1,
+    "batch_no": 1,
+    "scene": "Over-the-shoulder shot from behind a stick figure with a fur-trimmed parka hood, pointing a mittened hand toward a specific stretch of icy coastline and low rocky islands in the distance, a stone cairn nearby. Clear, confident pose.",
+    "edited": 0,
+    "label": "Hunter pointing to coastline",
+    "characters": null,
+    "things": null,
+    "idx": 11,
+    "beat_text": "and roughly where, the whole time.",
+    "word_start": 118,
+    "word_end": 123,
+    "title": "Hunter pointing",
+    "prompt": "Hunter pointing. Over-the-shoulder shot from behind a stick figure with a fur-trimmed parka hood, pointing a mittened hand toward a specific stretch of icy coastline and low rocky islands in the distance, a stone cairn nearby. Clear, confident pose. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep crimson, mustard gold, slate gray). The background fills the whole frame and matches the scene's place, time of day and lighting: night scenes are dark, indoor scenes show the room, never a blank white or paper background. Uncluttered composition with one clear focal point, 16:9 widescreen. No text, no letters, no numbers, no captions, no speech bubbles, no watermark."
+   }
+  ],
+  "beats": 153,
+  "batch_size": 24,
+  "done_batches": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "batch_texts": {
+   "1": "INSTRUCTIONS FOR BATCH 1 OF 7 (do not make an image for this paragraph). Generate 24 images, one for each prompt below, in order, one image per prompt. Name each image exactly with its prompt's title, the words before the first period, for example \"Victorian London street\"; never make up your own names and never add numbers. Never draw the title or any number in the image. Keep every recurring character, object and place looking exactly the same in every image: the prompts repeat the same description for each one, so follow those descriptions closely and match how you drew them before. Keep the same art style throughout.\n\nFoggy Victorian London. Wide establishing shot of a foggy Victorian London street in autumn: gray brick buildings, gas lamps glowing, orange leaves blowing across cobblestones, a horse-drawn carriage in the distance. Small stick figures in coats and top hats hurry past under a pale overcast sky. Moody, quiet atmosphere. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, …",
+   "2": "INSTRUCTIONS FOR BATCH 2 OF 7 (do not make an image for this paragraph). Generate 24 images, one for each prompt below, in order, one image per prompt. Name each image exactly with its prompt's title, the words before the first period, for example \"Victorian London street\"; never make up your own names and never add numbers. Never draw the title or any number in the image. These images continue the same video as the earlier batches you made. Keep every recurring character, object and place looking exactly the same in every image: the prompts repeat the same description for each one, so follow those descriptions closely and match how you drew them before. Keep the same art style throughout.\n\nSurveyor on tundra. Medium shot of the stick figure with the plaid tartan scarf walking across snowy tundra with a measuring chain and notebook, focused on the ground, ignoring a faint ghostly ship silhouette on the horizon behind him. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, d…",
+   "3": "INSTRUCTIONS FOR BATCH 3 OF 7 (do not make an image for this paragraph). Generate 24 images, one for each prompt below, in order, one image per prompt. Name each image exactly with its prompt's title, the words before the first period, for example \"Victorian London street\"; never make up your own names and never add numbers. Never draw the title or any number in the image. These images continue the same video as the earlier batches you made. Keep every recurring character, object and place looking exactly the same in every image: the prompts repeat the same description for each one, so follow those descriptions closely and match how you drew them before. Keep the same art style throughout.\n\nWriting the report. Close-up over the shoulder of the stick figure with the plaid tartan scarf, writing with a pen on blank paper by lamplight inside a snow house. Through the entrance, stick figures with fur-trimmed parka hoods stand peacefully with open hands. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, …",
+   "4": "INSTRUCTIONS FOR BATCH 4 OF 7 (do not make an image for this paragraph). Generate 24 images, one for each prompt below, in order, one image per prompt. Name each image exactly with its prompt's title, the words before the first period, for example \"Victorian London street\"; never make up your own names and never add numbers. Never draw the title or any number in the image. These images continue the same video as the earlier batches you made. Keep every recurring character, object and place looking exactly the same in every image: the prompts repeat the same description for each one, so follow those descriptions closely and match how you drew them before. Keep the same art style throughout.\n\nHopeful ship note. Close-up of the yellowed sheet showing neat rows of faint, unreadable scribble lines with no actual letters. A small, cheerful inset vision shows the two tall-masted wooden ships sailing confidently under sunny skies, giving a hopeful feel. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, nav…",
+   "5": "INSTRUCTIONS FOR BATCH 5 OF 7 (do not make an image for this paragraph). Generate 24 images, one for each prompt below, in order, one image per prompt. Name each image exactly with its prompt's title, the words before the first period, for example \"Victorian London street\"; never make up your own names and never add numbers. Never draw the title or any number in the image. These images continue the same video as the earlier batches you made. Keep every recurring character, object and place looking exactly the same in every image: the prompts repeat the same description for each one, so follow those descriptions closely and match how you drew them before. Keep the same art style throughout.\n\nResearcher explaining. Medium close-up of the stick figure researcher in a gray sweater leaning back in his chair, one hand raised as if explaining, the opened notebooks and string-connected map behind him. Thoughtful, earnest face. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue, navy blue, parchment tan, deep…",
+   "6": "INSTRUCTIONS FOR BATCH 6 OF 7 (do not make an image for this paragraph). Generate 24 images, one for each prompt below, in order, one image per prompt. Name each image exactly with its prompt's title, the words before the first period, for example \"Victorian London street\"; never make up your own names and never add numbers. Never draw the title or any number in the image. These images continue the same video as the earlier batches you made. Keep every recurring character, object and place looking exactly the same in every image: the prompts repeat the same description for each one, so follow those descriptions closely and match how you drew them before. Keep the same art style throughout.\n\nWreck discovery press. Wide shot of a plain stick figure in a dark suit standing at a wooden podium with microphones, announcing proudly. Behind him a large glowing rectangle shows a blank sonar image of an upright ship. Rows of stick-figure reporters raise cameras with bright flashes, faces excited. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clo…",
+   "7": "INSTRUCTIONS FOR BATCH 7 OF 7 (do not make an image for this paragraph). Generate 9 images, one for each prompt below, in order, one image per prompt. Name each image exactly with its prompt's title, the words before the first period, for example \"Victorian London street\"; never make up your own names and never add numbers. Never draw the title or any number in the image. These images continue the same video as the earlier batches you made. Keep every recurring character, object and place looking exactly the same in every image: the prompts repeat the same description for each one, so follow those descriptions closely and match how you drew them before. Keep the same art style throughout.\n\nProud Inuit elders. Low-angle medium shot of a group of stick figures with fur-trimmed parka hoods, elders and hunters, standing tall and dignified on the white snow under a clearing pale sky, sunlight breaking through behind them. Calm, quietly proud expressions. Minimalist stick figure illustration, clean hand-drawn style: bold black outlines, round white heads with simple expressive faces (dot eyes, eyebrows, line mouth), thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands that are always the same color as the head, never black, unless a character's look gives gloves or mittens, flat colors for props, clothing and backgrounds (icy steel blue,…"
+  },
+  "main_characters": [],
+  "character_sheet": ""
+ },
+ "/api/projects/1/images": {
+  "batches": [
+   {
+    "batch_no": 1,
+    "expected": 24,
+    "count": 24,
+    "folder": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01",
+    "slots": [
+     {
+      "beat_idx": 0,
+      "beat_text": "Picture this. London, autumn of eighteen fifty-four.",
+      "image": {
+       "id": 121,
+       "project_id": 1,
+       "batch_no": 1,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\1_-_Victorian_London_street_20261022001313.jpg",
+       "sort_key": 1792656792,
+       "sort_source": "label",
+       "position": 0,
+       "url": "/api/projects/1/file?path=images/batch_01/1_-_Victorian_London_street_20261022001313.jpg",
+       "name": "1_-_Victorian_London_street_20261022001313.jpg"
+      }
+     },
+     {
+      "beat_idx": 1,
+      "beat_text": "A Scottish doctor named John Rae opens a bundle of Arctic relics and lifts out a small silver fork.",
+      "image": {
+       "id": 122,
+       "project_id": 1,
+       "batch_no": 1,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\2_-_Stick_figure_at_20261022001313.jpg",
+       "sort_key": 1792656792,
+       "sort_source": "label",
+       "position": 1,
+       "url": "/api/projects/1/file?path=images/batch_01/2_-_Stick_figure_at_20261022001313.jpg",
+       "name": "2_-_Stick_figure_at_20261022001313.jpg"
+      }
+     },
+     {
+      "beat_idx": 2,
+      "beat_text": "On the back of the handle is a family crest.",
+      "image": {
+       "id": 123,
+       "project_id": 1,
+       "batch_no": 1,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\3_-_Close-up_of_silver_20261022001313.jpg",
+       "sort_key": 1792656792,
+       "sort_source": "label",
+       "position": 2,
+       "url": "/api/projects/1/file?path=images/batch_01/3_-_Close-up_of_silver_20261022001313.jpg",
+       "name": "3_-_Close-up_of_silver_20261022001313.jpg"
+      }
+     },
+     {
+      "beat_idx": 3,
+      "beat_text": "It belongs to Sir John Franklin, the famous explorer",
+      "image": {
+       "id": 124,
+       "project_id": 1,
+       "batch_no": 1,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\4_-_Stick_figure_in_20261022001313.jpg",
+       "sort_key": 1792656792,
+       "sort_source": "label",
+       "position": 3,
+       "url": "/api/projects/1/file?path=images/batch_01/4_-_Stick_figure_in_20261022001313.jpg",
+       "name": "4_-_Stick_figure_in_20261022001313.jpg"
+      }
+     },
+     {
+      "beat_idx": 4,
+      "beat_text": "who sailed into the Arctic nine years earlier with two ships and one hundred and twenty-nine men,",
+      "image": {
+       "id": 125,
+       "project_id": 1,
+       "batch_no": 1,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\5_-_Ships_in_Arctic_20261022001313.jpg",
+       "sort_key": 1792656792,
+       "sort_source": "label",
+       "position": 4,
+       "url": "/api/projects/1/file?path=images/batch_01/5_-_Ships_in_Arctic_20261022001313.jpg",
+       "name": "5_-_Ships_in_Arctic_20261022001313.jpg"
+      }
+     },
+     {
+      "beat_idx": 5,
+      "beat_text": "and was never seen again.",
+      "image": {
+       "id": 126,
+       "project_id": 1,
+       "batch_no": 1,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\6_-_Ships_vanishing_into_20261022001313.jpg",
+       "sort_key": 1792656792,
+       "sort_source": "label",
+       "position": 5,
+       "url": "/api/projects/1/file?path=images/batch_01/6_-_Ships_vanishing_into_20261022001313.jpg",
+       "name": "6_-_Ships_vanishing_into_20261022001313.jpg"
+      }
+     },
+     {
+      "beat_idx": 6,
+      "beat_text": "Rae didn't find that fork in the snow. He bought it from Inuit hunters.",
+      "image": {
+       "id": 127,
+       "project_id": 1,
+       "batch_no": 1,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\7_-_Stick_figures_trading_20261022001313.jpg",
+       "sort_key": 1792656792,
+       "sort_source": "label",
+       "position": 6,
+       "url": "/api/projects/1/file?path=images/batch_01/7_-_Stick_figures_trading_20261022001313.jpg",
+       "name": "7_-_Stick_figures_trading_20261022001313.jpg"
+      }
+     },
+     {
+      "beat_idx": 7,
+      "beat_text": "And they told him a story that Victorian England flatly refused to believe.",
+      "image": {
+       "id": 128,
+       "project_id": 1,
+       "batch_no": 1,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\8_-_Stick_figures_at_20261022001313.jpg",
+       "sort_key": 1792656792,
+       "sort_source": "label",
+       "position": 7,
+       "url": "/api/projects/1/file?path=images/batch_01/8_-_Stick_figures_at_20261022001313.jpg",
+       "name": "8_-_Stick_figures_at_20261022001313.jpg"
+      }
+     },
+     {
+      "beat_idx": 8,
+      "beat_text": "Here's the strange part.",
+      "image": {
+       "id": 129,
+       "project_id": 1,
+       "batch_no": 1,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\9_-_Magnifying_glass_on_20261022001313.jpg",
+       "sort_key": 1792656792,
+       "sort_source": "label",
+       "position": 8,
+       "url": "/api/projects/1/file?path=images/batch_01/9_-_Magnifying_glass_on_20261022001313.jpg",
+       "name": "9_-_Magnifying_glass_on_20261022001313.jpg"
+      }
+     },
+     {
+      "beat_idx": 9,
+      "beat_text": "Those ships stayed lost for nearly one hundred and seventy years,",
+      "image": {
+       "id": 130,
+       "project_id": 1,
+       "batch_no": 1,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\10_-_Hourglass_over_Arctic_20261022001313.jpg",
+       "sort_key": 1792656792,
+       "sort_source": "label",
+       "position": 9,
+       "url": "/api/projects/1/file?path=images/batch_01/10_-_Hourglass_over_Arctic_20261022001313.jpg",
+       "name": "10_-_Hourglass_over_Arctic_20261022001313.jpg"
+      }
+     },
+     {
+      "beat_idx": 10,
+      "beat_text": "even though the Inuit had been describing what happened,",
+      "image": {
+       "id": 131,
+       "project_id": 1,
+       "batch_no": 1,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\11_-_Stick_figures_in_20261022001313.jpg",
+       "sort_key": 1792656792,
+       "sort_source": "label",
+       "position": 10,
+       "url": "/api/projects/1/file?path=images/batch_01/11_-_Stick_figures_in_20261022001313.jpg",
+       "name": "11_-_Stick_figures_in_20261022001313.jpg"
+      }
+     },
+     {
+      "beat_idx": 11,
+      "beat_text": "and roughly where, the whole time.",
+      "image": {
+       "id": 132,
+       "project_id": 1,
+       "batch_no": 1,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\12_-_Stick_figure_pointing_20261022001313.jpg",
+       "sort_key": 1792656792,
+       "sort_source": "label",
+       "position": 11,
+       "url": "/api/projects/1/file?path=images/batch_01/12_-_Stick_figure_pointing_20261022001313.jpg",
+       "name": "12_-_Stick_figure_pointing_20261022001313.jpg"
+      }
+     }
+    ],
+    "extra": []
+   },
+   {
+    "batch_no": 2,
+    "expected": 24,
+    "count": 24,
+    "folder": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_02",
+    "slots": [
+     {
+      "beat_idx": 24,
+      "beat_text": "John Rae wasn't even looking for Franklin.",
+      "image": {
+       "id": 25,
+       "project_id": 1,
+       "batch_no": 2,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_02\\1_-_Plaid_tartan_scarf_20261022012353.jpg",
+       "sort_key": 1792661032,
+       "sort_source": "label",
+       "position": 0,
+       "url": "/api/projects/1/file?path=images/batch_02/1_-_Plaid_tartan_scarf_20261022012353.jpg",
+       "name": "1_-_Plaid_tartan_scarf_20261022012353.jpg"
+      }
+     },
+     {
+      "beat_idx": 25,
+      "beat_text": "In the spring of eighteen fifty-four, he was mapping coastline for the Hudson's Bay Company.",
+      "image": {
+       "id": 26,
+       "project_id": 1,
+       "batch_no": 2,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_02\\2_-_Plaid_tartan_scarf_20261022012353.jpg",
+       "sort_key": 1792661032,
+       "sort_source": "label",
+       "position": 1,
+       "url": "/api/projects/1/file?path=images/batch_02/2_-_Plaid_tartan_scarf_20261022012353.jpg",
+       "name": "2_-_Plaid_tartan_scarf_20261022012353.jpg"
+      }
+     },
+     {
+      "beat_idx": 26,
+      "beat_text": "Rae traveled the way the Inuit did.",
+      "image": {
+       "id": 27,
+       "project_id": 1,
+       "batch_no": 2,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_02\\3_-_Plaid_tartan_scarf_20261022012353.jpg",
+       "sort_key": 1792661032,
+       "sort_source": "label",
+       "position": 2,
+       "url": "/api/projects/1/file?path=images/batch_02/3_-_Plaid_tartan_scarf_20261022012353.jpg",
+       "name": "3_-_Plaid_tartan_scarf_20261022012353.jpg"
+      }
+     },
+     {
+      "beat_idx": 27,
+      "beat_text": "He hunted for his food,",
+      "image": {
+       "id": 28,
+       "project_id": 1,
+       "batch_no": 2,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_02\\4_-_Plaid_tartan_scarf_20261022012353.jpg",
+       "sort_key": 1792661032,
+       "sort_source": "label",
+       "position": 3,
+       "url": "/api/projects/1/file?path=images/batch_02/4_-_Plaid_tartan_scarf_20261022012353.jpg",
+       "name": "4_-_Plaid_tartan_scarf_20261022012353.jpg"
+      }
+     },
+     {
+      "beat_idx": 28,
+      "beat_text": "built snow houses,",
+      "image": {
+       "id": 29,
+       "project_id": 1,
+       "batch_no": 2,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_02\\5_-_Mittened_hands_plaid_20261022012353.jpg",
+       "sort_key": 1792661032,
+       "sort_source": "label",
+       "position": 4,
+       "url": "/api/projects/1/file?path=images/batch_02/5_-_Mittened_hands_plaid_20261022012353.jpg",
+       "name": "5_-_Mittened_hands_plaid_20261022012353.jpg"
+      }
+     },
+     {
+      "beat_idx": 29,
+      "beat_text": "and moved fast and light.",
+      "image": {
+       "id": 30,
+       "project_id": 1,
+       "batch_no": 2,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_02\\6_-_Dynamic_side-view_plaid_20261022012353.jpg",
+       "sort_key": 1792661032,
+       "sort_source": "label",
+       "position": 5,
+       "url": "/api/projects/1/file?path=images/batch_02/6_-_Dynamic_side-view_plaid_20261022012353.jpg",
+       "name": "6_-_Dynamic_side-view_plaid_20261022012353.jpg"
+      }
+     },
+     {
+      "beat_idx": 30,
+      "beat_text": "At Pelly Bay, he met an Inuk hunter named In-nook-poo-zhee-jook.",
+      "image": {
+       "id": 31,
+       "project_id": 1,
+       "batch_no": 2,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_02\\7_-_Flat_white_snowy_20261022012353.jpg",
+       "sort_key": 1792661032,
+       "sort_source": "label",
+       "position": 6,
+       "url": "/api/projects/1/file?path=images/batch_02/7_-_Flat_white_snowy_20261022012353.jpg",
+       "name": "7_-_Flat_white_snowy_20261022012353.jpg"
+      }
+     },
+     {
+      "beat_idx": 31,
+      "beat_text": "The man had something that didn't belong in the Arctic:",
+      "image": {
+       "id": 32,
+       "project_id": 1,
+       "batch_no": 2,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_02\\8_-_Fur-trimmed_parka_hood_20261022012353.jpg",
+       "sort_key": 1792661032,
+       "sort_source": "label",
+       "position": 7,
+       "url": "/api/projects/1/file?path=images/batch_02/8_-_Fur-trimmed_parka_hood_20261022012353.jpg",
+       "name": "8_-_Fur-trimmed_parka_hood_20261022012353.jpg"
+      }
+     },
+     {
+      "beat_idx": 32,
+      "beat_text": "a cap band from a Royal Navy uniform.",
+      "image": {
+       "id": 33,
+       "project_id": 1,
+       "batch_no": 2,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_02\\9_-_Mittened_hands_holding_20261022012353.jpg",
+       "sort_key": 1792661032,
+       "sort_source": "label",
+       "position": 8,
+       "url": "/api/projects/1/file?path=images/batch_02/9_-_Mittened_hands_holding_20261022012353.jpg",
+       "name": "9_-_Mittened_hands_holding_20261022012353.jpg"
+      }
+     },
+     {
+      "beat_idx": 33,
+      "beat_text": "Rae asked where it came from.",
+      "image": {
+       "id": 34,
+       "project_id": 1,
+       "batch_no": 2,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_02\\10_-_Over-the-shoulder_plaid_tartan_20261022012353.jpg",
+       "sort_key": 1792661032,
+       "sort_source": "label",
+       "position": 9,
+       "url": "/api/projects/1/file?path=images/batch_02/10_-_Over-the-shoulder_plaid_tartan_20261022012353.jpg",
+       "name": "10_-_Over-the-shoulder_plaid_tartan_20261022012353.jpg"
+      }
+     },
+     {
+      "beat_idx": 34,
+      "beat_text": "The hunter said that some winters back,",
+      "image": {
+       "id": 35,
+       "project_id": 1,
+       "batch_no": 2,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_02\\11_-_Inside_glowing_snow_20261022012353.jpg",
+       "sort_key": 1792661032,
+       "sort_source": "label",
+       "position": 10,
+       "url": "/api/projects/1/file?path=images/batch_02/11_-_Inside_glowing_snow_20261022012353.jpg",
+       "name": "11_-_Inside_glowing_snow_20261022012353.jpg"
+      }
+     },
+     {
+      "beat_idx": 35,
+      "beat_text": "other Inuit had seen about forty white men dragging a boat south over the ice.",
+      "image": {
+       "id": 36,
+       "project_id": 1,
+       "batch_no": 2,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_02\\12_-_Long_frozen_plain_20261022012353.jpg",
+       "sort_key": 1792661032,
+       "sort_source": "label",
+       "position": 11,
+       "url": "/api/projects/1/file?path=images/batch_02/12_-_Long_frozen_plain_20261022012353.jpg",
+       "name": "12_-_Long_frozen_plain_20261022012353.jpg"
+      }
+     }
+    ],
+    "extra": []
+   },
+   {
+    "batch_no": 3,
+    "expected": 24,
+    "count": 24,
+    "folder": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_03",
+    "slots": [
+     {
+      "beat_idx": 48,
+      "beat_text": "He also wrote that there was no reason to think the Inuit had harmed anyone.",
+      "image": {
+       "id": 49,
+       "project_id": 1,
+       "batch_no": 3,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_03\\1_-_Plaid_tartan_scarf_a5cea0b6.jpg",
+       "sort_key": 1793239928,
+       "sort_source": "label",
+       "position": 0,
+       "url": "/api/projects/1/file?path=images/batch_03/1_-_Plaid_tartan_scarf_a5cea0b6.jpg",
+       "name": "1_-_Plaid_tartan_scarf_a5cea0b6.jpg"
+      }
+     },
+     {
+      "beat_idx": 49,
+      "beat_text": "He carried his report and the relics home to London,",
+      "image": {
+       "id": 50,
+       "project_id": 1,
+       "batch_no": 3,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_03\\2_-_Wooden_sailing_ship_e065cb4b.jpg",
+       "sort_key": 1793239928,
+       "sort_source": "label",
+       "position": 1,
+       "url": "/api/projects/1/file?path=images/batch_03/2_-_Wooden_sailing_ship_e065cb4b.jpg",
+       "name": "2_-_Wooden_sailing_ship_e065cb4b.jpg"
+      }
+     },
+     {
+      "beat_idx": 50,
+      "beat_text": "thinking he was delivering the answer to the greatest mystery of his age.",
+      "image": {
+       "id": 51,
+       "project_id": 1,
+       "batch_no": 3,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_03\\3_-_Gray_brick_london_73f3f232.jpg",
+       "sort_key": 1793239928,
+       "sort_source": "label",
+       "position": 2,
+       "url": "/api/projects/1/file?path=images/batch_03/3_-_Gray_brick_london_73f3f232.jpg",
+       "name": "3_-_Gray_brick_london_73f3f232.jpg"
+      }
+     },
+     {
+      "beat_idx": 51,
+      "beat_text": "And that's when everything went wrong.",
+      "image": {
+       "id": 52,
+       "project_id": 1,
+       "batch_no": 3,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_03\\4_-_Low-angle_dark_storm_de192f8f.jpg",
+       "sort_key": 1793239928,
+       "sort_source": "label",
+       "position": 3,
+       "url": "/api/projects/1/file?path=images/batch_03/4_-_Low-angle_dark_storm_de192f8f.jpg",
+       "name": "4_-_Low-angle_dark_storm_de192f8f.jpg"
+      }
+     },
+     {
+      "beat_idx": 52,
+      "beat_text": "The report ran in The Times,",
+      "image": {
+       "id": 53,
+       "project_id": 1,
+       "batch_no": 3,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_03\\5_-_Printing_press_newspaper_523cee8b.jpg",
+       "sort_key": 1793239928,
+       "sort_source": "label",
+       "position": 4,
+       "url": "/api/projects/1/file?path=images/batch_03/5_-_Printing_press_newspaper_523cee8b.jpg",
+       "name": "5_-_Printing_press_newspaper_523cee8b.jpg"
+      }
+     },
+     {
+      "beat_idx": 53,
+      "beat_text": "and Victorian England recoiled.",
+      "image": {
+       "id": 54,
+       "project_id": 1,
+       "batch_no": 3,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_03\\6_-_Crowded_gray_london_ac4c448d.jpg",
+       "sort_key": 1793239928,
+       "sort_source": "label",
+       "position": 5,
+       "url": "/api/projects/1/file?path=images/batch_03/6_-_Crowded_gray_london_ac4c448d.jpg",
+       "name": "6_-_Crowded_gray_london_ac4c448d.jpg"
+      }
+     },
+     {
+      "beat_idx": 54,
+      "beat_text": "British naval heroes, driven to that? Unthinkable.",
+      "image": {
+       "id": 55,
+       "project_id": 1,
+       "batch_no": 3,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_03\\7_-_Grand_marble_statue_fcb4859e.jpg",
+       "sort_key": 1793239928,
+       "sort_source": "label",
+       "position": 6,
+       "url": "/api/projects/1/file?path=images/batch_03/7_-_Grand_marble_statue_fcb4859e.jpg",
+       "name": "7_-_Grand_marble_statue_fcb4859e.jpg"
+      }
+     },
+     {
+      "beat_idx": 55,
+      "beat_text": "Lady Franklin rejected it outright.",
+      "image": {
+       "id": 56,
+       "project_id": 1,
+       "batch_no": 3,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_03\\8_-_Dim_victorian_parlor_1c4c75e3.jpg",
+       "sort_key": 1793239928,
+       "sort_source": "label",
+       "position": 7,
+       "url": "/api/projects/1/file?path=images/batch_03/8_-_Dim_victorian_parlor_1c4c75e3.jpg",
+       "name": "8_-_Dim_victorian_parlor_1c4c75e3.jpg"
+      }
+     },
+     {
+      "beat_idx": 56,
+      "beat_text": "Then the most famous writer in the country stepped in.",
+      "image": {
+       "id": 57,
+       "project_id": 1,
+       "batch_no": 3,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_03\\9_-_Dramatic_low-angle_tall_0a315543.jpg",
+       "sort_key": 1793239928,
+       "sort_source": "label",
+       "position": 8,
+       "url": "/api/projects/1/file?path=images/batch_03/9_-_Dramatic_low-angle_tall_0a315543.jpg",
+       "name": "9_-_Dramatic_low-angle_tall_0a315543.jpg"
+      }
+     },
+     {
+      "beat_idx": 57,
+      "beat_text": "That December, Charles Dickens published a two-part essay in his magazine, Household Words.",
+      "image": {
+       "id": 58,
+       "project_id": 1,
+       "batch_no": 3,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_03\\10_-_Cozy_study_lit_f5c789e6.jpg",
+       "sort_key": 1793239928,
+       "sort_source": "label",
+       "position": 9,
+       "url": "/api/projects/1/file?path=images/batch_03/10_-_Cozy_study_lit_f5c789e6.jpg",
+       "name": "10_-_Cozy_study_lit_f5c789e6.jpg"
+      }
+     },
+     {
+      "beat_idx": 58,
+      "beat_text": "He argued Rae's account was highly improbable.",
+      "image": {
+       "id": 59,
+       "project_id": 1,
+       "batch_no": 3,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_03\\11_-_Over-the-shoulder_tall_black_eda9e14a.jpg",
+       "sort_key": 1793239928,
+       "sort_source": "label",
+       "position": 10,
+       "url": "/api/projects/1/file?path=images/batch_03/11_-_Over-the-shoulder_tall_black_eda9e14a.jpg",
+       "name": "11_-_Over-the-shoulder_tall_black_eda9e14a.jpg"
+      }
+     },
+     {
+      "beat_idx": 59,
+      "beat_text": "He even suggested that if anyone had done something terrible, it may have been the Inuit.",
+      "image": {
+       "id": 60,
+       "project_id": 1,
+       "batch_no": 3,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_03\\12_-_Visual_metaphor_tall_43002d96.jpg",
+       "sort_key": 1793239928,
+       "sort_source": "label",
+       "position": 11,
+       "url": "/api/projects/1/file?path=images/batch_03/12_-_Visual_metaphor_tall_43002d96.jpg",
+       "name": "12_-_Visual_metaphor_tall_43002d96.jpg"
+      }
+     }
+    ],
+    "extra": []
+   },
+   {
+    "batch_no": 4,
+    "expected": 24,
+    "count": 24,
+    "folder": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_04",
+    "slots": [
+     {
+      "beat_idx": 72,
+      "beat_text": "The first note, from eighteen forty-seven, ended with two words: All well.",
+      "image": {
+       "id": 73,
+       "project_id": 1,
+       "batch_no": 4,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_04\\1_-_Yellowed_sheet_neat_8fb0ec6e.jpg",
+       "sort_key": 1793240322,
+       "sort_source": "label",
+       "position": 0,
+       "url": "/api/projects/1/file?path=images/batch_04/1_-_Yellowed_sheet_neat_8fb0ec6e.jpg",
+       "name": "1_-_Yellowed_sheet_neat_8fb0ec6e.jpg"
+      }
+     },
+     {
+      "beat_idx": 73,
+      "beat_text": "But squeezed into the margin was a second message, from April eighteen forty-eight.",
+      "image": {
+       "id": 74,
+       "project_id": 1,
+       "batch_no": 4,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_04\\2_-_Paper's_edge_where_015ab61b.jpg",
+       "sort_key": 1793240322,
+       "sort_source": "label",
+       "position": 1,
+       "url": "/api/projects/1/file?path=images/batch_04/2_-_Paper's_edge_where_015ab61b.jpg",
+       "name": "2_-_Paper's_edge_where_015ab61b.jpg"
+      }
+     },
+     {
+      "beat_idx": 74,
+      "beat_text": "Franklin was dead.",
+      "image": {
+       "id": 75,
+       "project_id": 1,
+       "batch_no": 4,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_04\\3_-_Black_royal_navy_b9ca13bf.jpg",
+       "sort_key": 1793240322,
+       "sort_source": "label",
+       "position": 2,
+       "url": "/api/projects/1/file?path=images/batch_04/3_-_Black_royal_navy_b9ca13bf.jpg",
+       "name": "3_-_Black_royal_navy_b9ca13bf.jpg"
+      }
+     },
+     {
+      "beat_idx": 75,
+      "beat_text": "The ships had been trapped in ice for over a year and a half.",
+      "image": {
+       "id": 76,
+       "project_id": 1,
+       "batch_no": 4,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_04\\4_-_Two_tall-masted_wooden_fd1c8af0.jpg",
+       "sort_key": 1793240322,
+       "sort_source": "label",
+       "position": 3,
+       "url": "/api/projects/1/file?path=images/batch_04/4_-_Two_tall-masted_wooden_fd1c8af0.jpg",
+       "name": "4_-_Two_tall-masted_wooden_fd1c8af0.jpg"
+      }
+     },
+     {
+      "beat_idx": 76,
+      "beat_text": "One hundred and five survivors were abandoning them to walk south.",
+      "image": {
+       "id": 77,
+       "project_id": 1,
+       "batch_no": 4,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_04\\5_-_Long_line_thin_270d6aed.jpg",
+       "sort_key": 1793240322,
+       "sort_source": "label",
+       "position": 4,
+       "url": "/api/projects/1/file?path=images/batch_04/5_-_Long_line_thin_270d6aed.jpg",
+       "name": "5_-_Long_line_thin_270d6aed.jpg"
+      }
+     },
+     {
+      "beat_idx": 77,
+      "beat_text": "Walking south was exactly what the Inuit had described.",
+      "image": {
+       "id": 78,
+       "project_id": 1,
+       "batch_no": 4,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_04\\6_-_Split_composition_left_26ad1d7d.jpg",
+       "sort_key": 1793240322,
+       "sort_source": "label",
+       "position": 5,
+       "url": "/api/projects/1/file?path=images/batch_04/6_-_Split_composition_left_26ad1d7d.jpg",
+       "name": "6_-_Split_composition_left_26ad1d7d.jpg"
+      }
+     },
+     {
+      "beat_idx": 78,
+      "beat_text": "Nearby, searchers found a boat holding the remains of two men,",
+      "image": {
+       "id": 79,
+       "project_id": 1,
+       "batch_no": 4,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_04\\7_-_Bright_orange_life_ffdc78de.jpg",
+       "sort_key": 1793240322,
+       "sort_source": "label",
+       "position": 6,
+       "url": "/api/projects/1/file?path=images/batch_04/7_-_Bright_orange_life_ffdc78de.jpg",
+       "name": "7_-_Bright_orange_life_ffdc78de.jpg"
+      }
+     },
+     {
+      "beat_idx": 79,
+      "beat_text": "along with books, soap, combs, and about forty pounds of chocolate.",
+      "image": {
+       "id": 80,
+       "project_id": 1,
+       "batch_no": 4,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_04\\8_-_Items_laid_out_2bf2c5ba.jpg",
+       "sort_key": 1793240322,
+       "sort_source": "label",
+       "position": 7,
+       "url": "/api/projects/1/file?path=images/batch_04/8_-_Items_laid_out_2bf2c5ba.jpg",
+       "name": "8_-_Items_laid_out_2bf2c5ba.jpg"
+      }
+     },
+     {
+      "beat_idx": 80,
+      "beat_text": "Every new clue matched the Inuit account.",
+      "image": {
+       "id": 81,
+       "project_id": 1,
+       "batch_no": 4,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_04\\9_-_Bright_orange_life_90a4a8f7.jpg",
+       "sort_key": 1793240322,
+       "sort_source": "label",
+       "position": 8,
+       "url": "/api/projects/1/file?path=images/batch_04/9_-_Bright_orange_life_90a4a8f7.jpg",
+       "name": "9_-_Bright_orange_life_90a4a8f7.jpg"
+      }
+     },
+     {
+      "beat_idx": 81,
+      "beat_text": "So now you might be wondering:",
+      "image": {
+       "id": 82,
+       "project_id": 1,
+       "batch_no": 4,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_04\\10_-_Lone_fur-trimmed_parka_dfbc7363.jpg",
+       "sort_key": 1793240322,
+       "sort_source": "label",
+       "position": 9,
+       "url": "/api/projects/1/file?path=images/batch_04/10_-_Lone_fur-trimmed_parka_dfbc7363.jpg",
+       "name": "10_-_Lone_fur-trimmed_parka_dfbc7363.jpg"
+      }
+     },
+     {
+      "beat_idx": 82,
+      "beat_text": "if the Inuit were right about the men, were they right about the ships too?",
+      "image": {
+       "id": 83,
+       "project_id": 1,
+       "batch_no": 4,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_04\\11_-_White_arctic_sea_0aece9c6.jpg",
+       "sort_key": 1793240322,
+       "sort_source": "label",
+       "position": 10,
+       "url": "/api/projects/1/file?path=images/batch_04/11_-_White_arctic_sea_0aece9c6.jpg",
+       "name": "11_-_White_arctic_sea_0aece9c6.jpg"
+      }
+     },
+     {
+      "beat_idx": 83,
+      "beat_text": "They were. And that's where this story gets truly frustrating.",
+      "image": {
+       "id": 84,
+       "project_id": 1,
+       "batch_no": 4,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_04\\12_-_Fur-trimmed_parka_hood_e706f524.jpg",
+       "sort_key": 1793240322,
+       "sort_source": "label",
+       "position": 11,
+       "url": "/api/projects/1/file?path=images/batch_04/12_-_Fur-trimmed_parka_hood_e706f524.jpg",
+       "name": "12_-_Fur-trimmed_parka_hood_e706f524.jpg"
+      }
+     }
+    ],
+    "extra": []
+   },
+   {
+    "batch_no": 5,
+    "expected": 24,
+    "count": 24,
+    "folder": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_05",
+    "slots": [
+     {
+      "beat_idx": 96,
+      "beat_text": "He later said something like this:",
+      "image": {
+       "id": 97,
+       "project_id": 1,
+       "batch_no": 5,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_05\\1_-_Researcher_gray_sweater_ba7a74c6.jpg",
+       "sort_key": 1793240632,
+       "sort_source": "label",
+       "position": 0,
+       "url": "/api/projects/1/file?path=images/batch_05/1_-_Researcher_gray_sweater_ba7a74c6.jpg",
+       "name": "1_-_Researcher_gray_sweater_ba7a74c6.jpg"
+      }
+     },
+     {
+      "beat_idx": 97,
+      "beat_text": "without that testimony, searchers wouldn't know where to look.",
+      "image": {
+       "id": 98,
+       "project_id": 1,
+       "batch_no": 5,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_05\\2_-_Lone_searcher_bright_a1641977.jpg",
+       "sort_key": 1793240632,
+       "sort_source": "label",
+       "position": 1,
+       "url": "/api/projects/1/file?path=images/batch_05/2_-_Lone_searcher_bright_a1641977.jpg",
+       "name": "2_-_Lone_searcher_bright_a1641977.jpg"
+      }
+     },
+     {
+      "beat_idx": 98,
+      "beat_text": "In the town of Gjoa Haven,",
+      "image": {
+       "id": 99,
+       "project_id": 1,
+       "batch_no": 5,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_05\\3_-_Small_arctic_town_cba00f7a.jpg",
+       "sort_key": 1793240632,
+       "sort_source": "label",
+       "position": 2,
+       "url": "/api/projects/1/file?path=images/batch_05/3_-_Small_arctic_town_cba00f7a.jpg",
+       "name": "3_-_Small_arctic_town_cba00f7a.jpg"
+      }
+     },
+     {
+      "beat_idx": 99,
+      "beat_text": "a teacher named Louie Kamookak spent years gathering stories from elders and matching them against explorers' journals.",
+      "image": {
+       "id": 100,
+       "project_id": 1,
+       "batch_no": 5,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_05\\4_-_Interior_cozy_kitchen_318f9310.jpg",
+       "sort_key": 1793240632,
+       "sort_source": "label",
+       "position": 3,
+       "url": "/api/projects/1/file?path=images/batch_05/4_-_Interior_cozy_kitchen_318f9310.jpg",
+       "name": "4_-_Interior_cozy_kitchen_318f9310.jpg"
+      }
+     },
+     {
+      "beat_idx": 100,
+      "beat_text": "He pointed out something outsiders kept missing.",
+      "image": {
+       "id": 101,
+       "project_id": 1,
+       "batch_no": 5,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_05\\5_-_Round_glasses_notebook_15e98f0f.jpg",
+       "sort_key": 1793240632,
+       "sort_source": "label",
+       "position": 4,
+       "url": "/api/projects/1/file?path=images/batch_05/5_-_Round_glasses_notebook_15e98f0f.jpg",
+       "name": "5_-_Round_glasses_notebook_15e98f0f.jpg"
+      }
+     },
+     {
+      "beat_idx": 101,
+      "beat_text": "You couldn't ask the elders about Franklin, because they didn't know the name.",
+      "image": {
+       "id": 102,
+       "project_id": 1,
+       "batch_no": 5,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_05\\6_-_Over-the-shoulder_behind_outsider_148c0a01.jpg",
+       "sort_key": 1793240632,
+       "sort_source": "label",
+       "position": 5,
+       "url": "/api/projects/1/file?path=images/batch_05/6_-_Over-the-shoulder_behind_outsider_148c0a01.jpg",
+       "name": "6_-_Over-the-shoulder_behind_outsider_148c0a01.jpg"
+      }
+     },
+     {
+      "beat_idx": 102,
+      "beat_text": "You had to ask about the ships,",
+      "image": {
+       "id": 103,
+       "project_id": 1,
+       "batch_no": 5,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_05\\7_-_Elder_fur-trimmed_parka_415bb0a1.jpg",
+       "sort_key": 1793240632,
+       "sort_source": "label",
+       "position": 6,
+       "url": "/api/projects/1/file?path=images/batch_05/7_-_Elder_fur-trimmed_parka_415bb0a1.jpg",
+       "name": "7_-_Elder_fur-trimmed_parka_415bb0a1.jpg"
+      }
+     },
+     {
+      "beat_idx": 103,
+      "beat_text": "and the strangers,",
+      "image": {
+       "id": 104,
+       "project_id": 1,
+       "batch_no": 5,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_05\\8_-_Elder_fur-trimmed_parka_70260511.jpg",
+       "sort_key": 1793240632,
+       "sort_source": "label",
+       "position": 7,
+       "url": "/api/projects/1/file?path=images/batch_05/8_-_Elder_fur-trimmed_parka_70260511.jpg",
+       "name": "8_-_Elder_fur-trimmed_parka_70260511.jpg"
+      }
+     },
+     {
+      "beat_idx": 104,
+      "beat_text": "and what their families remembered.",
+      "image": {
+       "id": 105,
+       "project_id": 1,
+       "batch_no": 5,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_05\\9_-_Warm_family_circle_1dc14024.jpg",
+       "sort_key": 1793240632,
+       "sort_source": "label",
+       "position": 8,
+       "url": "/api/projects/1/file?path=images/batch_05/9_-_Warm_family_circle_1dc14024.jpg",
+       "name": "9_-_Warm_family_circle_1dc14024.jpg"
+      }
+     },
+     {
+      "beat_idx": 105,
+      "beat_text": "Even then, it wasn't easy.",
+      "image": {
+       "id": 106,
+       "project_id": 1,
+       "batch_no": 5,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_05\\10_-_Small_boat_bobbing_63b96b52.jpg",
+       "sort_key": 1793240632,
+       "sort_source": "label",
+       "position": 9,
+       "url": "/api/projects/1/file?path=images/batch_05/10_-_Small_boat_bobbing_63b96b52.jpg",
+       "name": "10_-_Small_boat_bobbing_63b96b52.jpg"
+      }
+     },
+     {
+      "beat_idx": 106,
+      "beat_text": "The accounts pointed to more than one possible site.",
+      "image": {
+       "id": 107,
+       "project_id": 1,
+       "batch_no": 5,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_05\\11_-_Large_blank_arctic_a8d46980.jpg",
+       "sort_key": 1793240632,
+       "sort_source": "label",
+       "position": 10,
+       "url": "/api/projects/1/file?path=images/batch_05/11_-_Large_blank_arctic_a8d46980.jpg",
+       "name": "11_-_Large_blank_arctic_a8d46980.jpg"
+      }
+     },
+     {
+      "beat_idx": 107,
+      "beat_text": "Parks Canada searched year after year starting in two thousand eight.",
+      "image": {
+       "id": 108,
+       "project_id": 1,
+       "batch_no": 5,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_05\\12_-_Montage-style_same_search_ddae2386.jpg",
+       "sort_key": 1793240632,
+       "sort_source": "label",
+       "position": 11,
+       "url": "/api/projects/1/file?path=images/batch_05/12_-_Montage-style_same_search_ddae2386.jpg",
+       "name": "12_-_Montage-style_same_search_ddae2386.jpg"
+      }
+     }
+    ],
+    "extra": []
+   },
+   {
+    "batch_no": 6,
+    "expected": 24,
+    "count": 24,
+    "folder": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_06",
+    "slots": [
+     {
+      "beat_idx": 120,
+      "beat_text": "A week later, Canada's Prime Minister announced it to the world.",
+      "image": {
+       "id": 145,
+       "project_id": 1,
+       "batch_no": 6,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_06\\1_-_Plain_dark_suit_2f87c56e.jpg",
+       "sort_key": 1793241710,
+       "sort_source": "label",
+       "position": 0,
+       "url": "/api/projects/1/file?path=images/batch_06/1_-_Plain_dark_suit_2f87c56e.jpg",
+       "name": "1_-_Plain_dark_suit_2f87c56e.jpg"
+      }
+     },
+     {
+      "beat_idx": 121,
+      "beat_text": "That same month, a memorial stone to John Rae was placed in Westminster Abbey,",
+      "image": {
+       "id": 146,
+       "project_id": 1,
+       "batch_no": 6,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_06\\2_-_Interior_westminster_abbey_aba039c0.jpg",
+       "sort_key": 1793241710,
+       "sort_source": "label",
+       "position": 1,
+       "url": "/api/projects/1/file?path=images/batch_06/2_-_Interior_westminster_abbey_aba039c0.jpg",
+       "name": "2_-_Interior_westminster_abbey_aba039c0.jpg"
+      }
+     },
+     {
+      "beat_idx": 122,
+      "beat_text": "just below the memorial to Franklin.",
+      "image": {
+       "id": 147,
+       "project_id": 1,
+       "batch_no": 6,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_06\\3_-_Abbey_floor_small_862e7de2.jpg",
+       "sort_key": 1793241710,
+       "sort_source": "label",
+       "position": 2,
+       "url": "/api/projects/1/file?path=images/batch_06/3_-_Abbey_floor_small_862e7de2.jpg",
+       "name": "3_-_Abbey_floor_small_862e7de2.jpg"
+      }
+     },
+     {
+      "beat_idx": 123,
+      "beat_text": "It came one hundred and sixty years after Rae brought home the truth.",
+      "image": {
+       "id": 148,
+       "project_id": 1,
+       "batch_no": 6,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_06\\4_-_Split_image_metaphor_eb1f0bf1.jpg",
+       "sort_key": 1793241710,
+       "sort_source": "label",
+       "position": 3,
+       "url": "/api/projects/1/file?path=images/batch_06/4_-_Split_image_metaphor_eb1f0bf1.jpg",
+       "name": "4_-_Split_image_metaphor_eb1f0bf1.jpg"
+      }
+     },
+     {
+      "beat_idx": 124,
+      "beat_text": "But Terror was still missing,",
+      "image": {
+       "id": 149,
+       "project_id": 1,
+       "batch_no": 6,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_06\\5_-_Dark_choppy_arctic_5f330abc.jpg",
+       "sort_key": 1793241710,
+       "sort_source": "label",
+       "position": 4,
+       "url": "/api/projects/1/file?path=images/batch_06/5_-_Dark_choppy_arctic_5f330abc.jpg",
+       "name": "5_-_Dark_choppy_arctic_5f330abc.jpg"
+      }
+     },
+     {
+      "beat_idx": 125,
+      "beat_text": "and the man who would find it almost wasn't on the boat.",
+      "image": {
+       "id": 150,
+       "project_id": 1,
+       "batch_no": 6,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_06\\6_-_Small_research_ship_4f4aa404.jpg",
+       "sort_key": 1793241710,
+       "sort_source": "label",
+       "position": 5,
+       "url": "/api/projects/1/file?path=images/batch_06/6_-_Small_research_ship_4f4aa404.jpg",
+       "name": "6_-_Small_research_ship_4f4aa404.jpg"
+      }
+     },
+     {
+      "beat_idx": 126,
+      "beat_text": "He was Sammy Kogvik, a Canadian Ranger from Gjoa Haven.",
+      "image": {
+       "id": 151,
+       "project_id": 1,
+       "batch_no": 6,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_06\\7_-_Portrait_red_canadian_0cd299fe.jpg",
+       "sort_key": 1793241710,
+       "sort_source": "label",
+       "position": 6,
+       "url": "/api/projects/1/file?path=images/batch_06/7_-_Portrait_red_canadian_0cd299fe.jpg",
+       "name": "7_-_Portrait_red_canadian_0cd299fe.jpg"
+      }
+     },
+     {
+      "beat_idx": 127,
+      "beat_text": "As Kogvik told reporters, around two thousand nine he was out on the ice in Terror Bay",
+      "image": {
+       "id": 152,
+       "project_id": 1,
+       "batch_no": 6,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_06\\8_-_Flat_white_sea_d862b168.jpg",
+       "sort_key": 1793241710,
+       "sort_source": "label",
+       "position": 7,
+       "url": "/api/projects/1/file?path=images/batch_06/8_-_Flat_white_sea_d862b168.jpg",
+       "name": "8_-_Flat_white_sea_d862b168.jpg"
+      }
+     },
+     {
+      "beat_idx": 128,
+      "beat_text": "when he saw a wooden pole sticking up through it.",
+      "image": {
+       "id": 153,
+       "project_id": 1,
+       "batch_no": 6,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_06\\9_-_Over-the-shoulder_behind_red_d735c513.jpg",
+       "sort_key": 1793241710,
+       "sort_source": "label",
+       "position": 8,
+       "url": "/api/projects/1/file?path=images/batch_06/9_-_Over-the-shoulder_behind_red_d735c513.jpg",
+       "name": "9_-_Over-the-shoulder_behind_red_d735c513.jpg"
+      }
+     },
+     {
+      "beat_idx": 129,
+      "beat_text": "He posed beside it for a photo.",
+      "image": {
+       "id": 154,
+       "project_id": 1,
+       "batch_no": 6,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_06\\10_-_Red_canadian_ranger_dd23b0dd.jpg",
+       "sort_key": 1793241710,
+       "sort_source": "label",
+       "position": 9,
+       "url": "/api/projects/1/file?path=images/batch_06/10_-_Red_canadian_ranger_dd23b0dd.jpg",
+       "name": "10_-_Red_canadian_ranger_dd23b0dd.jpg"
+      }
+     },
+     {
+      "beat_idx": 130,
+      "beat_text": "Then, on the way home, he lost the camera.",
+      "image": {
+       "id": 155,
+       "project_id": 1,
+       "batch_no": 6,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_06\\11_-_Small_camera_bouncing_4457f4da.jpg",
+       "sort_key": 1793241710,
+       "sort_source": "label",
+       "position": 10,
+       "url": "/api/projects/1/file?path=images/batch_06/11_-_Small_camera_bouncing_4457f4da.jpg",
+       "name": "11_-_Small_camera_bouncing_4457f4da.jpg"
+      }
+     },
+     {
+      "beat_idx": 131,
+      "beat_text": "In twenty sixteen, Kogvik joined the research ship Martin Bergmann as a last-minute replacement.",
+      "image": {
+       "id": 156,
+       "project_id": 1,
+       "batch_no": 6,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_06\\12_-_Modest_research_vessel_e7d9ef37.jpg",
+       "sort_key": 1793241710,
+       "sort_source": "label",
+       "position": 11,
+       "url": "/api/projects/1/file?path=images/batch_06/12_-_Modest_research_vessel_e7d9ef37.jpg",
+       "name": "12_-_Modest_research_vessel_e7d9ef37.jpg"
+      }
+     }
+    ],
+    "extra": []
+   },
+   {
+    "batch_no": 7,
+    "expected": 9,
+    "count": 9,
+    "folder": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_07",
+    "slots": [
+     {
+      "beat_idx": 144,
+      "beat_text": "The Inuit had told the truth.",
+      "image": {
+       "id": 169,
+       "project_id": 1,
+       "batch_no": 7,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_07\\1_-_Low-angle_group_fur-trimmed_57f81b78.jpg",
+       "sort_key": 1793241844,
+       "sort_source": "label",
+       "position": 0,
+       "url": "/api/projects/1/file?path=images/batch_07/1_-_Low-angle_group_fur-trimmed_57f81b78.jpg",
+       "name": "1_-_Low-angle_group_fur-trimmed_57f81b78.jpg"
+      }
+     },
+     {
+      "beat_idx": 145,
+      "beat_text": "So why did it take nearly one hundred and seventy years?",
+      "image": {
+       "id": 170,
+       "project_id": 1,
+       "batch_no": 7,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_07\\2_-_Visual_metaphor_giant_cf181b4d.jpg",
+       "sort_key": 1793241844,
+       "sort_source": "label",
+       "position": 1,
+       "url": "/api/projects/1/file?path=images/batch_07/2_-_Visual_metaphor_giant_cf181b4d.jpg",
+       "name": "2_-_Visual_metaphor_giant_cf181b4d.jpg"
+      }
+     },
+     {
+      "beat_idx": 146,
+      "beat_text": "The answer wasn't hidden in the ice.",
+      "image": {
+       "id": 171,
+       "project_id": 1,
+       "batch_no": 7,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_07\\3_-_Flat_white_pack_7920fd89.jpg",
+       "sort_key": 1793241844,
+       "sort_source": "label",
+       "position": 2,
+       "url": "/api/projects/1/file?path=images/batch_07/3_-_Flat_white_pack_7920fd89.jpg",
+       "name": "3_-_Flat_white_pack_7920fd89.jpg"
+      }
+     },
+     {
+      "beat_idx": 147,
+      "beat_text": "It was kept in the memories of the people who had been there all along.",
+      "image": {
+       "id": 172,
+       "project_id": 1,
+       "batch_no": 7,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_07\\4_-_Elderly_fur-trimmed_parka_c56bedd0.jpg",
+       "sort_key": 1793241844,
+       "sort_source": "label",
+       "position": 3,
+       "url": "/api/projects/1/file?path=images/batch_07/4_-_Elderly_fur-trimmed_parka_c56bedd0.jpg",
+       "name": "4_-_Elderly_fur-trimmed_parka_c56bedd0.jpg"
+      }
+     },
+     {
+      "beat_idx": 148,
+      "beat_text": "A handful of outsiders listened,",
+      "image": {
+       "id": 173,
+       "project_id": 1,
+       "batch_no": 7,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_07\\5_-_Inside_snow_house_e686265d.jpg",
+       "sort_key": 1793241844,
+       "sort_source": "label",
+       "position": 4,
+       "url": "/api/projects/1/file?path=images/batch_07/5_-_Inside_snow_house_e686265d.jpg",
+       "name": "5_-_Inside_snow_house_e686265d.jpg"
+      }
+     },
+     {
+      "beat_idx": 149,
+      "beat_text": "but far too many didn't.",
+      "image": {
+       "id": 174,
+       "project_id": 1,
+       "batch_no": 7,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_07\\6_-_Gray_brick_london_3f89c56f.jpg",
+       "sort_key": 1793241844,
+       "sort_source": "label",
+       "position": 5,
+       "url": "/api/projects/1/file?path=images/batch_07/6_-_Gray_brick_london_3f89c56f.jpg",
+       "name": "6_-_Gray_brick_london_3f89c56f.jpg"
+      }
+     },
+     {
+      "beat_idx": 150,
+      "beat_text": "Charles Dickens called it babble.",
+      "image": {
+       "id": 175,
+       "project_id": 1,
+       "batch_no": 7,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_07\\7_-_Dim_victorian_london_290d3d0b.jpg",
+       "sort_key": 1793241844,
+       "sort_source": "label",
+       "position": 6,
+       "url": "/api/projects/1/file?path=images/batch_07/7_-_Dim_victorian_london_290d3d0b.jpg",
+       "name": "7_-_Dim_victorian_london_290d3d0b.jpg"
+      }
+     },
+     {
+      "beat_idx": 151,
+      "beat_text": "It turned out to be the best map anyone ever had.",
+      "image": {
+       "id": 176,
+       "project_id": 1,
+       "batch_no": 7,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_07\\8_-_Weathered_hand-drawn_map_e0c4e05c.jpg",
+       "sort_key": 1793241844,
+       "sort_source": "label",
+       "position": 7,
+       "url": "/api/projects/1/file?path=images/batch_07/8_-_Weathered_hand-drawn_map_e0c4e05c.jpg",
+       "name": "8_-_Weathered_hand-drawn_map_e0c4e05c.jpg"
+      }
+     },
+     {
+      "beat_idx": 152,
+      "beat_text": "If you like stories where the overlooked witness turns out to be right, subscribe. There are more coming.",
+      "image": {
+       "id": 177,
+       "project_id": 1,
+       "batch_no": 7,
+       "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_07\\9_-_Flat_white_arctic_06e68a96.jpg",
+       "sort_key": 1793241844,
+       "sort_source": "label",
+       "position": 8,
+       "url": "/api/projects/1/file?path=images/batch_07/9_-_Flat_white_arctic_06e68a96.jpg",
+       "name": "9_-_Flat_white_arctic_06e68a96.jpg"
+      }
+     }
+    ],
+    "extra": []
+   }
+  ]
+ },
+ "/api/projects/1/shots/preview": {
+  "shots": [
+   {
+    "image": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\1_-_Victorian_London_street_20261022001313.jpg",
+    "start_frame": 0,
+    "end_frame": 122,
+    "scale": 1,
+    "beat_ids": [
+     0
+    ]
+   },
+   {
+    "image": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\2_-_Stick_figure_at_20261022001313.jpg",
+    "start_frame": 122,
+    "end_frame": 316,
+    "scale": 1,
+    "beat_ids": [
+     1
+    ]
+   },
+   {
+    "image": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\3_-_Close-up_of_silver_20261022001313.jpg",
+    "start_frame": 316,
+    "end_frame": 394,
+    "scale": 1,
+    "beat_ids": [
+     2
+    ]
+   },
+   {
+    "image": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\4_-_Stick_figure_in_20261022001313.jpg",
+    "start_frame": 394,
+    "end_frame": 492,
+    "scale": 1,
+    "beat_ids": [
+     3
+    ]
+   },
+   {
+    "image": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\5_-_Ships_in_Arctic_20261022001313.jpg",
+    "start_frame": 492,
+    "end_frame": 647,
+    "scale": 1,
+    "beat_ids": [
+     4
+    ]
+   },
+   {
+    "image": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\6_-_Ships_vanishing_into_20261022001313.jpg",
+    "start_frame": 647,
+    "end_frame": 706,
+    "scale": 1,
+    "beat_ids": [
+     5
+    ]
+   },
+   {
+    "image": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\7_-_Stick_figures_trading_20261022001313.jpg",
+    "start_frame": 706,
+    "end_frame": 834,
+    "scale": 1,
+    "beat_ids": [
+     6
+    ]
+   },
+   {
+    "image": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\8_-_Stick_figures_at_20261022001313.jpg",
+    "start_frame": 834,
+    "end_frame": 962,
+    "scale": 1,
+    "beat_ids": [
+     7
+    ]
+   },
+   {
+    "image": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\9_-_Magnifying_glass_on_20261022001313.jpg",
+    "start_frame": 962,
+    "end_frame": 1006,
+    "scale": 1,
+    "beat_ids": [
+     8
+    ]
+   },
+   {
+    "image": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\10_-_Hourglass_over_Arctic_20261022001313.jpg",
+    "start_frame": 1006,
+    "end_frame": 1116,
+    "scale": 1,
+    "beat_ids": [
+     9
+    ]
+   },
+   {
+    "image": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\11_-_Stick_figures_in_20261022001313.jpg",
+    "start_frame": 1116,
+    "end_frame": 1191,
+    "scale": 1,
+    "beat_ids": [
+     10
+    ]
+   },
+   {
+    "image": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\images\\batch_01\\12_-_Stick_figure_pointing_20261022001313.jpg",
+    "start_frame": 1191,
+    "end_frame": 1267,
+    "scale": 1,
+    "beat_ids": [
+     11
+    ]
+   }
+  ],
+  "unused_images": [],
+  "total_frames": 14923,
+  "missing_images": [],
+  "fps": 30,
+  "stats": {
+   "shots": 153,
+   "min_s": 0.9,
+   "max_s": 6.5,
+   "avg_s": 3.25,
+   "total_s": 497.43
+  }
+ },
+ "/api/projects/1/outputs": {
+  "folder": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\output",
+  "files": {
+   "video.mp4": {
+    "url": "/api/projects/1/file?path=output/video.mp4",
+    "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\output\\video.mp4",
+    "size": 61217728,
+    "modified": 1793231718.9794016
+   },
+   "short.mp4": {
+    "url": "/api/projects/1/file?path=output/short.mp4",
+    "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\output\\short.mp4",
+    "size": 4009585,
+    "modified": 1793310513.3059955
+   },
+   "timeline.fcpxml": {
+    "url": "/api/projects/1/file?path=output/timeline.fcpxml",
+    "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\output\\timeline.fcpxml",
+    "size": 76869,
+    "modified": 1793231634.562169
+   },
+   "captions.srt": {
+    "url": "/api/projects/1/file?path=output/captions.srt",
+    "path": "C:\\studio\\projects\\the-inuit-knew-where-franklin-s-lost-ships-were-no-one-liste\\output\\captions.srt",
+    "size": 19583,
+    "modified": 1793231634.5281343
+   }
+  }
+ },
+ "/api/projects/1/publish": {
+  "titles": [
+   "The Inuit Knew Where Franklin's Lost Ships Were. No One Listened",
+   "Charles Dickens Called It 'Babble.' It Was the Best Map Ever",
+   "How Inuit Memory Found Two Ships Lost for Nearly 170 Years",
+   "A Silver Fork, a Vanished Crew, and a Truth Britain Rejected",
+   "The Arctic Mystery Victorian England Refused to Solve"
+  ],
+  "description": "In 1854, a doctor came home from the Arctic with Sir John Franklin's silver fork and the Inuit account of what happened to his 129 lost men. Victorian England refused to believe it. Charles Dickens himself dismissed the Inuit testimony as \"babble.\"\n\nThe ships HMS Erebus and HMS Terror stayed lost for nearly 170 years, even though Inuit witnesses had described what happened, and roughly where, the whole time. This is the story of John Rae, the note found under a pile of stones, the testimony that sat forgotten in old notebooks, and the people who finally went back and listened.\n\nThis video is narrated with an AI voice and illustrated with stick-figure art.\n\nChapters\n0:00 The Silver Fork\n0:47 Into the Ice\n1:27 What the Inuit Saw\n2:40 London Recoils\n3:36 A Note Under Stones\n4:33 A Mark on the Chart\n5:07 Listening to the Elders\n6:39 The Ranger's Story\n\nSources\n- https://www.rmg.co.uk/collections/objects/rmgc-object-2292: https://www.rmg.co.uk/collections/objects/rmgc-object-2292\n- https://www.rmg.co.uk/collections/objects/rmgc-object-2379: https://www.rmg.co.uk/collections/objects/rmgc-object-2379\n- https://www.archive.org/download/melancholyfateof00raej/melancholyfateof00raej_bw.pdf: https://www.archive.org/download/melancholyfateof00raej/melancholyfateof00raej_bw.pdf\n- https://arctonauts.com/?p=1922: https://arctonauts.com/?p=1922\n- https://canadianmysteries.ca/sites/franklin/archive/text/DickensHouseholdWords1_en.htm: https://canadianmysteries.ca/sites/franklin/archive/text/Di…",
+  "tags": [
+   "Franklin expedition",
+   "HMS Erebus",
+   "HMS Terror",
+   "Franklin lost ships",
+   "John Rae",
+   "Inuit oral history",
+   "Inuit testimony Franklin",
+   "Northwest Passage",
+   "Arctic exploration history",
+   "Charles Dickens Franklin",
+   "Lady Jane Franklin",
+   "Franklin expedition mystery"
+  ],
+  "chapters": [
+   {
+    "time": "0:00",
+    "title": "The Silver Fork"
+   },
+   {
+    "time": "0:47",
+    "title": "Into the Ice"
+   },
+   {
+    "time": "1:27",
+    "title": "What the Inuit Saw"
+   },
+   {
+    "time": "2:40",
+    "title": "London Recoils"
+   },
+   {
+    "time": "3:36",
+    "title": "A Note Under Stones"
+   },
+   {
+    "time": "4:33",
+    "title": "A Mark on the Chart"
+   },
+   {
+    "time": "5:07",
+    "title": "Listening to the Elders"
+   },
+   {
+    "time": "6:39",
+    "title": "The Ranger's Story"
+   }
+  ],
+  "custom_thumbnails": []
+ },
+ "/api/projects/1/site": {
+  "youtube_url": "https://www.youtube.com/watch?v=PcrwWUBp_kQ&t=288s",
+  "youtube_id": "PcrwWUBp_kQ",
+  "title": "The Search to Find the Lost Ships of James Franklin",
+  "summary": "In 1854, a doctor came home from the Arctic with Sir John Franklin's silver fork and the Inuit account of what happened to his 129 lost men. Victorian England refused to believe it. Charles Dickens himself dismissed the Inuit testimony as \"babble.\"",
+  "title_options": [
+   "The Inuit Knew Where Franklin's Lost Ships Were. No One Listened",
+   "Charles Dickens Called It 'Babble.' It Was the Best Map Ever",
+   "How Inuit Memory Found Two Ships Lost for Nearly 170 Years",
+   "A Silver Fork, a Vanished Crew, and a Truth Britain Rejected",
+   "The Arctic Mystery Victorian England Refused to Solve"
+  ],
+  "published": true,
+  "published_at": "2026-11-06 21:29:59",
+  "chunks": 15,
+  "stale": false,
+  "has_voice": true,
+  "rag_ready": true
+ }
+}

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../api";
 import { StepProps } from "../App";
-import { CopyButton, ErrorBox, JobProgress, useJob } from "../components";
+import { CopyButton, ErrorBox, JobProgress, useJob, Icon } from "../components";
 
 // Prompts and images on one page: each batch lists its prompts with the Flow image next to each one.
 
@@ -353,7 +353,7 @@ export default function ImagesStep({ project, refresh }: StepProps) {
           </button>
           {totalImages > 0 && (
             <a className="button" href={`#/p/${pid}/assemble`}>
-              Next: assemble →
+              Next: assemble <Icon name="next" />
             </a>
           )}
         </div>
@@ -475,7 +475,7 @@ export default function ImagesStep({ project, refresh }: StepProps) {
               const b = batches.find((x) => x.batch_no === n);
               return (
                 <button key={n} className={`${n === active ? "active" : ""} ${complete(b) ? "done" : ""}`} onClick={() => setActive(n)}>
-                  Batch {n} {complete(b) && <small className="good">✓</small>}{" "}
+                  Batch {n} {complete(b) && <span className="good"><Icon name="check" size={14} /></span>}{" "}
                   {b && (
                     <small className={complete(b) ? "good" : "warn"}>
                       {b.count}/{b.expected}

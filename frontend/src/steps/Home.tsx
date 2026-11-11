@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import { ErrorBox } from "../components";
+import { ErrorBox, Icon } from "../components";
 import { FORMAT_LABELS, Project } from "../types";
 
 interface Health {
@@ -80,7 +80,7 @@ export default function Home() {
       <div className="row between">
         <h1>Your videos</h1>
         <a className="button" href="#/ideas">
-          + New video
+          <Icon name="plus" /> New video
         </a>
       </div>
       <ErrorBox error={error} onClose={() => setError(null)} />
@@ -109,7 +109,7 @@ export default function Home() {
       {archived.length > 0 && (
         <section className="archived">
           <button className="link archived-toggle" onClick={() => setShowArchived(!showArchived)}>
-            {showArchived ? "▾" : "▸"} Archived ({archived.length})
+            <span className={showArchived ? "turn open" : "turn"}><Icon name="chevron" /></span> Archived ({archived.length})
           </button>
           {showArchived && (
             <div className="cards">

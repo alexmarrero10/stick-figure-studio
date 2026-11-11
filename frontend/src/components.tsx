@@ -1,6 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, Job, waitForJob } from "./api";
 
+const ICONS = {
+  check: "M5 12.5l4.5 4.5L19 7.5",
+  x: "M6 6l12 12M18 6L6 18",
+  next: "M5 12h14M13 6l6 6-6 6",
+  undo: "M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 010 11H11",
+  folder: "M3 7.5A1.5 1.5 0 014.5 6h4l2 2.5h9A1.5 1.5 0 0121 10v8.5a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 18.5z",
+  chevron: "M9 6l6 6-6 6",
+  plus: "M12 5v14M5 12h14",
+};
+
+/** A small line icon drawn in the text color (one stroke weight everywhere). */
+export function Icon({ name, size = 16 }: { name: keyof typeof ICONS; size?: number }) {
+  return (
+    <svg className={`icon icon-${name}`} viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
+      <path d={ICONS[name]} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /** A password-style input with an eye button to show or hide what was typed. */
 export function SecretInput({
   value,

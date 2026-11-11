@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { StepProps } from "../App";
-import { ErrorBox, Stale } from "../components";
+import { ErrorBox, Stale, Icon } from "../components";
 import { Beat } from "../types";
 
 export default function BeatsStep({ project, refresh }: StepProps) {
@@ -132,11 +132,11 @@ export default function BeatsStep({ project, refresh }: StepProps) {
             disabled={undoSteps === 0}
             title={undoSteps ? `Undo the last split or merge (Ctrl+Z). ${undoSteps} step${undoSteps === 1 ? "" : "s"} available.` : "Nothing to undo"}
           >
-            ↶ Undo{undoSteps > 0 ? ` (${undoSteps})` : ""}
+            <Icon name="undo" /> Undo{undoSteps > 0 ? ` (${undoSteps})` : ""}
           </button>
           {beats.length > 0 && (
             <a className="button" href={`#/p/${pid}/voice`}>
-              Next: voice →
+              Next: voice <Icon name="next" />
             </a>
           )}
         </div>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api, fmtTime } from "../api";
 import { StepProps } from "../App";
-import { ErrorBox, JobProgress, Stale, useJob } from "../components";
+import { ErrorBox, JobProgress, Stale, useJob, Icon } from "../components";
 import { Beat } from "../types";
 
 interface Voice {
@@ -62,7 +62,7 @@ export default function VoiceStep({ project, refresh }: StepProps) {
         </button>
         {voice && (
           <a className="button" href={`#/p/${pid}/images`}>
-            Next: images →
+            Next: images <Icon name="next" />
           </a>
         )}
       </div>
