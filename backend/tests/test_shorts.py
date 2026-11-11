@@ -106,21 +106,22 @@ def test_script_prompt_has_format_rules_and_accuracy():
 def test_publish_description_keeps_the_research_sources():
     class C:
         def json(self, *a, **k):
-            return {"titles": ["T"], "description": "Hook.", "tags": ["navy"], "chapters": [{"beat": 0, "title": "Start"}],
-                    "thumbnails": [{"scene": "A shocked stick figure holds a huge silver fork.", "background": "deep navy blue"}]}
+            return {"titles": ["T"], "description": "Hook.", "tags": ["navy"], "chapters": [{"beat": 0, "title": "Start"}]}
     beats = [{"idx": 0, "word_start": 0, "text": "w"}]
     meta_ = publish.generate(C(), "T", "w", beats, [], [{"title": "Navy report", "url": "https://navy.mil/r"}],
                              ["animation", "history", "education"])
     assert "Sources\n- Navy report: https://navy.mil/r" in meta_["description"]
     assert meta_["tags"] == ["navy", "animation", "history", "education"]
-    thumb = meta_["thumbnail_prompts"][0]
+    assert "thumbnail_prompts" not in meta_  # thumbnails come one at a time from the Thumbnail panel
+    assert "thumbnails" not in publish.SYSTEM
+
+
+def test_thumbnail_prompt_uses_the_videos_style():
+    thumb = publish.thumbnail_prompt("A shocked stick figure holds a huge silver fork", "deep navy blue")
     assert thumb.startswith("A shocked stick figure holds a huge silver fork. Background: deep navy blue. YouTube thumbnail")
     assert prompts.BODY in thumb  # no style guide yet: the default video style
-    # With a style guide, the thumbnail ends with the video's own style text, like every image prompt.
-    guide = {"style_prefix": "Minimalist stick figure illustration, thin black stick limbs, flat colors (sand beige).",
-             "characters": [], "props": [], "locations": []}
-    meta_ = publish.generate(C(), "T", "w", beats, [], [], [], guide)
-    assert meta_["thumbnail_prompts"][0].endswith(prompts.with_body_rule(guide["style_prefix"]))
+    style = "Minimalist stick figure illustration, thin black stick limbs, flat colors (sand beige)."
+    assert publish.thumbnail_prompt("A", "B", style).endswith(prompts.with_body_rule(style))
 
 
 def test_projects_store_their_format(client, temp_db):

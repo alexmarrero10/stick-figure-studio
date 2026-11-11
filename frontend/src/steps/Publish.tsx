@@ -8,8 +8,7 @@ interface Meta {
   description: string;
   tags: string[];
   chapters: { time: string; title: string }[];
-  thumbnail_prompts: string[];
-  custom_thumbnails: { request: string; prompt: string }[];
+  custom_thumbnails: { request: string; prompt: string; suggested?: boolean }[];
 }
 
 export default function PublishStep({ project, refresh }: StepProps) {
@@ -18,20 +17,26 @@ export default function PublishStep({ project, refresh }: StepProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [idea, setIdea] = useState("");
-  const [asking, setAsking] = useState(false);
+  const [asking, setAsking] = useState<"idea" | "suggest" | null>(null);
 
-  const askThumbnail = async () => {
-    setAsking(true);
+  const askThumbnail = async (kind: "idea" | "suggest") => {
+    setAsking(kind);
     setError(null);
     try {
-      setMeta(await api.post<Meta>(`/api/projects/${pid}/publish/thumbnails`, { request: idea }));
-      setIdea("");
+      if (kind === "idea") {
+        setMeta(await api.post<Meta>(`/api/projects/${pid}/publish/thumbnails`, { request: idea }));
+        setIdea("");
+      } else {
+        setMeta(await api.post<Meta>(`/api/projects/${pid}/publish/thumbnails/suggest`));
+      }
     } catch (e) {
       setError((e as Error).message);
     } finally {
-      setAsking(false);
+      setAsking(null);
     }
   };
+  const thumbs = meta?.custom_thumbnails ?? [];
+  const hasPack = !!meta?.titles?.length;
 
   const removeThumbnail = async (n: number) => {
     try {
@@ -63,14 +68,14 @@ export default function PublishStep({ project, refresh }: StepProps) {
       <div className="panel">
         <h2>Publishing pack</h2>
         <p className="muted small">
-          Title options, a description with chapters and sources, tags, and thumbnail prompts in the same style.
+          Title options, a description with chapters and sources, and tags.
         </p>
         <button onClick={generate} disabled={busy}>
-          {busy ? "Writing…" : meta ? "Regenerate" : "Generate publishing pack"}
+          {busy ? "Writing…" : hasPack ? "Regenerate" : "Generate publishing pack"}
         </button>
         <ErrorBox error={error} onClose={() => setError(null)} />
       </div>
-      {meta && (
+      {hasPack && meta && (
         <>
           <div className="panel">
             <h3>Titles</h3>
@@ -96,53 +101,49 @@ export default function PublishStep({ project, refresh }: StepProps) {
             </div>
             <p>{meta.tags.join(", ")}</p>
           </div>
-          <div className="panel">
-            <h3>Thumbnail prompts</h3>
-            <p className="muted small">Suggested by Claude:</p>
-            <ul className="copy-list">
-              {meta.thumbnail_prompts.map((t) => (
-                <li key={t}>
-                  <span className="small">{t}</span> <CopyButton text={t} />
-                </li>
-              ))}
-            </ul>
-            <h4>Ask Claude</h4>
-            <p className="muted small">
-              Describe the thumbnail you have in mind and Claude writes the image prompt, in the video's style and with
-              its characters' looks.
-            </p>
-            <textarea
-              rows={3}
-              value={idea}
-              onChange={(e) => setIdea(e.target.value)}
-              placeholder="e.g. Saddam peeking out of the hole with a soldier's flashlight shining right on his face"
-            />
-            <div className="row">
-              <button onClick={askThumbnail} disabled={asking || !idea.trim()}>
-                {asking ? "Writing…" : "Write the prompt"}
-              </button>
-            </div>
-            {meta.custom_thumbnails.length > 0 && (
-              <ul className="copy-list">
-                {meta.custom_thumbnails.map((t, n) => (
-                  <li key={n}>
-                    <span className="small">
-                      <span className="muted">Your idea: {t.request}</span>
-                      <br />
-                      {t.prompt}
-                    </span>{" "}
-                    <CopyButton text={t.prompt} />
-                    <button className="link danger small" onClick={() => removeThumbnail(n)}>
-                      Remove
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <p className="muted small">Add the title text to the thumbnail yourself, since image models garble lettering.</p>
-          </div>
         </>
       )}
+      <div className="panel">
+        <h3>Thumbnail: idea to prompt</h3>
+        <p className="muted small">
+          Describe the thumbnail you have in mind and Claude writes the image prompt, in the video's style and with its
+          characters' looks. No idea yet? Give suggestion writes one for you; press it again for a different one.
+        </p>
+        <textarea
+          rows={3}
+          value={idea}
+          onChange={(e) => setIdea(e.target.value)}
+          placeholder="e.g. Saddam peeking out of the hole with a soldier's flashlight shining right on his face"
+        />
+        <div className="row">
+          <button onClick={() => askThumbnail("idea")} disabled={!!asking || !idea.trim()}>
+            {asking === "idea" ? "Writing…" : "Write the prompt"}
+          </button>
+          <button className="secondary" onClick={() => askThumbnail("suggest")} disabled={!!asking}>
+            {asking === "suggest" ? "Thinking…" : "Give suggestion"}
+          </button>
+        </div>
+        {thumbs.length > 0 && (
+          <ul className="copy-list">
+            {thumbs.map((t, n) => (
+              <li key={n}>
+                <span className="small">
+                  <span className="muted">
+                    {t.suggested ? "Claude's suggestion" : "Your idea"}: {t.request}
+                  </span>
+                  <br />
+                  {t.prompt}
+                </span>{" "}
+                <CopyButton text={t.prompt} />
+                <button className="link danger small" onClick={() => removeThumbnail(n)}>
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="muted small">Add the title text to the thumbnail yourself, since image models garble lettering.</p>
+      </div>
     </div>
   );
 }

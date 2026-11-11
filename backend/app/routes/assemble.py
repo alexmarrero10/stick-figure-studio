@@ -144,37 +144,59 @@ def make_publish(project_id: int) -> dict[str, Any]:
     research = db.latest_research(project_id)
     meta = publish.generate(claude(), p["title"], script["text"], beats, db.list_words(project_id),
                             research["sources"] if research else [],
-                            load_config().get("publish", {}).get("general_tags", []),
-                            db.get_style_guide(project_id))
+                            load_config().get("publish", {}).get("general_tags", []))
     meta["custom_thumbnails"] = (db.get_publish_meta(project_id) or {}).get("custom_thumbnails", [])
     db.save_publish_meta(project_id, meta)
+    return meta
+
+
+def _meta(project_id: int) -> dict[str, Any]:
+    """The stored publishing pack (may hold only thumbnails). The old three auto-suggested thumbnail
+    prompts were dropped in Nov 2026; one suggestion at a time replaces them."""
+    meta = {"titles": [], "description": "", "tags": [], "chapters": [], "custom_thumbnails": [],
+            **(db.get_publish_meta(project_id) or {})}
+    meta.pop("thumbnail_prompts", None)
     return meta
 
 
 @router.get("/publish")
 def get_publish(project_id: int) -> dict[str, Any] | None:
     project_or_404(project_id)
-    meta = db.get_publish_meta(project_id)
-    return {"custom_thumbnails": [], **meta} if meta else None
+    return _meta(project_id) if db.get_publish_meta(project_id) else None
 
 
 class ThumbAsk(BaseModel):
     request: str
 
 
+def _thumb_inputs(project_id: int) -> tuple[dict[str, Any], str, str]:
+    p = project_or_404(project_id)
+    script = db.current_script(project_id)
+    if not script:
+        raise HTTPException(400, "Write the script first")
+    meta = _meta(project_id)
+    return meta, (meta["titles"][0] if meta["titles"] else p["title"]), script["text"]
+
+
 @router.post("/publish/thumbnails")
 def ask_thumbnail(project_id: int, body: ThumbAsk) -> dict[str, Any]:
-    """Claude writes a thumbnail prompt from the owner's own idea; it is kept next to the suggested ones."""
-    p = project_or_404(project_id)
-    meta = db.get_publish_meta(project_id)
-    script = db.current_script(project_id)
-    if not meta or not script:
-        raise HTTPException(400, "Generate the publishing pack first")
+    """Claude writes a thumbnail prompt from the owner's own idea."""
     if not body.request.strip():
         raise HTTPException(400, "Describe the thumbnail you want")
-    title = meta["titles"][0] if meta.get("titles") else p["title"]
-    prompt = publish.ask_thumbnail(claude(), body.request, title, script["text"], db.get_style_guide(project_id))
-    meta["custom_thumbnails"] = [*meta.get("custom_thumbnails", []), {"request": body.request.strip(), "prompt": prompt}]
+    meta, title, script = _thumb_inputs(project_id)
+    prompt = publish.ask_thumbnail(claude(), body.request, title, script, db.get_style_guide(project_id))
+    meta["custom_thumbnails"].append({"request": body.request.strip(), "prompt": prompt})
+    db.save_publish_meta(project_id, meta)
+    return meta
+
+
+@router.post("/publish/thumbnails/suggest")
+def suggest_thumbnail(project_id: int) -> dict[str, Any]:
+    """Claude picks one thumbnail itself, different from the ones already listed."""
+    meta, title, script = _thumb_inputs(project_id)
+    s = publish.suggest_thumbnail(claude(), title, script, db.get_style_guide(project_id),
+                                  [t["request"] for t in meta["custom_thumbnails"]])
+    meta["custom_thumbnails"].append({"request": s["idea"], "prompt": s["prompt"], "suggested": True})
     db.save_publish_meta(project_id, meta)
     return meta
 
@@ -182,8 +204,8 @@ def ask_thumbnail(project_id: int, body: ThumbAsk) -> dict[str, Any]:
 @router.delete("/publish/thumbnails/{n}")
 def remove_thumbnail(project_id: int, n: int) -> dict[str, Any]:
     project_or_404(project_id)
-    meta = db.get_publish_meta(project_id)
-    if not meta or not 0 <= n < len(meta.get("custom_thumbnails", [])):
+    meta = _meta(project_id)
+    if not 0 <= n < len(meta["custom_thumbnails"]):
         raise HTTPException(404, "Thumbnail not found")
     meta["custom_thumbnails"].pop(n)
     db.save_publish_meta(project_id, meta)

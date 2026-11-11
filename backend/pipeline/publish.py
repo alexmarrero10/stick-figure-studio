@@ -1,4 +1,5 @@
-"""Step 9: titles, description with sources, chapters, tags, thumbnail prompts."""
+"""Step 9: titles, description with sources, chapters, tags; thumbnail prompts from the creator's idea
+or one suggestion at a time."""
 from __future__ import annotations
 
 from typing import Any
@@ -27,10 +28,7 @@ words, e.g. "How Did a Family Tree Find Saddam?"). Curiosity without lying. Vary
 mystery). Do NOT include chapters or sources; they are appended automatically.
 - tags: 12-20 search phrases.
 - chapters: 5-8 chapters. Each starts at a beat index where the story clearly moves to a new part. \
-The first chapter MUST start at beat 0. Titles are 2-5 words and must not spoil the ending.
-- thumbnails: 3 thumbnail ideas, each a different angle on the video's biggest mystery or moment \
-(e.g. a shocked face next to the key object; the dangerous or mysterious thing shown huge; a tiny \
-figure dwarfed by something). {THUMB_RULES}"""
+The first chapter MUST start at beat 0. Titles are 2-5 words and must not spoil the ending."""
 
 THUMB_ASK_SYSTEM = f"""You turn a YouTube creator's idea for a thumbnail into an image prompt for \
 their stick-figure history video. Draw what they ask for, filling in what they leave out. Follow \
@@ -39,12 +37,18 @@ these rules unless the request clearly asks otherwise (for example more figures)
 
 THUMB_SCHEMA = obj({"scene": STR, "background": STR})
 
+THUMB_SUGGEST_SYSTEM = f"""You suggest ONE thumbnail for a creator's stick-figure history video: the \
+single strongest angle on its biggest mystery or moment (e.g. a shocked face next to the key object; \
+the dangerous or mysterious thing shown huge; a tiny figure dwarfed by something). idea: that \
+thumbnail in one short plain sentence for the creator. Then the image prompt parts: {THUMB_RULES}"""
+
+THUMB_SUGGEST_SCHEMA = obj({"idea": STR, "scene": STR, "background": STR})
+
 SCHEMA = obj({
     "titles": arr(STR),
     "description": STR,
     "tags": arr(STR),
     "chapters": arr(obj({"beat": INT, "title": STR})),
-    "thumbnails": arr(obj({"scene": STR, "background": STR})),
 })
 
 # Thumbnails use the video's own style text, so they look like its images, plus what a thumbnail
@@ -64,12 +68,28 @@ def thumbnail_prompt(scene: str, background: str, style_prefix: str | None = Non
 def ask_thumbnail(claude: Claude, request: str, title: str, script: str,
                   guide: dict[str, Any] | None = None) -> str:
     """A thumbnail prompt in the video's style, written from the creator's own description."""
+    msg = _thumb_context(title, script, guide) + f"\n\nTHE CREATOR'S IDEA FOR THE THUMBNAIL\n{request.strip()}"
+    res = claude.json(THUMB_ASK_SYSTEM, [{"role": "user", "content": msg}], THUMB_SCHEMA, effort="medium")
+    return thumbnail_prompt(res["scene"], res["background"], guide["style_prefix"] if guide else None)
+
+
+def suggest_thumbnail(claude: Claude, title: str, script: str, guide: dict[str, Any] | None = None,
+                      avoid: list[str] | None = None) -> dict[str, str]:
+    """One thumbnail Claude picks itself: {"idea": plain sentence, "prompt": image prompt}. `avoid` lists
+    ideas already on the page, so pressing the button again gives a different one."""
+    msg = _thumb_context(title, script, guide)
+    if avoid:
+        msg += "\n\nTHUMBNAIL IDEAS ALREADY TRIED (suggest a different one)\n" + "\n".join(f"- {a}" for a in avoid)
+    res = claude.json(THUMB_SUGGEST_SYSTEM, [{"role": "user", "content": msg}], THUMB_SUGGEST_SCHEMA, effort="medium")
+    return {"idea": res["idea"].strip(),
+            "prompt": thumbnail_prompt(res["scene"], res["background"], guide["style_prefix"] if guide else None)}
+
+
+def _thumb_context(title: str, script: str, guide: dict[str, Any] | None) -> str:
     msg = f"VIDEO TITLE: {title}\n\nSCRIPT\n{script}"
     if guide:
         msg += f"\n\nVISUAL BIBLE (so the thumbnail matches the video)\n{visual_bible(guide)}"
-    msg += f"\n\nTHE CREATOR'S IDEA FOR THE THUMBNAIL\n{request.strip()}"
-    res = claude.json(THUMB_ASK_SYSTEM, [{"role": "user", "content": msg}], THUMB_SCHEMA, effort="medium")
-    return thumbnail_prompt(res["scene"], res["background"], guide["style_prefix"] if guide else None)
+    return msg
 
 
 def merge_tags(specific: list[str], general: list[str], limit: int = 500) -> list[str]:
@@ -96,11 +116,9 @@ def _mmss(t: float) -> str:
 
 def generate(claude: Claude, title: str, script: str, beats: list[dict[str, Any]],
              words: list[dict[str, Any]], sources: list[dict[str, str]],
-             general_tags: list[str] | None = None, guide: dict[str, Any] | None = None) -> dict[str, Any]:
+             general_tags: list[str] | None = None) -> dict[str, Any]:
     beat_lines = "\n".join(f"{b['idx']}: {b['text']}" for b in beats)
     msg = f"WORKING TITLE: {title}\n\nSCRIPT\n{script}\n\nBEATS\n{beat_lines}"
-    if guide:
-        msg += f"\n\nVISUAL BIBLE (so thumbnails match the video)\n{visual_bible(guide)}"
     res = claude.json(SYSTEM, [{"role": "user", "content": msg}], SCHEMA, effort="medium")
 
     # Chapters need real timestamps; YouTube requires the first at 0:00 and each >= 10 s.
@@ -129,6 +147,4 @@ def generate(claude: Claude, title: str, script: str, beats: list[dict[str, Any]
         "description": desc,
         "tags": merge_tags(res["tags"], general_tags or []),
         "chapters": chapters,
-        "thumbnail_prompts": [thumbnail_prompt(t["scene"], t["background"], guide["style_prefix"] if guide else None)
-                              for t in res["thumbnails"]],
     }

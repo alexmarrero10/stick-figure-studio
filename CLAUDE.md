@@ -38,7 +38,7 @@ is the active plan for RAG research and the public site (both built; deployment 
    slowly zoom in (`video.zoom_min_seconds`, `video.zoom_per_second`, capped at 12%). The same job also
    renders the vertical Short (`shorts.py`, `output/short.mp4`): 50-70 s, black background (`shorts.background`), ending on the best cliffhanger
    (Claude picks it once per voice-over), channel name under the pictures. If the Short fails, the video is kept.
-8. **Publish** (`publish.py`): titles, description with chapters and sources, tags, thumbnail prompts.
+8. **Publish** (`publish.py`): titles, description with chapters and sources, tags. Thumbnail panel: your idea to a prompt, or **Give suggestion** (one at a time, each different).
 9. **Your video site** (`site_publish.py`, UI step 7, `Site.tsx`): stores the video and its narration in
    30-45 s timed windows in Supabase `videos` / `video_chunks` for the public site.
 
@@ -69,7 +69,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (175 passing as of 2026-11-10,
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (176 passing as of 2026-11-10,
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
