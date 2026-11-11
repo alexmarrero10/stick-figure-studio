@@ -125,7 +125,7 @@ export default function PublishStep({ project, refresh }: StepProps) {
         </div>
         {thumbs.length > 0 && (
           <ul className="copy-list">
-            {thumbs.map((t, n) => (
+            {thumbs.map((t, n) => ({ t, n })).reverse().map(({ t, n }) => ( // newest first; n stays the stored index for Remove
               <li key={n}>
                 <span className="small">
                   <span className="muted">

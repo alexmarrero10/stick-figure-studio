@@ -21,7 +21,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   (`SEARCH_GLOBAL_PER_DAY`), since search and chat share the 1K-a-day embedding limit with the studio.
 
 - **Thumbnail panel is "idea to prompt"** (Publish step): the pack no longer writes 3 thumbnail prompts; **Give
-  suggestion** writes one (`publish.suggest_thumbnail`, told to differ from those listed). Works before the pack exists.
+  suggestion** writes one (`publish.suggest_thumbnail`, told to differ from those listed). Newest listed first. Works before the pack exists.
 
 - **Script rule:** clumsy real quotes are retold in plain words; never "1 person, 2 persons". Watergate's script
   still has Frank Wills' "one person, then two persons..." quote (voice + beats already made on v30; not changed).
