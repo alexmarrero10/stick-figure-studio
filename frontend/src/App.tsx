@@ -66,7 +66,7 @@ export default function App() {
         <span className="version" title="App version">v{__APP_VERSION__}</span>
         <nav aria-label="Main">
           <a href="#/" aria-current={route.page === "home" || route.page === "project" ? "page" : undefined}>Projects</a>
-          <a href="#/ideas" aria-current={route.page === "ideas" ? "page" : undefined}>New video</a>
+          <a href="#/ideas" aria-current={route.page === "ideas" ? "page" : undefined}>New project</a>
           <a href="#/settings" aria-current={route.page === "settings" ? "page" : undefined}>Settings</a>
         </nav>
       </header>

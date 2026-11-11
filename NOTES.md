@@ -9,7 +9,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 179 backend tests and 18 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
+- 180 backend tests and 18 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
   not pushed). The studio redesign commit (2026-11-11) and the notes commit before it are local, not pushed.
 - **Public site is live: https://stick-figure-studio.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`).
   Vercel redeploys automatically on every push to `main`; check a build with
@@ -20,6 +20,10 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Studio follow-ups (2026-11-11):** Settings grouped into sections (API keys, Claude, Research sources,
+  Script and beats, Voice, Pictures and video, Publishing and Shorts) with a side menu and a save bar that stays
+  on screen; bigger project titles and labels on the home page; "New video" renamed "New project"; Claude
+  suggests 3 ideas at a time (was 10; `count` default 3 in the route and `ideas.suggest`).
 - **Studio redesign (2026-11-11)** in the public site's look (navy ink, cool paper, red marker for the current
   step, yellow highlighter for the playing beat, Bricolage Grotesque + Atkinson Hyperlegible, dark mode). New
   top bar with the stick-figure mark, a connected step track (done = navy check, needs attention = yellow,

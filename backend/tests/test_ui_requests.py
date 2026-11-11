@@ -334,3 +334,21 @@ def test_find_passage_in_the_script():
     r = subprocess.run(["node", "--experimental-strip-types", "--no-warnings", "--test", str(test)],
                        capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=60)
     assert r.returncode == 0, r.stdout + r.stderr
+
+
+# --- idea suggestions: 3 at a time -------------------------------------------------------------
+
+def test_claude_suggests_three_ideas_by_default():
+    from pipeline import ideas
+
+    class FakeClaude:
+        def json(self, system, messages, schema, **kw):
+            self.prompt = messages[0]["content"]
+            return {"ideas": []}
+
+    fake = FakeClaude()
+    ideas.suggest(fake)
+    assert fake.prompt.startswith("Suggest 3 video topics.")
+    assert "at most one can be a topic explainer or a countdown list" in fake.prompt
+    from app.routes.ideas import SuggestBody
+    assert SuggestBody().count == 3

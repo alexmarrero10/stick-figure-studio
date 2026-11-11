@@ -80,7 +80,7 @@ export default function Home() {
       <div className="row between">
         <h1>Your videos</h1>
         <a className="button" href="#/ideas">
-          <Icon name="plus" /> New video
+          <Icon name="plus" /> New project
         </a>
       </div>
       <ErrorBox error={error} onClose={() => setError(null)} />

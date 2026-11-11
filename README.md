@@ -29,7 +29,7 @@ provider, Claude uses your existing `claude` login. If you're logged out, run `c
 
 ## Workflow
 
-1. **New video.** Ask Claude for ideas (optionally on a theme) or type your own. Save the ones you
+1. **New project.** Ask Claude for 3 ideas (optionally on a theme) or type your own. Save the ones you
    like for later. Choosing one creates a project.
 2. **Script.**
    1. Click **Research the story** first. Claude searches the web and writes a fact sheet (timeline,

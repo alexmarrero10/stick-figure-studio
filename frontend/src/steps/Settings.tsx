@@ -171,7 +171,37 @@ const FIELDS: {
   { section: "shorts", key: "text_color", label: "Channel name color", help: "e.g. #FFFFFF for white" },
 ];
 
+/** Settings are shown in these groups, in this order; each config section belongs to one. */
+const GROUPS: { id: string; title: string; about: string; sections: string[] }[] = [
+  { id: "claude", title: "Claude", about: "Which Claude writes your ideas, research and scripts, and how hard it thinks.", sections: ["claude"] },
+  {
+    id: "rag",
+    title: "Research sources",
+    about: "Download real sources into your Supabase database and write the research brief from them.",
+    sections: ["rag"],
+  },
+  { id: "script", title: "Script and beats", about: "How long scripts are and how they are cut into pictures.", sections: ["script", "beats"] },
+  { id: "voice", title: "Voice", about: "The ElevenLabs voice and how the narration is cleaned up.", sections: ["voice"] },
+  {
+    id: "video",
+    title: "Pictures and video",
+    about: "Image prompt batches, shot timing, zoom and video quality.",
+    sections: ["prompts", "shots", "video"],
+  },
+  { id: "publish", title: "Publishing and Shorts", about: "Tags for every video and how the vertical Short looks.", sections: ["publish", "shorts"] },
+];
+
+const KEY_LABELS: Record<string, string> = {
+  ANTHROPIC_API_KEY: "Anthropic API key",
+  ELEVENLABS_API_KEY: "ElevenLabs API key",
+  GEMINI_API_KEY: "Gemini API key",
+  SUPABASE_DB_URL: "Supabase database address",
+  SITE_DATABASE_URL: "Public site database address",
+};
+
 const KEY_HELP: Record<string, string> = {
+  ANTHROPIC_API_KEY: "Only needed if the Claude provider is set to Anthropic API. With Claude Code, your Claude login is used.",
+  ELEVENLABS_API_KEY: "From elevenlabs.io (your profile, then API keys). Used for the voice-over.",
   GEMINI_API_KEY: "Free key from aistudio.google.com. Leave billing off on that Google project so it can never cost money.",
   SUPABASE_DB_URL:
     "Supabase: Connect > Session pooler > URI, with your database password filled in. Run backend/supabase/schema.sql once in its SQL Editor.",
@@ -266,96 +296,134 @@ export default function SettingsPage() {
   const status = (where: string) =>
     saved[where] && <span className={`save-status ${saved[where].ok ? "good" : "bad"}`}>{saved[where].text}</span>;
 
+  const field = (f: (typeof FIELDS)[number]) => {
+    const v = s.config[f.section]?.[f.key];
+    const id = `f-${f.section}-${f.key}`;
+    const helpId = f.help ? `${id}-help` : undefined;
+    const help = f.help && (
+      <small className="help" id={helpId}>
+        {f.help}
+      </small>
+    );
+    if (f.type === "bool") {
+      return (
+        <div className="field field-check" key={id}>
+          <label className="check" htmlFor={id}>
+            <input id={id} type="checkbox" checked={!!v} aria-describedby={helpId} onChange={(e) => setField(f.section, f.key, e.target.checked)} />
+            <span>{f.label}</span>
+          </label>
+          {help}
+        </div>
+      );
+    }
+    const wide = f.type === "list" || f.type === "select" || (!f.type && f.key !== "background" && f.key !== "text_color");
+    return (
+      <div className={`field ${wide ? "field-wide" : ""}`} key={id}>
+        <label htmlFor={id}>{f.label}</label>
+        {f.type === "select" ? (
+          <select id={id} value={String(v ?? "")} aria-describedby={helpId} onChange={(e) => setField(f.section, f.key, e.target.value)}>
+            {/* Keep a value set by hand in config.yaml visible even if it isn't a listed choice. */}
+            {v != null && v !== "" && !f.options!.some((o) => o.value === String(v)) && <option value={String(v)}>{String(v)}</option>}
+            {f.options!.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            id={id}
+            inputMode={f.type === "number" ? "decimal" : undefined}
+            value={Array.isArray(v) ? v.join(", ") : String(v ?? "")}
+            aria-describedby={helpId}
+            onChange={(e) => setField(f.section, f.key, e.target.value)}
+          />
+        )}
+        {help}
+      </div>
+    );
+  };
+
+  const jump = (id: string) => document.getElementById(`group-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+
   return (
     <div className="settings">
-      <h1>Settings</h1>
-      <ErrorBox error={error} />
-      <div className="panel">
-        <h2>API keys</h2>
-        <p className="muted small">
-          Stored in the .env file in the app folder. The Anthropic key is only needed if the Claude provider is set
-          to "Anthropic API"; with Claude Code, your Claude login is used instead. The Gemini key (free, from Google AI
-          Studio) and the Supabase database address are for researching from downloaded sources.
-        </p>
-        {(Object.keys(keys) as (keyof typeof keys)[]).map((name) => (
-          <div className="row" key={name}>
-            <label className="grow">
-              {name} <span className="muted">{s.keys[name] ? `(current: ${s.keys[name]})` : "(not set)"}</span>
-              {KEY_HELP[name] && <small className="muted">{KEY_HELP[name]}</small>}
-              <SecretInput
-                value={keys[name]}
-                onChange={(v) => setKeys({ ...keys, [name]: v })}
-                placeholder="Paste a new key"
-              />
-            </label>
-            <button onClick={() => saveKey(name)} disabled={saving === name}>
-              {saving === name ? "Saving…" : "Save"}
-            </button>
-            {status(name)}
-          </div>
-        ))}
-        <div className="row">
-          <button className="secondary" onClick={testRag} disabled={saving === "rag"}>
-            {saving === "rag" ? "Testing…" : "Test Gemini and Supabase"}
-          </button>
-          {status("rag")}
-        </div>
-        {ragCheck && (
-          <ul className="small">
-            {[ragCheck.gemini, ragCheck.database].map((r, i) => (
-              <li key={i} className={r.ok ? "good" : "bad"}>
-                <Icon name={r.ok ? "check" : "x"} size={14} /> {r.message}
-              </li>
-            ))}
-          </ul>
-        )}
+      <div className="settings-head">
+        <h1>Settings</h1>
+        <p className="muted">Changes apply to the next run. Nothing needs a restart.</p>
       </div>
-      <div className="panel">
-        <h2>Pipeline</h2>
-        <div className="grid2">
-          {FIELDS.map((f) => {
-            const v = s.config[f.section]?.[f.key];
-            return (
-              <label key={`${f.section}.${f.key}`} className={f.type === "bool" ? "check" : ""}>
-                {f.type === "select" ? (
-                  <>
-                    {f.label}
-                    <select value={String(v ?? "")} onChange={(e) => setField(f.section, f.key, e.target.value)}>
-                      {/* Keep a value set by hand in config.yaml visible even if it isn't a listed choice. */}
-                      {v != null && v !== "" && !f.options!.some((o) => o.value === String(v)) && (
-                        <option value={String(v)}>{String(v)}</option>
-                      )}
-                      {f.options!.map((o) => (
-                        <option key={o.value} value={o.value}>
-                          {o.label}
-                        </option>
-                      ))}
-                    </select>
-                  </>
-                ) : f.type === "bool" ? (
-                  <>
-                    <input type="checkbox" checked={!!v} onChange={(e) => setField(f.section, f.key, e.target.checked)} />
-                    {f.label}
-                  </>
-                ) : (
-                  <>
-                    {f.label}
-                    <input
-                      value={Array.isArray(v) ? v.join(", ") : String(v ?? "")}
-                      onChange={(e) => setField(f.section, f.key, e.target.value)}
+      <ErrorBox error={error} />
+      <div className="settings-layout">
+        <nav className="settings-nav" aria-label="Settings sections">
+          <button onClick={() => jump("keys")}>API keys</button>
+          {GROUPS.map((g) => (
+            <button key={g.id} onClick={() => jump(g.id)}>
+              {g.title}
+            </button>
+          ))}
+        </nav>
+        <div className="settings-body">
+          <section className="panel settings-group" id="group-keys">
+            <header>
+              <h2>API keys</h2>
+              <p className="muted">Saved in the .env file in the app folder. Only the first and last few characters are shown.</p>
+            </header>
+            <div className="key-list">
+              {(Object.keys(keys) as (keyof typeof keys)[]).map((name) => (
+                <div className="key-row" key={name}>
+                  <div className="key-name">
+                    <label htmlFor={`key-${name}`}>{KEY_LABELS[name]}</label>
+                    <span className={`key-state ${s.keys[name] ? "on" : ""}`}>{s.keys[name] ? `Set: ${s.keys[name]}` : "Not set"}</span>
+                  </div>
+                  {KEY_HELP[name] && <small className="help">{KEY_HELP[name]}</small>}
+                  <div className="key-input">
+                    <SecretInput
+                      id={`key-${name}`}
+                      value={keys[name]}
+                      onChange={(v) => setKeys({ ...keys, [name]: v })}
+                      placeholder={s.keys[name] ? "Paste a new key to replace it" : "Paste the key"}
                     />
-                  </>
-                )}
-                {f.help && <small className="muted">{f.help}</small>}
-              </label>
-            );
-          })}
-        </div>
-        <div className="row">
-          <button onClick={saveConfig} disabled={saving === "config"}>
-            {saving === "config" ? "Saving…" : "Save settings"}
-          </button>
-          {status("config")}
+                    <button className="secondary" onClick={() => saveKey(name)} disabled={saving === name}>
+                      {saving === name ? "Saving…" : "Save"}
+                    </button>
+                  </div>
+                  {status(name)}
+                </div>
+              ))}
+            </div>
+            <div className="row">
+              <button className="secondary" onClick={testRag} disabled={saving === "rag"}>
+                {saving === "rag" ? "Testing…" : "Test Gemini and Supabase"}
+              </button>
+              {status("rag")}
+            </div>
+            {ragCheck && (
+              <ul className="check-list">
+                {[ragCheck.gemini, ragCheck.database].map((r, i) => (
+                  <li key={i} className={r.ok ? "good" : "bad"}>
+                    <Icon name={r.ok ? "check" : "x"} size={14} /> {r.message}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          {GROUPS.map((g) => (
+            <section className="panel settings-group" id={`group-${g.id}`} key={g.id}>
+              <header>
+                <h2>{g.title}</h2>
+                <p className="muted">{g.about}</p>
+              </header>
+              <div className="fields">{FIELDS.filter((f) => g.sections.includes(f.section)).map(field)}</div>
+            </section>
+          ))}
+
+          <div className="save-bar">
+            <button onClick={saveConfig} disabled={saving === "config"}>
+              {saving === "config" ? "Saving…" : "Save settings"}
+            </button>
+            {status("config") || <span className="muted small">Saves every section except the API keys, which save on their own.</span>}
+          </div>
         </div>
       </div>
     </div>

@@ -22,10 +22,12 @@ export function Icon({ name, size = 16 }: { name: keyof typeof ICONS; size?: num
 
 /** A password-style input with an eye button to show or hide what was typed. */
 export function SecretInput({
+  id,
   value,
   onChange,
   placeholder,
 }: {
+  id?: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -34,6 +36,7 @@ export function SecretInput({
   return (
     <span className="secret-input">
       <input
+        id={id}
         type={shown ? "text" : "password"}
         value={value}
         onChange={(e) => onChange(e.target.value)}

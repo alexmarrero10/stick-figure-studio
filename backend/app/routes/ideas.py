@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/ideas", tags=["ideas"])
 
 class SuggestBody(BaseModel):
     theme: str = ""
-    count: int = 10
+    count: int = 3
     trending: bool = True
 
 
@@ -33,7 +33,7 @@ def suggest(body: SuggestBody) -> dict[str, Any]:
             notes = ideas.trends(c, body.theme)
         progress("Writing topic ideas", 0.6)
         avoid = db.used_idea_titles() + [i["title"] for i in db.list_ideas()[:100]]
-        result = ideas.suggest(c, max(3, min(body.count, 20)), body.theme, avoid, notes)
+        result = ideas.suggest(c, max(1, min(body.count, 20)), body.theme, avoid, notes)
         return db.add_ideas(result, "trending" if notes else "suggested")
 
     return jobs.start("ideas", 0, work)

@@ -36,9 +36,9 @@ test("archiving a video sends it to the archive", async ({ page, api }) => {
 
 test("top navigation reaches every page", async ({ page, api }) => {
   await page.goto("/#/");
-  await page.getByRole("link", { name: "New video" }).first().click();
+  await page.getByRole("link", { name: "New project" }).first().click();
   await expect(page.getByRole("heading", { name: "Find a story" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "New video" }).first()).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("link", { name: "New project" }).first()).toHaveAttribute("aria-current", "page");
   await page.getByRole("link", { name: "Settings" }).click();
   await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Projects" }).click();
@@ -110,8 +110,9 @@ test("a long job shows progress and can be stopped", async ({ page, api }) => {
   api.on("GET", "/api/jobs/j1", () => (api.sent("POST", "/api/jobs/j1/stop").length ? { ...running, status: "stopped" } : running));
   api.on("POST", "/api/jobs/j1/stop", {});
   await page.goto("/#/ideas");
-  await page.getByRole("button", { name: "Suggest 10 ideas" }).click();
+  await page.getByRole("button", { name: "Suggest 3 ideas" }).click();
   await expect(page.getByText("Looking for stories")).toBeVisible();
+  expect(api.sent("POST", "/api/ideas/suggest")[0].body).toMatchObject({ count: 3 });
   await page.getByRole("button", { name: "Stop" }).click();
   await expect(page.getByText(/Stopped\. You can start it again/)).toBeVisible();
 });
@@ -120,6 +121,9 @@ test("settings save through the API, keys stay hidden", async ({ page, api }) =>
   api.on("PUT", "/api/settings/config", (c) => c.body);
   await page.goto("/#/settings");
   await expect(page.getByRole("heading", { name: "API keys" })).toBeVisible();
+  for (const name of ["Claude", "Research sources", "Script and beats", "Voice", "Pictures and video", "Publishing and Shorts"])
+    await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
+  await expect(page.getByLabel("ElevenLabs API key")).toHaveAttribute("type", "password");
   for (const input of await page.locator(".secret-input input").all()) await expect(input).toHaveAttribute("type", "password");
   await page.getByRole("button", { name: "Save settings" }).click();
   await expect.poll(() => api.sent("PUT", "/api/settings/config").length).toBe(1);

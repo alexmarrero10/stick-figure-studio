@@ -70,7 +70,7 @@ def trends(claude: Claude, theme: str = "") -> str:
     return text[i:] if i > 0 else text
 
 
-def suggest(claude: Claude, count: int = 10, theme: str = "", avoid: list[str] | None = None,
+def suggest(claude: Claude, count: int = 3, theme: str = "", avoid: list[str] | None = None,
             trend_notes: str = "") -> list[dict[str, Any]]:
     parts = [f"Suggest {count} video topics."]
     if theme.strip():
@@ -83,8 +83,12 @@ def suggest(claude: Claude, count: int = 10, theme: str = "", avoid: list[str] |
         )
     if avoid:
         parts.append("These topics are already used or suggested, so do not repeat them:\n- " + "\n- ".join(avoid[:150]))
-    parts.append("Mix categories and eras unless a theme was given, and mix the formats: mostly stories, "
-                 "plus a few topic explainers and countdown lists.")
+    if count <= 4:
+        parts.append("Use different categories and eras unless a theme was given. Make most of them single "
+                     "stories; at most one can be a topic explainer or a countdown list.")
+    else:
+        parts.append("Mix categories and eras unless a theme was given, and mix the formats: mostly stories, "
+                     "plus a few topic explainers and countdown lists.")
     result = claude.json(SYSTEM, [{"role": "user", "content": "\n\n".join(parts)}],
                          obj({"ideas": arr(IDEA)}), effort="medium")
     return result["ideas"]

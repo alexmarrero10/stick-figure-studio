@@ -30,7 +30,7 @@ export default function Ideas() {
     setBusy(true);
     setError(null);
     try {
-      const done = await run(() => api.post<Job>("/api/ideas/suggest", { theme, count: 10, trending }));
+      const done = await run(() => api.post<Job>("/api/ideas/suggest", { theme, count: 3, trending }));
       setIdeas((prev) => [...(done.result as Idea[]), ...prev]);
     } catch (e) {
       setError((e as Error).message);
@@ -91,7 +91,7 @@ export default function Ideas() {
             few minutes)
           </label>
           <button onClick={suggest} disabled={busy || suggesting}>
-            {busy || suggesting ? "Thinking…" : ideas.length ? "Suggest more" : "Suggest 10 ideas"}
+            {busy || suggesting ? "Thinking…" : ideas.length ? "Suggest more" : "Suggest 3 ideas"}
           </button>
           <JobProgress job={job} />
         </div>
