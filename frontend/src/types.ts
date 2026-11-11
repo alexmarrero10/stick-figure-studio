@@ -10,6 +10,7 @@ export interface Idea {
   source: string;
   saved: number;
   format: VideoFormat;
+  created_at?: string;
 }
 
 export type VideoFormat = "story" | "topic" | "list";

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
+import { go } from "../App";
 import { ErrorBox, Icon } from "../components";
-import { FORMAT_LABELS, Project } from "../types";
+import { FORMAT_LABELS, Idea, Project } from "../types";
 
 interface Health {
   ffmpeg: boolean;
@@ -18,10 +19,17 @@ export default function Home() {
   const [health, setHealth] = useState<Health | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [ideas, setIdeas] = useState<Idea[]>([]); // saved ideas not yet started
 
   const load = () => api.get<Project[]>("/api/projects").then(setProjects).catch((e) => setError(e.message));
+  const loadIdeas = () =>
+    api
+      .get<Idea[]>("/api/ideas?saved=true&unused=true")
+      .then(setIdeas)
+      .catch((e) => setError(e.message));
   useEffect(() => {
     load();
+    loadIdeas();
     api.get<Health>("/api/settings/health").then(setHealth).catch(() => {});
   }, []);
 
@@ -47,6 +55,26 @@ export default function Home() {
     try {
       await api.del(`/api/projects/${p.id}?delete_files=true`);
       load();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
+
+  const startIdea = async (idea: Idea) => {
+    setError(null);
+    try {
+      const p = await api.post<Project>(`/api/ideas/${idea.id}/use`);
+      go(`/p/${p.id}/script`);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
+
+  const unsaveIdea = async (idea: Idea) => {
+    setError(null);
+    try {
+      await api.put(`/api/ideas/${idea.id}/saved`, { saved: false });
+      loadIdeas();
     } catch (e) {
       setError((e as Error).message);
     }
@@ -84,7 +112,7 @@ export default function Home() {
         </a>
       </div>
       <ErrorBox error={error} onClose={() => setError(null)} />
-      {projects && active.length === 0 && (
+      {projects && active.length === 0 && ideas.length === 0 && (
         <div className="empty">
           <p>
             {archived.length
@@ -105,6 +133,35 @@ export default function Home() {
           </ProjectCard>
         ))}
       </div>
+
+      {ideas.length > 0 && (
+        <section className="saved-ideas" aria-labelledby="saved-ideas-title">
+          <div className="row between">
+            <h2 id="saved-ideas-title">Saved ideas</h2>
+            <a href="#/ideas">Find more ideas</a>
+          </div>
+          <ul className="saved-idea-list">
+            {ideas.map((i) => (
+              <li key={i.id} className="saved-idea">
+                <div className="saved-idea-text">
+                  <h3>{i.title}</h3>
+                  {i.hook && <p className="muted">{i.hook}</p>}
+                  <small className="muted">
+                    {FORMAT_LABELS[i.format] ?? "One story"}
+                    {i.created_at ? `, saved ${i.created_at.slice(0, 10)}` : ""}
+                  </small>
+                </div>
+                <div className="saved-idea-actions">
+                  <button onClick={() => startIdea(i)}>Start project</button>
+                  <button className="link" onClick={() => unsaveIdea(i)}>
+                    Remove
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {archived.length > 0 && (
         <section className="archived">

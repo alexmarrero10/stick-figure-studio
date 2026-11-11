@@ -53,12 +53,14 @@ def own(body: OwnIdea) -> dict[str, Any]:
     else:
         idea = {"title": body.text.strip()[:120], "hook": "", "why_it_works": "", "category": "",
                 "era": "", "documentation": body.text.strip(), "format": ideas.guess_format(body.text)}
-    return db.add_ideas([idea], "user")[0]
+    # Saved straight away, so the idea is on the home page even if the user clicks away.
+    return db.add_ideas([idea], "user", saved=True)[0]
 
 
 @router.get("")
-def list_ideas(saved: bool = False) -> list[dict[str, Any]]:
-    return db.list_ideas(saved)
+def list_ideas(saved: bool = False, unused: bool = False) -> list[dict[str, Any]]:
+    """unused=true: only ideas not yet turned into a project (the newest 200)."""
+    return db.list_ideas(saved, unused, 200 if unused else None)
 
 
 class SaveBody(BaseModel):

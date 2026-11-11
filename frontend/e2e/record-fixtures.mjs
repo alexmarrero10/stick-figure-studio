@@ -14,7 +14,8 @@ const ROOT = fileURLToPath(new URL("../..", import.meta.url)).replace(/[\\/]$/, 
 
 const paths = [
   "/api/projects",
-  "/api/ideas?saved=true",
+  "/api/ideas?unused=true",
+  "/api/ideas?saved=true&unused=true",
   "/api/settings",
   "/api/settings/health",
   "/api/settings/voices",

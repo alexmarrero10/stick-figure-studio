@@ -85,7 +85,6 @@
    }
   }
  ],
- "/api/ideas?saved=true": [],
  "/api/settings": {
   "config": {
    "claude": {
@@ -2460,5 +2459,7 @@
   "stale": false,
   "has_voice": true,
   "rag_ready": true
- }
+ },
+ "/api/ideas?unused=true": [],
+ "/api/ideas?saved=true&unused=true": []
 }

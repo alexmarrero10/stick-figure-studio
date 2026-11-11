@@ -12,7 +12,8 @@ is the plan for RAG research and the public site (both built and deployed).
 
 ## Pipeline (one step per UI tab, one module per step)
 
-1. **Ideas** (`ideas.py`): Claude suggests topics or the user types one. Choosing one creates a project.
+1. **Ideas** (`ideas.py`): Claude suggests 3 topics or the user types one (saved at once and listed on the
+   Projects page until started). Choosing one creates a project.
    Formats: one story, topic explained, countdown list.
 2. **Script** (`script.py`): research brief, then a streamed script (target 1,550-1,650 words). With RAG on
    (`rag.enabled` + `GEMINI_API_KEY` + `SUPABASE_DB_URL`), research downloads 10-15 sources (`sources.py`),
@@ -70,11 +71,11 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (180 passing as of 2026-11-11,
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (182 passing as of 2026-11-11,
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
-- **Studio browser tests:** `cd frontend && npm run test:e2e` (builds, then 18 Playwright tests in `e2e/`
+- **Studio browser tests:** `cd frontend && npm run test:e2e` (builds, then 21 Playwright tests in `e2e/`
   on Windows' Edge against a fake backend from `e2e/fixtures.json`; never the real server or data, ~10 s).
   Run after any UI change. Refresh fixtures with `node e2e/record-fixtures.mjs 1` (studio running).
 - **Public site:** `cd site/web && npm run build`, then

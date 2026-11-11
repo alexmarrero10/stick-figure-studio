@@ -127,7 +127,7 @@ def touch_project(conn: sqlite3.Connection, project_id: int) -> None:
 IDEA_FIELDS = ("title", "hook", "why_it_works", "category", "era", "documentation", "format")
 
 
-def add_ideas(ideas: list[dict[str, Any]], source: str = "suggested") -> list[dict[str, Any]]:
+def add_ideas(ideas: list[dict[str, Any]], source: str = "suggested", saved: bool = False) -> list[dict[str, Any]]:
     with tx() as conn:
         ids = []
         for idea in ideas:
@@ -135,20 +135,27 @@ def add_ideas(ideas: list[dict[str, Any]], source: str = "suggested") -> list[di
             if values["format"] not in FORMATS:
                 values["format"] = "story"
             cur = conn.execute(
-                f"INSERT INTO ideas ({', '.join(IDEA_FIELDS)}, source) VALUES ({', '.join('?' * len(IDEA_FIELDS))}, ?)",
-                (*values.values(), source),
+                f"INSERT INTO ideas ({', '.join(IDEA_FIELDS)}, source, saved) "
+                f"VALUES ({', '.join('?' * len(IDEA_FIELDS))}, ?, ?)",
+                (*values.values(), source, int(saved)),
             )
             ids.append(cur.lastrowid)
         q = f"SELECT * FROM ideas WHERE id IN ({','.join('?' * len(ids))}) ORDER BY id"
         return _rows(conn.execute(q, ids).fetchall()) if ids else []
 
 
-def list_ideas(saved_only: bool = False) -> list[dict[str, Any]]:
-    q = "SELECT * FROM ideas"
+def list_ideas(saved_only: bool = False, unused_only: bool = False, limit: int | None = None) -> list[dict[str, Any]]:
+    """Newest first. unused_only leaves out ideas that already became a project."""
+    where = []
     if saved_only:
-        q += " WHERE saved = 1"
+        where.append("saved = 1")
+    if unused_only:
+        where.append("project_id IS NULL")
+    q = "SELECT * FROM ideas" + (" WHERE " + " AND ".join(where) if where else "") + " ORDER BY id DESC"
+    if limit:
+        q += f" LIMIT {int(limit)}"
     with tx() as conn:
-        return _rows(conn.execute(q + " ORDER BY id DESC").fetchall())
+        return _rows(conn.execute(q).fetchall())
 
 
 def get_idea(idea_id: int) -> dict[str, Any] | None:

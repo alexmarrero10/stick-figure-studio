@@ -92,16 +92,77 @@ test("the script chat drawer opens and closes", async ({ page }) => {
   await expect(drawer).not.toHaveClass(/open/);
 });
 
-test("your own idea is added to the list", async ({ page, api }) => {
-  const idea = { id: 99, project_id: null, title: "The Great Molasses Flood", hook: "A wave of syrup", why_it_works: "", category: "", era: "", documentation: "", source: "own", saved: 0, format: "story" };
-  api.on("POST", "/api/ideas/own", idea);
+const molasses = {
+  id: 99, project_id: null, title: "The Great Molasses Flood", hook: "A wave of syrup swallows a Boston street.",
+  why_it_works: "Strange, visual and true.", category: "Disasters", era: "1919", documentation: "Boston Globe archive",
+  source: "user", saved: 1, format: "story", created_at: "2026-11-11 08:00:00",
+};
+
+test("your own idea is saved and shown on its own, full width", async ({ page, api }) => {
+  let saved: any[] = [];
+  api.on("POST", "/api/ideas/own", () => ((saved = [molasses]), molasses));
+  api.on("GET", "/api/ideas?unused=true", () => saved);
   await page.goto("/#/ideas");
   await page.getByRole("button", { name: "Use my own idea" }).click();
   await page.getByLabel("Your idea").fill("The Great Molasses Flood");
-  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Save my idea" }).click();
   await expect.poll(() => api.sent("POST", "/api/ideas/own").length).toBe(1);
-  expect(api.sent("POST", "/api/ideas/own")[0].body).toMatchObject({ text: "The Great Molasses Flood" });
-  await expect(page.getByRole("heading", { name: "The Great Molasses Flood" })).toBeVisible();
+  expect(api.sent("POST", "/api/ideas/own")[0].body).toEqual({ text: "The Great Molasses Flood", refine: true });
+  const feature = page.getByRole("article", { name: "Your saved idea" });
+  await expect(feature.getByRole("heading", { name: "The Great Molasses Flood" })).toBeVisible();
+  await expect(feature.getByText("Saved on your Projects page")).toBeVisible();
+  await expect(feature.getByText("Strange, visual and true.")).toBeVisible();
+  // Shown once (as the feature), not repeated in the saved list below it.
+  await expect(page.getByRole("heading", { name: "The Great Molasses Flood" })).toHaveCount(1);
+  // The feature spans the page instead of sitting in a narrow grid column.
+  const width = await feature.evaluate((el) => el.getBoundingClientRect().width);
+  expect(width).toBeGreaterThan(900);
+  await expect(page.getByLabel("Your idea")).toHaveValue(""); // the box is cleared once it's saved
+});
+
+test("saved ideas are listed on the Projects page and can be started or removed", async ({ page, api }) => {
+  let saved: any[] = [molasses];
+  api.on("GET", "/api/ideas?saved=true&unused=true", () => saved);
+  api.on("PUT", "/api/ideas/99/saved", () => ((saved = []), { ok: true }));
+  api.on("POST", "/api/ideas/99/use", project);
+  await page.goto("/#/");
+  const list = page.getByRole("region", { name: "Saved ideas" });
+  await expect(list.getByRole("heading", { name: "The Great Molasses Flood" })).toBeVisible();
+  await expect(list.getByText("A wave of syrup swallows a Boston street.")).toBeVisible();
+  await list.getByRole("button", { name: "Start project" }).click();
+  await expect(page).toHaveURL(new RegExp(`#/p/${PID}/script$`));
+  await page.goto("/#/");
+  await page.getByRole("region", { name: "Saved ideas" }).getByRole("button", { name: "Remove" }).click();
+  await expect.poll(() => api.sent("PUT", "/api/ideas/99/saved").length).toBe(1);
+  expect(api.sent("PUT", "/api/ideas/99/saved")[0].body).toEqual({ saved: false });
+  await expect(page.getByRole("region", { name: "Saved ideas" })).toHaveCount(0);
+});
+
+test("a half-typed idea is still there after leaving the page", async ({ page }) => {
+  await page.goto("/#/ideas");
+  await page.getByRole("button", { name: "Use my own idea" }).click();
+  await page.getByLabel("Your idea").fill("The Dancing Plague of 1518");
+  await page.getByRole("link", { name: "Projects" }).click();
+  await expect(page.getByRole("heading", { name: "Your videos" })).toBeVisible();
+  await page.getByRole("link", { name: "New project" }).first().click();
+  await expect(page.getByLabel("Your idea")).toHaveValue("The Dancing Plague of 1518");
+  await page.reload();
+  await expect(page.getByLabel("Your idea")).toHaveValue("The Dancing Plague of 1518");
+});
+
+test("Claude's latest suggestions are still there when the page is reopened", async ({ page, api }) => {
+  const s = (id: number, title: string) => ({ ...molasses, id, title, source: "suggested", saved: 0 });
+  api.on("GET", "/api/ideas?unused=true", [s(5, "The Radium Girls"), s(4, "The Halifax Explosion"), { ...molasses }]);
+  api.on("PUT", "/api/ideas/5/saved", { ok: true });
+  await page.goto("/#/ideas");
+  const latest = page.locator(".idea-section", { has: page.getByRole("heading", { name: "Latest suggestions" }) });
+  await expect(latest.getByRole("heading", { name: "The Radium Girls" })).toBeVisible();
+  await expect(latest.getByRole("heading", { name: "The Halifax Explosion" })).toBeVisible();
+  const saved = page.locator(".idea-section", { has: page.getByRole("heading", { name: "Saved ideas" }) });
+  await expect(saved.getByRole("heading", { name: "The Great Molasses Flood" })).toBeVisible();
+  await latest.locator("article", { hasText: "The Radium Girls" }).getByRole("button", { name: "Save for later" }).click();
+  await expect.poll(() => api.sent("PUT", "/api/ideas/5/saved").length).toBe(1);
+  expect(api.sent("PUT", "/api/ideas/5/saved")[0].body).toEqual({ saved: true });
 });
 
 test("a long job shows progress and can be stopped", async ({ page, api }) => {
