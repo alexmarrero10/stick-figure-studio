@@ -39,8 +39,8 @@ is the plan for RAG research and the public site (both built and deployed).
    slowly zoom in (`video.zoom_min_seconds`, `video.zoom_per_second`, capped at 12%). The same job also
    renders the vertical Short (`shorts.py`, `output/short.mp4`): 50-70 s, black background (`shorts.background`), ending on the best cliffhanger
    (Claude picks it once per voice-over), channel name under the pictures. If the Short fails, the video is kept.
-8. **Publish** (`publish.py`): titles, description with chapters and sources, tags. Thumbnail panel: your idea to a prompt, or **Give suggestion** (one at a time, each different).
-9. **Your video site** (`site_publish.py`, UI step 7, `Site.tsx`): stores the video and its narration in
+8. **Publish** (`publish.py`): one suggested title, description with chapters and sources, tags. Thumbnail panel (always beside the pack): your idea to a prompt, or **Give suggestion** (one at a time, each different).
+9. **Publish to Video Site** (`site_publish.py`, UI step 7, `Site.tsx`; title and summary start from the publishing pack): stores the video and its narration in
    30-45 s timed windows in Supabase `videos` / `video_chunks` for the public site.
 
 ## Tech stack
@@ -75,7 +75,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
-- **Studio browser tests:** `cd frontend && npm run test:e2e` (builds, then 23 Playwright tests in `e2e/`
+- **Studio browser tests:** `cd frontend && npm run test:e2e` (builds, then 24 Playwright tests in `e2e/`
   on Windows' Edge against a fake backend from `e2e/fixtures.json`; never the real server or data, ~10 s).
   Run after any UI change. Refresh fixtures with `node e2e/record-fixtures.mjs 1` (studio running).
 - **Public site:** `cd site/web && npm run build`, then

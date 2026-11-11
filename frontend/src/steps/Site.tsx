@@ -75,7 +75,7 @@ export default function SiteStep({ project, refresh }: StepProps) {
   return (
     <div className="panel">
       <div className="row between">
-        <h2>Your video site</h2>
+        <h2>Publish to Video Site</h2>
         {view.published && (
           <span className={`save-status ${view.stale ? "bad" : "good"}`}>
             {view.stale ? "Voice re-recorded since publishing: update it" : `On the site since ${view.published_at} UTC`}
@@ -108,7 +108,7 @@ export default function SiteStep({ project, refresh }: StepProps) {
             <option key={t} value={t} />
           ))}
         </datalist>
-        <small className="muted">Pick one of the title ideas or type your own.</small>
+        <small className="muted">Starts as the suggested title from the publishing pack. Change it if you like.</small>
       </label>
       <label>
         Short summary

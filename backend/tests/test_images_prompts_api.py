@@ -228,8 +228,8 @@ class ThumbFake:
 
     def json(self, system, messages, schema, max_tokens=32000, effort=None):
         self.asks.append(messages[-1]["content"])
-        if "titles" in schema["properties"]:
-            return {"titles": ["The Hole"], "description": "Hook.", "tags": [], "chapters": []}
+        if "tags" in schema["properties"]:
+            return {"title": "The Hole", "description": "Hook.", "tags": [], "chapters": []}
         if "idea" in schema["properties"]:
             return {"idea": f"Idea {len(self.asks)}", "scene": "A huge flashlight beam", "background": "night"}
         return {"scene": "A stick figure peeks out of a hole, a flashlight on his face", "background": "dark navy night"}

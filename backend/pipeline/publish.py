@@ -1,4 +1,4 @@
-"""Step 9: titles, description with sources, chapters, tags; thumbnail prompts from the creator's idea
+"""Step 9: a suggested title, description with sources, chapters, tags; thumbnail prompts from the creator's idea
 or one suggestion at a time."""
 from __future__ import annotations
 
@@ -44,9 +44,8 @@ SYSTEM = f"""You package true-story YouTube videos for publishing. Write metadat
 
 {TITLE_RULES}
 
-- titles: 5 options following TITLES, each a different shape and angle, strongest first. Every \
-title is about THIS video. Check each one: if someone read only the title, would they still not \
-know the answer? If they would, rewrite it.
+- title: the ONE strongest title following TITLES, about THIS video. Check it: if someone read only \
+the title, would they still not know the answer? If they would, rewrite it.
 - description: 2 short hook paragraphs (the first 150 characters show in search, so lead with the \
 mystery). Do NOT include chapters or sources; they are appended automatically.
 - tags: 12-20 search phrases.
@@ -68,7 +67,7 @@ thumbnail in one short plain sentence for the creator. Then the image prompt par
 THUMB_SUGGEST_SCHEMA = obj({"idea": STR, "scene": STR, "background": STR})
 
 SCHEMA = obj({
-    "titles": arr(STR),
+    "title": STR,
     "description": STR,
     "tags": arr(STR),
     "chapters": arr(obj({"beat": INT, "title": STR})),
@@ -166,7 +165,7 @@ def generate(claude: Claude, title: str, script: str, beats: list[dict[str, Any]
     if sources:
         desc += "\n\nSources\n" + "\n".join(f"- {s['title']}: {s['url']}" for s in sources[:15])
     return {
-        "titles": res["titles"],
+        "titles": [res["title"].strip()],  # a list, so packs from before Nov 2026 (5 titles) still load
         "description": desc,
         "tags": merge_tags(res["tags"], general_tags or []),
         "chapters": chapters,

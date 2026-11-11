@@ -9,7 +9,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 185 backend tests and 23 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
+- 185 backend tests and 24 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
   not pushed). The studio redesign commit (2026-11-11) and the notes commit before it are local, not pushed.
 - **Public site is live: https://stick-figure-studio.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`).
   Vercel redeploys automatically on every push to `main`; check a build with
@@ -19,6 +19,13 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   published to the site.
 
 ## Recently done
+
+- **Publish tweaks (2026-11-11):** the publishing pack writes ONE suggested title (schema `title`, stored as
+  `titles: [title]` so old 5-title packs still load), plus description and tags. The thumbnail panel sits beside
+  the pack (`.publish-layout`, sticky; stacks under 900 px). "Your video site" is now "Publish to Video Site";
+  its title starts as the pack's suggested title (summary already started from the description). The "Open
+  project folder" button was removed (it did nothing). The "Open output folder" (Assemble) and "Open batch
+  folder" (Images) buttons use the same `os.startfile` route and probably do nothing either; not touched yet.
 
 - **Retention and click-through rules (2026-11-11).** Saddam video stats: 2.1K impressions, **1.3% CTR** (very
   low), 2:38 average view duration, big drop at the start. Causes found: the title gave the answer away, the

@@ -12,7 +12,7 @@ const STEPS = [
   { key: "images", heading: "Image prompts and images" },
   { key: "assemble", heading: "Assemble the video" },
   { key: "publish", heading: "Publishing pack" },
-  { key: "site", heading: "Your video site" },
+  { key: "site", heading: "Publish to Video Site" },
 ];
 
 test("home lists every video with its progress", async ({ page, api }) => {
@@ -184,6 +184,18 @@ test("Claude's latest suggestions are still there when the page is reopened", as
   await latest.locator("article", { hasText: "The Radium Girls" }).getByRole("button", { name: "Save for later" }).click();
   await expect.poll(() => api.sent("PUT", "/api/ideas/5/saved").length).toBe(1);
   expect(api.sent("PUT", "/api/ideas/5/saved")[0].body).toEqual({ saved: true });
+});
+
+test("the thumbnail panel sits beside the publishing pack, which suggests one title", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await page.goto(`/#/p/${PID}/publish`);
+  const pack = page.getByRole("heading", { name: "Publishing pack" });
+  const thumbs = page.getByRole("heading", { name: "Thumbnail: idea to prompt" });
+  await expect(thumbs).toBeVisible();
+  const [a, b] = [await pack.boundingBox(), await thumbs.boundingBox()];
+  expect(b!.x).toBeGreaterThan(a!.x + a!.width); // to the right, not below
+  await expect(page.getByRole("heading", { name: "Suggested title" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /open project folder/i })).toHaveCount(0);
 });
 
 test("a long job shows progress and can be stopped", async ({ page, api }) => {

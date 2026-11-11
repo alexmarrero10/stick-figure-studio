@@ -3,7 +3,7 @@
 A read-only website for the finished videos: a search bar that searches by meaning, a page per video with
 the YouTube player, and a chatbot that answers questions about that video with clickable timestamps.
 
-It reads what the studio's **Your video site** step (step 7) puts in Supabase. It never writes anything.
+It reads what the studio's **Publish to Video Site** step (step 7) puts in Supabase. It never writes anything.
 
 - `server/`: FastAPI app (`app.py`) that serves the API and the built pages. `store.py` reads Supabase,
   `gemini.py` calls Gemini, `limits.py` holds the abuse limits and the answer cache.

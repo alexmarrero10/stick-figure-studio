@@ -64,46 +64,45 @@ export default function PublishStep({ project, refresh }: StepProps) {
   };
 
   return (
-    <div>
-      <div className="panel">
-        <h2>Publishing pack</h2>
-        <p className="muted small">
-          Title options, a description with chapters and sources, and tags.
-        </p>
-        <button onClick={generate} disabled={busy}>
-          {busy ? "Writing…" : hasPack ? "Regenerate" : "Generate publishing pack"}
-        </button>
-        <ErrorBox error={error} onClose={() => setError(null)} />
+    <div className="publish-layout">
+      <div>
+        <div className="panel">
+          <h2>Publishing pack</h2>
+          <p className="muted small">
+            A suggested title, a description with chapters and sources, and tags.
+          </p>
+          <button onClick={generate} disabled={busy}>
+            {busy ? "Writing…" : hasPack ? "Regenerate" : "Generate publishing pack"}
+          </button>
+          <ErrorBox error={error} onClose={() => setError(null)} />
+        </div>
+        {hasPack && meta && (
+          <>
+            <div className="panel">
+              <div className="row between">
+                <h3>Suggested title</h3>
+                <CopyButton text={meta.titles[0]} />
+              </div>
+              <p>{meta.titles[0]}</p>
+            </div>
+            <div className="panel">
+              <div className="row between">
+                <h3>Description</h3>
+                <CopyButton text={meta.description} />
+              </div>
+              <pre className="description">{meta.description}</pre>
+            </div>
+            <div className="panel">
+              <div className="row between">
+                <h3>Tags</h3>
+                <CopyButton text={meta.tags.join(", ")} />
+              </div>
+              <p>{meta.tags.join(", ")}</p>
+            </div>
+          </>
+        )}
       </div>
-      {hasPack && meta && (
-        <>
-          <div className="panel">
-            <h3>Titles</h3>
-            <ul className="copy-list">
-              {meta.titles.map((t) => (
-                <li key={t}>
-                  <span>{t}</span> <CopyButton text={t} />
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="panel">
-            <div className="row between">
-              <h3>Description</h3>
-              <CopyButton text={meta.description} />
-            </div>
-            <pre className="description">{meta.description}</pre>
-          </div>
-          <div className="panel">
-            <div className="row between">
-              <h3>Tags</h3>
-              <CopyButton text={meta.tags.join(", ")} />
-            </div>
-            <p>{meta.tags.join(", ")}</p>
-          </div>
-        </>
-      )}
-      <div className="panel">
+      <div className="panel publish-thumbs">
         <h3>Thumbnail: idea to prompt</h3>
         <p className="muted small">
           Describe the thumbnail you have in mind and Claude writes the image prompt, in the video's style and with its

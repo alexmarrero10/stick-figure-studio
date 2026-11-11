@@ -28,7 +28,7 @@ def _view(project_id: int) -> dict[str, Any]:
     return {
         "youtube_url": youtube_url,
         "youtube_id": site_publish.youtube_id(youtube_url),
-        "title": saved.get("title") or p["title"],
+        "title": saved.get("title") or (meta.get("titles") or [p["title"]])[0],  # the pack's suggested title
         "summary": saved.get("summary") or site_publish.default_summary(meta.get("description", "")),
         "title_options": meta.get("titles", []),
         "published": published_at is not None,

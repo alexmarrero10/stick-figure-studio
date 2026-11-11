@@ -124,7 +124,7 @@ def test_site_routes_publish_update_and_unpublish(client, temp_db, monkeypatch):
     temp_db.save_short(pid, youtube_url="https://youtu.be/dQw4w9WgXcQ")
 
     view = client.get(f"/api/projects/{pid}/site").json()
-    assert view["title"] == "The Piece of Tape" and view["summary"] == "A guard found tape."
+    assert view["title"] == "Tape Title A" and view["summary"] == "A guard found tape."
     assert view["youtube_url"] == "https://youtu.be/dQw4w9WgXcQ"  # filled in from the Short step
     assert view["title_options"] == ["Tape Title A", "B"] and view["published"] is False and view["has_voice"] is False
 

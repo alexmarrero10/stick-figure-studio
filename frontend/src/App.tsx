@@ -20,7 +20,7 @@ export const STEPS = [
   { key: "images", label: "Images" },
   { key: "assemble", label: "Assemble" },
   { key: "publish", label: "Publish" },
-  { key: "site", label: "Your video site" },
+  { key: "site", label: "Publish to Video Site" },
 ] as const;
 
 type Route =
@@ -107,9 +107,6 @@ function ProjectView({ id, step }: { id: number; step: string }) {
     <div className="project">
       <div className="project-head">
         <h1>{project.title}</h1>
-        <button className="secondary small" onClick={() => api.post(`/api/projects/${id}/open-folder`)}>
-          <Icon name="folder" /> Open project folder
-        </button>
       </div>
       <nav className="stepper" aria-label="Video steps">
         <ol>

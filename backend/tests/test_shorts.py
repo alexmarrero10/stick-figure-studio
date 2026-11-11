@@ -106,12 +106,13 @@ def test_script_prompt_has_format_rules_and_accuracy():
 def test_publish_description_keeps_the_research_sources():
     class C:
         def json(self, *a, **k):
-            return {"titles": ["T"], "description": "Hook.", "tags": ["navy"], "chapters": [{"beat": 0, "title": "Start"}]}
+            return {"title": "One Title", "description": "Hook.", "tags": ["navy"], "chapters": [{"beat": 0, "title": "Start"}]}
     beats = [{"idx": 0, "word_start": 0, "text": "w"}]
     meta_ = publish.generate(C(), "T", "w", beats, [], [{"title": "Navy report", "url": "https://navy.mil/r"}],
                              ["animation", "history", "education"])
     assert "Sources\n- Navy report: https://navy.mil/r" in meta_["description"]
     assert meta_["tags"] == ["navy", "animation", "history", "education"]
+    assert meta_["titles"] == ["One Title"]  # one suggested title, not five options
     assert "thumbnail_prompts" not in meta_  # thumbnails come one at a time from the Thumbnail panel
     assert "thumbnails" not in publish.SYSTEM
 
@@ -354,6 +355,7 @@ def test_script_opening_keeps_the_answer_back_and_skips_detours():
     assert "RIGHT AFTER THE OPENING" in s and "No detours" in s
     assert "but before we get to" in s  # banned phrase
     assert "NEVER REVEAL THE ANSWER IN THE OPENING" in script.REVISE_SYSTEM
+    assert "not at anyone's birth" in script.FORMAT_RULES["story"]
 
 
 def test_script_retells_clumsy_quotes_in_plain_words():
