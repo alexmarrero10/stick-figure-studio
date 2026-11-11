@@ -15,6 +15,14 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Public site redesign (2026-11-10):** "Next Door Historian" branding; navy ink on cool paper, the red
+  marker ring from the thumbnails (drawn once around the hero search, beside a stick figure that draws
+  itself; skipped with reduced motion), yellow highlighter timestamp chips. Fonts: Bricolage Grotesque
+  (headings, numbers) + Atkinson Hyperlegible (body). Home = hero search, "Newest story" feature, grid;
+  search = result rows with the matching moment; dark mode kept. Thumbnails use 16:9 `maxresdefault`
+  (fallback `mqdefault`) instead of letterboxed `hqdefault`. Literal "\n" in stored summaries is shown as
+  paragraphs. Chat accepts loose stamps like "[0:0]". Checked with Playwright at 1366 px and 390 px.
+
 - **Gemini free-tier pacing:** embeddings are batched by size (max 100 texts and ~20K tokens per request,
   `embeddings.batches`) and paced to stay under ~24K tokens / 90 texts a minute (free tier: 30K / 100).
   Big research runs now wait instead of hitting 429s. Site search's global daily cap is 100

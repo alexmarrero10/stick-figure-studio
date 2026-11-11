@@ -1,5 +1,5 @@
 import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
-import { ask, parseTime, Turn } from "./api";
+import { ask, fmtTime, parseTime, Turn } from "./api";
 
 const STARTERS = [
   "What is this video about, in a few sentences?",
@@ -12,7 +12,7 @@ const STARTERS = [
 function render(text: string, seek: (s: number) => void): ReactNode[] {
   text = text.replace(/\*\*?([^*\n]+)\*\*?/g, "$1"); // drop Markdown bold/italic stars
   const out: ReactNode[] = [];
-  const T = "\\d{1,2}:\\d{2}(?::\\d{2})?";
+  const T = "\\d{1,2}:\\d{1,2}(?::\\d{2})?"; // Gemini sometimes writes "0:0"
   const re = new RegExp(`\\[(${T}(?:\\s*[,;]\\s*${T})*)\\]|\\[Source: ([^\\]]+)\\]`, "g");
   let last = 0;
   let m: RegExpExecArray | null;
@@ -22,8 +22,8 @@ function render(text: string, seek: (s: number) => void): ReactNode[] {
       // "[0:00, 1:34]" becomes two buttons.
       for (const t of m[1].split(/\s*[,;]\s*/)) {
         out.push(
-          <button key={`${m.index}-${t}`} className="ts" onClick={() => seek(parseTime(t))} title={`Jump to ${t}`}>
-            ▶ {t}
+          <button key={`${m.index}-${t}`} className="ts" onClick={() => seek(parseTime(t))} title={`Jump to ${fmtTime(parseTime(t))}`}>
+            {fmtTime(parseTime(t))}
           </button>,
         );
       }
