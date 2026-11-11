@@ -352,3 +352,11 @@ def test_script_retells_clumsy_quotes_in_plain_words():
     from pipeline import script
     assert "two persons" in script.SCRIPT_SYSTEM and "one by one" in script.SCRIPT_SYSTEM
     assert "sound natural said aloud" in script.REVISE_SYSTEM or "sound natural said aloud" in script.SCRIPT_SYSTEM
+
+
+def test_publish_prompts_and_page_hold_no_other_videos_examples():
+    from pathlib import Path
+    page = (Path(__file__).parents[2] / "frontend/src/steps/Publish.tsx").read_text(encoding="utf-8")
+    for name in ("Saddam", "Franklin", "Nixon", "Watergate"):
+        assert name not in publish.SYSTEM and name not in publish.THUMB_SUGGEST_SYSTEM
+        assert name not in publish.THUMB_ASK_SYSTEM and name not in page

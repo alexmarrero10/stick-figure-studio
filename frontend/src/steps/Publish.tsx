@@ -113,7 +113,7 @@ export default function PublishStep({ project, refresh }: StepProps) {
           rows={3}
           value={idea}
           onChange={(e) => setIdea(e.target.value)}
-          placeholder="e.g. Saddam peeking out of the hole with a soldier's flashlight shining right on his face"
+          placeholder="Your idea for this video's thumbnail, e.g. the main character frozen in shock next to the one object the story turns on"
         />
         <div className="row">
           <button onClick={() => askThumbnail("idea")} disabled={!!asking || !idea.trim()}>

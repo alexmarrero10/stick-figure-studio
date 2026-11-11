@@ -9,7 +9,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 176 backend tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`, not pushed).
+- 177 backend tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`, not pushed).
 - Active plan: `docs/PUBLIC_SITE_PLAN.md` (RAG research and public site built; Vercel deploy next).
 - Project 3 is Watergate ("The Piece of Tape..."), currently at the image step (221 prompts).
 
