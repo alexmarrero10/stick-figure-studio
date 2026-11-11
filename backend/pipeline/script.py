@@ -330,7 +330,10 @@ LENGTH
 
 FORMAT_RULES = {
     "story": """VIDEO FORMAT: ONE TRUE STORY
-Follow the story from the hook to the payoff, using the turning points in the research brief.""",
+Follow the story from the hook to the payoff, using the turning points in the research brief.
+- Start where the main thread starts (the hunt, the voyage, the crime, the disaster), not at \
+anyone's birth. The brief's timeline is for facts, not for the order of the script: earlier events \
+come in as short flashbacks when they explain the moment.""",
     "topic": """VIDEO FORMAT: A TOPIC EXPLAINED
 - The video answers one central question (from the research brief). The hook poses it through a \
 vivid real moment, then the script builds the answer step by step.
