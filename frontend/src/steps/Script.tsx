@@ -323,14 +323,6 @@ export default function ScriptStep({ project, refresh }: StepProps) {
         </p>
         <JobProgress job={job} />
         <SourcesPanel pid={pid} version={research?.id ?? 0} />
-        <label>
-          Notes for Claude when writing the script
-          <input
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Optional: tone, angle, things to include or leave out"
-          />
-        </label>
         {research && briefOpen && (
           <>
             <textarea className="brief" rows={16} value={brief} onChange={(e) => setBrief(e.target.value)} />
@@ -366,6 +358,14 @@ export default function ScriptStep({ project, refresh }: StepProps) {
               {words} words · ~{fmtTime(runtime)} (target {TARGET[0]}-{TARGET[1]})
             </div>
           </div>
+          <label>
+            Notes for Claude when writing the script
+            <input
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Optional: tone, angle, things to include or leave out"
+            />
+          </label>
           <div className="row">
             <button onClick={generate} disabled={!research || streaming}>
               {streaming ? "Writing…" : text ? "Rewrite script" : "Write script"}

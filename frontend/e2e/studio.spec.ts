@@ -138,6 +138,26 @@ test("saved ideas are listed on the Projects page and can be started or removed"
   await expect(page.getByRole("region", { name: "Saved ideas" })).toHaveCount(0);
 });
 
+test("Find a story opens on your own idea, before Claude's suggestions", async ({ page }) => {
+  await page.goto("/#/ideas");
+  const tabs = page.locator(".tabs button");
+  await expect(tabs.first()).toHaveText("Use my own idea");
+  await expect(tabs.first()).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByLabel("Your idea")).toBeVisible();
+  // Even after switching to suggestions and coming back, it opens on your own idea.
+  await page.getByRole("button", { name: "Suggest ideas with Claude" }).click();
+  await page.reload();
+  await expect(page.getByLabel("Your idea")).toBeVisible();
+});
+
+test("script notes sit with the script, not the research brief", async ({ page }) => {
+  await page.goto(`/#/p/${PID}/script`);
+  const scriptPanel = page.locator(".panel", { has: page.getByRole("heading", { name: "Script", exact: true }) });
+  const briefPanel = page.locator(".panel", { has: page.getByRole("heading", { name: "Research brief" }) });
+  await expect(scriptPanel.getByLabel("Notes for Claude when writing the script")).toBeVisible();
+  await expect(briefPanel.getByLabel("Notes for Claude when writing the script")).toHaveCount(0);
+});
+
 test("a half-typed idea is still there after leaving the page", async ({ page }) => {
   await page.goto("/#/ideas");
   await page.getByRole("button", { name: "Use my own idea" }).click();
@@ -155,6 +175,7 @@ test("Claude's latest suggestions are still there when the page is reopened", as
   api.on("GET", "/api/ideas?unused=true", [s(5, "The Radium Girls"), s(4, "The Halifax Explosion"), { ...molasses }]);
   api.on("PUT", "/api/ideas/5/saved", { ok: true });
   await page.goto("/#/ideas");
+  await page.getByRole("button", { name: "Suggest ideas with Claude" }).click();
   const latest = page.locator(".idea-section", { has: page.getByRole("heading", { name: "Latest suggestions" }) });
   await expect(latest.getByRole("heading", { name: "The Radium Girls" })).toBeVisible();
   await expect(latest.getByRole("heading", { name: "The Halifax Explosion" })).toBeVisible();
@@ -171,6 +192,7 @@ test("a long job shows progress and can be stopped", async ({ page, api }) => {
   api.on("GET", "/api/jobs/j1", () => (api.sent("POST", "/api/jobs/j1/stop").length ? { ...running, status: "stopped" } : running));
   api.on("POST", "/api/jobs/j1/stop", {});
   await page.goto("/#/ideas");
+  await page.getByRole("button", { name: "Suggest ideas with Claude" }).click();
   await page.getByRole("button", { name: "Suggest 3 ideas" }).click();
   await expect(page.getByText("Looking for stories")).toBeVisible();
   expect(api.sent("POST", "/api/ideas/suggest")[0].body).toMatchObject({ count: 3 });

@@ -75,7 +75,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
-- **Studio browser tests:** `cd frontend && npm run test:e2e` (builds, then 21 Playwright tests in `e2e/`
+- **Studio browser tests:** `cd frontend && npm run test:e2e` (builds, then 23 Playwright tests in `e2e/`
   on Windows' Edge against a fake backend from `e2e/fixtures.json`; never the real server or data, ~10 s).
   Run after any UI change. Refresh fixtures with `node e2e/record-fixtures.mjs 1` (studio running).
 - **Public site:** `cd site/web && npm run build`, then

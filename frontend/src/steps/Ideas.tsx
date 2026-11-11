@@ -8,11 +8,12 @@ import { FORMAT_LABELS, Idea, Project } from "../types";
 // doesn't lose it. Storage can be blocked (private window), so every access is guarded.
 const DRAFT_KEY = "ideas-draft";
 type Draft = { mode: "suggest" | "own"; theme: string; own: string; refine: boolean; trending: boolean };
-const EMPTY: Draft = { mode: "suggest", theme: "", own: "", refine: true, trending: true };
+const EMPTY: Draft = { mode: "own", theme: "", own: "", refine: true, trending: true };
 
 function loadDraft(): Draft {
   try {
-    return { ...EMPTY, ...JSON.parse(localStorage.getItem(DRAFT_KEY) || "{}") };
+    // The page always opens on "Use my own idea"; only what was typed and ticked is restored.
+    return { ...EMPTY, ...JSON.parse(localStorage.getItem(DRAFT_KEY) || "{}"), mode: "own" };
   } catch {
     return EMPTY;
   }
@@ -120,11 +121,11 @@ export default function Ideas() {
         <p className="muted">Ideas you keep are saved on the Projects page until you start them.</p>
       </div>
       <div className="tabs">
-        <button aria-pressed={draft.mode === "suggest"} className={draft.mode === "suggest" ? "active" : ""} onClick={() => update({ mode: "suggest" })}>
-          Suggest ideas with Claude
-        </button>
         <button aria-pressed={draft.mode === "own"} className={draft.mode === "own" ? "active" : ""} onClick={() => update({ mode: "own" })}>
           Use my own idea
+        </button>
+        <button aria-pressed={draft.mode === "suggest"} className={draft.mode === "suggest" ? "active" : ""} onClick={() => update({ mode: "suggest" })}>
+          Suggest ideas with Claude
         </button>
       </div>
 

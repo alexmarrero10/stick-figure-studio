@@ -9,7 +9,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 182 backend tests and 21 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
+- 182 backend tests and 23 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
   not pushed). The studio redesign commit (2026-11-11) and the notes commit before it are local, not pushed.
 - **Public site is live: https://stick-figure-studio.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`).
   Vercel redeploys automatically on every push to `main`; check a build with
@@ -20,6 +20,9 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Find a story opens on "Use my own idea"** (first tab, always the starting tab; the draft text is still restored).
+  "Notes for Claude when writing the script" moved from the Research brief panel to the Script panel (only
+  script writing uses them).
 - **Ideas are never lost (2026-11-11):** "Use my own idea" (button now "Save my idea") saves the idea at once
   (`saved=1`, `POST /api/ideas/own`) and shows it as one full-width feature card. Saved ideas not yet started
   are listed on the Projects page ("Saved ideas": Start project / Remove) via `GET /api/ideas?saved=true&unused=true`.
