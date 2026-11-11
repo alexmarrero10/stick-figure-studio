@@ -59,8 +59,9 @@ def _rag_research(p: dict[str, Any], c: Any, web: bool) -> dict[str, Any]:
         have = [s for s in db.list_sources(pid) if s["status"] == "ok"]
         if len(have) < cfg["docs_min"]:
             docs = rag.find_sources(c, store, embed, _idea(p), p["format"], _key(pid), cfg,
-                                    [s["url"] for s in db.list_sources(pid)], web, progress)
-            db.save_sources(pid, docs)
+                                    [s["url"] for s in db.list_sources(pid)], web, progress,
+                                    on_stored=lambda d: db.save_sources(pid, [d]))
+            db.save_sources(pid, docs)  # adds the skipped ones
         content, sources = rag.brief_from_store(c, store, embed, _idea(p), p["format"], _key(pid), cfg, progress)
         progress("Checking that every source link works", 0.95)
         return db.save_research(pid, content, script_mod.check_sources(sources))["id"]
@@ -85,8 +86,9 @@ def more_sources(project_id: int) -> dict[str, Any]:
 
     def work(progress):
         docs = rag.find_sources(c, store, embed, _idea(p), p["format"], _key(project_id), cfg,
-                                [s["url"] for s in db.list_sources(project_id)], web, progress)
-        db.save_sources(project_id, docs)
+                                [s["url"] for s in db.list_sources(project_id)], web, progress,
+                                on_stored=lambda d: db.save_sources(project_id, [d]))
+        db.save_sources(project_id, docs)  # adds the skipped ones
         return sum(d["status"] == "ok" for d in docs)
 
     return jobs.start("sources", project_id, work)

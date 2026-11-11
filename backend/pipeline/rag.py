@@ -38,9 +38,11 @@ def project_key(owner: str, project_id: int) -> str:
 
 def index_documents(store: Store, embed: EmbedFn, key: str, docs: list[dict[str, Any]], owner: str = "owner",
                     chunk_words: int = 300, overlap_words: int = 50,
-                    progress: ProgressFn | None = None) -> list[dict[str, Any]]:
+                    progress: ProgressFn | None = None,
+                    on_stored: Callable[[dict[str, Any]], None] | None = None) -> list[dict[str, Any]]:
     """Store every usable document and link it to the project. Returns the docs with `doc_id`,
-    `chunks` and `reused` set."""
+    `chunks` and `reused` set. Each one is linked (and `on_stored` called) as soon as it is stored,
+    so the count on the page goes up while it works and a stopped job keeps what it stored."""
     say = progress or (lambda m, f: None)
     usable = [d for d in docs if d.get("status") == "ok"]
     for n, d in enumerate(usable):
@@ -49,15 +51,17 @@ def index_documents(store: Store, embed: EmbedFn, key: str, docs: list[dict[str,
         existing = store.find_document(d["url"])
         if existing and existing["text_hash"] == text_hash(d["text"]) and existing.get("chunks"):
             d.update(doc_id=existing["id"], chunks=existing["chunks"], reused=True)
-            continue
-        chunks = chunk_text(d["text"], chunk_words, overlap_words)
-        # The title goes into what is embedded, so "the ship" in a chunk still links to its story.
-        vecs = embed([f"{d['title']}\n{c['heading']}\n{c['text']}" for c in chunks], "RETRIEVAL_DOCUMENT")
-        for c, v in zip(chunks, vecs):
-            c["embedding"] = v
-        d.update(doc_id=store.save_document(d["url"], d["title"], d["source_type"], d["text"], owner, chunks),
-                 chunks=len(chunks), reused=False)
-    store.link_project(key, [d["doc_id"] for d in usable])
+        else:
+            chunks = chunk_text(d["text"], chunk_words, overlap_words)
+            # The title goes into what is embedded, so "the ship" in a chunk still links to its story.
+            vecs = embed([f"{d['title']}\n{c['heading']}\n{c['text']}" for c in chunks], "RETRIEVAL_DOCUMENT")
+            for c, v in zip(chunks, vecs):
+                c["embedding"] = v
+            d.update(doc_id=store.save_document(d["url"], d["title"], d["source_type"], d["text"], owner, chunks),
+                     chunks=len(chunks), reused=False)
+        store.link_project(key, [d["doc_id"]])
+        if on_stored:
+            on_stored(d)
     return docs
 
 
@@ -175,12 +179,13 @@ def write_brief(claude: Claude, idea: dict[str, Any], format: str, chunks: list[
 
 def find_sources(claude: Claude, store: Store, embed: EmbedFn, idea: dict[str, Any], format: str, key: str,
                  cfg: dict[str, Any], exclude: list[str] | None = None, web_search: bool = True,
-                 progress: ProgressFn | None = None) -> list[dict[str, Any]]:
+                 progress: ProgressFn | None = None,
+                 on_stored: Callable[[dict[str, Any]], None] | None = None) -> list[dict[str, Any]]:
     """Download sources for the project and store them in the vector database."""
     from pipeline import sources
     docs = sources.gather(claude, idea, format, cfg["docs_min"], cfg["docs_max"], exclude, web_search, progress)
     return index_documents(store, embed, key, docs, cfg.get("owner", "owner"), cfg["chunk_words"],
-                           cfg["overlap_words"], progress)
+                           cfg["overlap_words"], progress, on_stored)
 
 
 def brief_from_store(claude: Claude, store: Store, embed: EmbedFn, idea: dict[str, Any], format: str, key: str,

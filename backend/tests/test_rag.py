@@ -228,6 +228,20 @@ def test_index_reuses_unchanged_documents_and_links_project():
     assert store.project_documents("owner:2") == [d1["doc_id"]]
 
 
+def test_index_reports_and_links_each_source_as_soon_as_it_is_stored():
+    store = MemoryStore()
+    seen = []
+
+    def on_stored(d):  # the page's count reads these while the job is still running
+        seen.append((d["url"], store.project_documents("owner:1")))
+
+    docs = [doc("https://a.org/1", "Erebus", para("Erebus", 60)), doc("https://a.org/2", "Terror", para("Terror", 60)),
+            {**doc("https://x", "x", ""), "status": "skipped"}]
+    rag.index_documents(store, fake_embed, "owner:1", docs, chunk_words=100, overlap_words=10, on_stored=on_stored)
+    assert [u for u, _ in seen] == ["https://a.org/1", "https://a.org/2"]  # skipped ones aren't reported
+    assert seen[0][1] == [docs[0]["doc_id"]]  # linked before the next source starts
+
+
 def test_retrieve_round_robins_queries_and_adds_close_shared_matches():
     store = MemoryStore()
     mine = doc("https://a.org/ice", "Ice", "The ships were trapped in pack ice near King William Island for two winters.")

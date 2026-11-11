@@ -40,7 +40,7 @@ interface SourceRow {
 }
 
 /** The pages downloaded into the vector database for this video (shown when RAG research is on). */
-function SourcesPanel({ pid, version }: { pid: number; version: number }) {
+function SourcesPanel({ pid, version, researchStep }: { pid: number; version: number; researchStep?: string }) {
   const [data, setData] = useState<{ rag: boolean; sources: SourceRow[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const load = () =>
@@ -49,9 +49,11 @@ function SourcesPanel({ pid, version }: { pid: number; version: number }) {
       .then(setData)
       .catch((e) => setError(e.message));
   const { run, job, busy } = useJob({ project: pid, kind: "sources", done: () => load(), failed: setError });
+  // Sources are saved one at a time while a job stores them, so reload at each new progress step
+  // ("Storing source 3 of 12...") and the count goes up as they arrive.
   useEffect(() => {
     load();
-  }, [pid, version]);
+  }, [pid, version, researchStep, job?.message]);
 
   if (!data || (!data.rag && !data.sources.length)) return null;
   const ok = data.sources.filter((s) => s.status === "ok");
@@ -322,7 +324,7 @@ export default function ScriptStep({ project, refresh }: StepProps) {
           type before researching.
         </p>
         <JobProgress job={job} />
-        <SourcesPanel pid={pid} version={research?.id ?? 0} />
+        <SourcesPanel pid={pid} version={research?.id ?? 0} researchStep={busy ? job?.message : undefined} />
         {research && briefOpen && (
           <>
             <textarea className="brief" rows={16} value={brief} onChange={(e) => setBrief(e.target.value)} />

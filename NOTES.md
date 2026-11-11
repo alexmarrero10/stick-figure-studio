@@ -20,6 +20,10 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Downloaded sources count goes up live:** each source is saved and linked to the project as soon as it's
+  stored (`rag.index_documents(on_stored=...)`), and the Script step's sources panel reloads at each research
+  progress step. Before, the count stayed at 0 until every source was done. A stopped job now keeps what it stored.
+
 - **Publish tweaks (2026-11-11):** the publishing pack writes ONE suggested title (schema `title`, stored as
   `titles: [title]` so old 5-title packs still load), plus description and tags. The thumbnail panel sits beside
   the pack (`.publish-layout`, sticky; stacks under 900 px). "Your video site" is now "Publish to Video Site";
@@ -216,7 +220,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Open issues
 
-- `README.md` and `PROGRESS.md` are partly out of date. They say the "current project" is the public site. CLAUDE.md and this file are correct. The
+- `README.md` is now a project overview the user is writing themselves (template with hints; don't write it for them). The old setup guide moved to `docs/SETUP.md`; it and `PROGRESS.md` are partly out of date. They say the "current project" is the public site. CLAUDE.md and this file are correct. The
   `shots.py` docstring also says "pictures are never zoomed" (zoom now happens in `assemble.py`).
 - `projects/a-han-governor-removed-the-tiger-traps-and-the-tigers-left/` exists on disk but has no project row
   in the database (leftover folder).
