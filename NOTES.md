@@ -1,4 +1,4 @@
-# Notes: current state (updated 2026-11-10)
+# Notes: current state (updated 2026-11-11)
 
 Read CLAUDE.md first for how the project works and the rules. This file is what's happening now.
 
@@ -9,13 +9,19 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 179 backend tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`, not pushed).
-- Active plan: `docs/PUBLIC_SITE_PLAN.md` (RAG research and public site built; Vercel deploy next).
-- Project 3 is Watergate ("The Piece of Tape..."), currently at the image step (221 prompts).
+- 179 backend tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`, not pushed). All commits
+  are pushed to `origin/main` as of 2026-11-11.
+- **Public site is live: https://stick-figure-studio.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`).
+  Vercel redeploys automatically on every push to `main`; check a build with
+  `gh api repos/alexmarrero10/stick-figure-studio/commits/<sha>/status`. No Vercel CLI installed.
+  Projects 1, 2 and 3 (Watergate) are published on it.
+- Project 3 is Watergate ("How Did the Watergate Files Take Down Nixon?"), at the image step (221 prompts, no
+  images uploaded yet). Bulk upload of the user's `Downloads\download.zip` (221 images) was dry-run checked:
+  every image lands in its slot.
 
 ## Recently done
 
-- **Public site redesign (2026-11-10):** "Next Door Historian" branding; navy ink on cool paper, the red
+- **Public site redesign (live since 2026-11-11, e13c486; the user likes it):** "Next Door Historian" branding; navy ink on cool paper, the red
   marker ring from the thumbnails (drawn once around the hero search, beside a stick figure that draws
   itself; skipped with reduced motion), yellow highlighter timestamp chips. Fonts: Bricolage Grotesque
   (headings, numbers) + Atkinson Hyperlegible (body). Home = hero search, "Newest story" feature, grid;
@@ -131,16 +137,26 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Next
 
-1. User: (projects 1 and 2 are published on the site) run
-   `backend/supabase/002_site_reader.sql`, then deploy per `site/README.md` (needs a push to GitHub first,
-   with the v1.0.0 tag).
+1. Site is deployed. Confirm with the user that they ran `backend/supabase/002_site_reader.sql`, then restore
+   its placeholder with `git checkout` (it holds their real password: never commit it). `v1.0.0` tag is local only.
 2. Finish project 3 (Watergate): user recopies batches (old copies had numbers), makes images in Flow.
    Open question to the user: should Frank Wills (Black security guard) get a brown head?
 3. Full speed test (`evals/speed.py --ways rag,full,old`) paused on 2026-11-09 for the user's usage limits;
    rerun when they say so.
 4. Possibly re-assemble projects 1 and 2 to see the zoom (only if the user wants new versions).
-5. Push to GitHub when the user asks (`alexmarrero10/stick-figure-studio`, private). Many local commits are
-   unpushed (`git log origin/main..main`).
+5. Push to GitHub only when the user asks (`alexmarrero10/stick-figure-studio`, private). A push redeploys
+   the public site.
+6. Open questions to the user (no answer yet): fix the Watergate script's clumsy Frank Wills quote (means
+   redoing beats and voice)? Quick Playwright browser checks after UI changes, or real Playwright tests?
+
+## Claude tools installed (2026-11-10, user scope)
+
+- Plugins: `frontend-design@claude-plugins-official`, `impeccable@impeccable` (runs a design-check hook at
+  session start, after each Edit/Write and at stop; `/impeccable hooks off` turns it off per project),
+  `ui-ux-pro-max@ui-ux-pro-max-skill`. Skills copied from vercel-labs/agent-skills into `~/.claude/skills`:
+  `web-design-guidelines`, `react-best-practices`, `composition-patterns` (deploy/account skills skipped).
+- Playwright MCP works for screenshots (save under `.playwright-mcp/`, gitignored). The first screenshot
+  after a navigation is often a stale frame: take a second one.
 
 ## Ideas discussed, not started
 

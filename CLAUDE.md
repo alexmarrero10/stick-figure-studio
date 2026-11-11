@@ -3,12 +3,12 @@
 A local web app that takes a true-history story from idea to finished video for the user's YouTube channel
 **NextDoorHistorian** (narrated stick-figure explainers, ~8.5-9 min, plus vertical Shorts).
 Single user, runs on their Windows PC. The studio is never deployed. A separate read-only **public site**
-(`site/`, see `site/README.md`) shows published videos with semantic search and a Gemini chatbot; it's built
-for Vercel (root directory `site`) but not deployed yet.
+(`site/`, see `site/README.md`) shows published videos with semantic search and a Gemini chatbot; it's live
+on Vercel at https://stick-figure-studio.vercel.app (root directory `site`); every push to `main` redeploys it.
 
 Current status, recent work and open issues are in **NOTES.md**. Read it at the start of a session.
 `PROGRESS.md` holds the older stage-by-stage build log and architecture notes; `docs/PUBLIC_SITE_PLAN.md`
-is the active plan for RAG research and the public site (both built; deployment next).
+is the plan for RAG research and the public site (both built and deployed).
 
 ## Pipeline (one step per UI tab, one module per step)
 
