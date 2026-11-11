@@ -75,11 +75,12 @@ All commands from the project root (Windows; PowerShell or Git Bash).
   rebuild after frontend changes.
 - **Public site:** `cd site/web && npm run build`, then
   `.venv\Scripts\python.exe -m uvicorn app:app --app-dir site/server --port 8790` (reuses the root `.env`).
-  Tests: `cd site/server && ../../.venv/Scripts/python -m pytest -q` (16 passing). Self-contained: it doesn't
+  Tests: `cd site/server && ../../.venv/Scripts/python -m pytest -q` (19 passing). Self-contained: it doesn't
   import the backend (it has its own copies of the embedding call and hybrid search), so it deploys alone.
 - **RAG evals** (`evals/README.md`): `make_questions.py` once, then `retrieval.py`, `answers.py`,
   `guardrails.py` score the real site code on real data; reports in `evals/reports/` (gitignored).
-  Scoring tests: `.venv/Scripts/python -m pytest -q evals/tests`.
+  Scoring tests: `.venv/Scripts/python -m pytest -q evals/tests`. Live chatbot checks (real data, Gemini):
+  `LIVE_EVALS=1 .venv/Scripts/python -m pytest -q evals/tests/test_chatbot_live.py`.
 - Shell notes: `bc` isn't available in Git Bash. Use PowerShell `Measure-Command` for timing. Prefer the
   Edit tool over heredoc/sed for multi-line edits (heredocs have mangled text before).
 

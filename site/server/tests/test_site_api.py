@@ -43,6 +43,7 @@ class FakeReader:
         return [MOMENTS[0]]
 
     def search_sources(self, project_key, vec, k=3):
+        self.calls.append(("sources", project_key, vec))
         return [{"id": 99, "text": "Wills was 24.", "heading": "", "title": "National Archives", "url": "https://archives.gov"}]
 
 
@@ -109,7 +110,7 @@ def test_chat_streams_an_answer_from_narration_and_sources(client):
     assert ev[-1] == {"type": "done", "cached": False}
     system, contents = site.app.state.gemini.prompts[0]
     assert "Answer from the material given below first" in system
-    assert "general history knowledge, but say so" in system  # topic questions beyond the video, labeled
+    assert "answer it straight from general history knowledge" in system  # topic questions beyond the video
     prompt = contents[-1]["parts"][0]["text"]
     assert "[3:42] He finds tape on the door latch." in prompt  # timestamps from the narration
     assert "[0:00] Frank Wills walks his rounds." in prompt
@@ -117,6 +118,39 @@ def test_chat_streams_an_answer_from_narration_and_sources(client):
     assert "[Source: National Archives] Wills was 24." in prompt
     assert "The viewer is at 3:50" in prompt
     assert ("search", "What did Wills find?", 1) in site.app.state.reader.calls  # searched this video only
+
+
+def test_questions_beyond_the_video_get_a_straight_answer_without_a_disclaimer():
+    rules = site.CHAT_SYSTEM
+    assert "answer it straight from general history knowledge" in rules
+    assert "Don't say the video or its sources don't cover it" in rules
+    assert "but from general history" not in rules  # the old "The video doesn't cover that, but..." example
+
+
+def test_every_question_searches_this_videos_narration_and_its_research_sources(client):
+    client.post("/api/chat", json={"video_id": 1, "question": "How old was Wills?"})
+    calls = site.app.state.reader.calls
+    assert ("search", "How old was Wills?", 1) in calls  # narration of this video only
+    sources = [c for c in calls if c[0] == "sources"]
+    assert sources == [("sources", "owner:3", [0.1] * 768)]  # this video's research, same question vector
+    prompt = site.app.state.gemini.prompts[0][1][-1]["parts"][0]["text"]
+    assert "RESEARCH SOURCES\n[Source: National Archives] Wills was 24." in prompt
+    assert prompt.endswith("QUESTION: How old was Wills?")
+
+
+def test_research_passages_reach_the_model_even_when_the_narration_barely_matches(client, monkeypatch):
+    """A question only the research sources answer: weak narration matches, a strong source match.
+    It must pass the relevance check, and the source passage must be in the prompt."""
+    reader = site.app.state.reader
+    monkeypatch.setattr(reader, "search_moments",
+                        lambda *a, **k: [{**MOMENTS[0], "similarity": 0.40, "keyword": False}])
+    monkeypatch.setattr(reader, "search_sources", lambda *a, **k: [
+        {"id": 7, "text": "Nixon beat George McGovern in 1972.", "heading": "", "title": "1972 election",
+         "url": "https://x.org", "similarity": 0.81}])
+    ev = events(client.post("/api/chat", json={"video_id": 1, "question": "Who did Nixon run against?"}))
+    assert not ev[-1].get("off_topic")
+    prompt = site.app.state.gemini.prompts[0][1][-1]["parts"][0]["text"]
+    assert "[Source: 1972 election] Nixon beat George McGovern in 1972." in prompt
 
 
 def test_repeated_first_question_comes_from_the_cache_without_counting(client):

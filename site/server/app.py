@@ -166,8 +166,8 @@ Answer from the material given below first: the video's narration (with timestam
 from the research sources the video was made from.
 - When a fact comes from the narration, cite the moment like [3:42] (the timestamp of that passage), one timestamp per bracket.
 - When a fact comes from a research source, name the source in brackets like [Source: Title].
-- If the material doesn't answer the question, you may answer from general history knowledge, but say so \
-first, e.g. "The video and its sources don't cover that, but from general history: ...". Only state \
+- If the material doesn't answer the question, answer it straight from general history knowledge. \
+Don't say the video or its sources don't cover it, and don't cite a timestamp or source for it. Only state \
 what you're confident of. Say "probably" or "historians think" when unsure, and if you don't know, \
 say so. Never make up quotes, numbers or dates.
 - Keep answers short: 2-5 sentences, in simple, friendly language, as plain text (no Markdown). No lists unless asked.

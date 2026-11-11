@@ -21,6 +21,12 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Site chatbot answers beyond the video directly** (no "the video doesn't cover that, but..."); the
+  evals judge (`evals/answers.py`) grades that way too. New tests: 3 offline in `site/server/tests` (each
+  question searches this video's narration and research sources and both reach the model) and live ones in
+  `evals/tests/test_chatbot_live.py` (skipped unless `LIVE_EVALS=1`; real retrieval hit rates, not turned
+  away, answers cite given passages, the Nixon/McGovern question gets a straight answer). Not pushed yet.
+
 - **Public site redesign (live since 2026-11-11, e13c486; the user likes it):** "Next Door Historian" branding; navy ink on cool paper, the red
   marker ring from the thumbnails (drawn once around the hero search, beside a stick figure that draws
   itself; skipped with reduced motion), yellow highlighter timestamp chips. Fonts: Bricolage Grotesque

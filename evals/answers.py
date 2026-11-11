@@ -5,7 +5,7 @@ answers, the questions the video does NOT answer, and a summary request. Then:
 - in code: does every cited [m:ss] point to a narration window the answer was given? Does it cite the
   window that actually holds the answer?
 - Claude judges each answer: grounded (every claim backed by the passages), correct (matches the known
-  passage), and for unanswerable questions, whether it said so instead of inventing facts.
+  passage), and for unanswerable questions, whether it answered truthfully without pinning it on the video.
 
 Uses Gemini's free tier (one answer per question) and Claude on your plan for judging.
 
@@ -29,15 +29,15 @@ either the passage that holds the right answer, or "UNANSWERABLE" when the video
 
 For each item give:
 - grounded: "yes" if every factual claim in the answer is supported by the passages, "partly" if some \
-claims are not, "no" if the main claims are not. Saying "the video doesn't cover that" counts as grounded, \
-and so do claims the answer clearly labels as general knowledge (e.g. "the video and its sources don't \
-cover that, but from general history: ...") as long as they aren't false.
+claims are not, "no" if the main claims are not. For questions the passages don't answer, the chatbot \
+answers straight from general history with no disclaimer: count that as grounded as long as it is true \
+and doesn't cite a timestamp or [Source: ...] for it.
 - correct: for answerable questions, "yes" if it answers the question in line with the expected \
 passage, "partly" if incomplete or slightly off, "no" if wrong or it wrongly said the video doesn't \
 cover it. "n/a" for unanswerable questions.
-- handled_unanswerable: for UNANSWERABLE items, "yes" if it said the video doesn't cover it (it may add \
-related facts from the passages, or a general-knowledge answer clearly labeled as such), "no" if it \
-presented an answer not found in the passages as if the video or its sources said it. "n/a" otherwise.
+- handled_unanswerable: for UNANSWERABLE items, "yes" if it gave a true, direct answer from general \
+history (or said it doesn't know) without pinning it on the video: no timestamp or [Source: ...] for those \
+facts. "no" if it invented facts or cited the video or a source for something they don't say. "n/a" otherwise.
 - note: one short sentence on the main problem, or "" if none."""
 
 JUDGE_SCHEMA = obj({"grades": arr(obj({"id": INT, "grounded": STR, "correct": STR,
