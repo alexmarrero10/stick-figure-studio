@@ -9,7 +9,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 182 backend tests and 23 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
+- 185 backend tests and 23 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
   not pushed). The studio redesign commit (2026-11-11) and the notes commit before it are local, not pushed.
 - **Public site is live: https://stick-figure-studio.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`).
   Vercel redeploys automatically on every push to `main`; check a build with
@@ -19,6 +19,18 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   published to the site.
 
 ## Recently done
+
+- **Retention and click-through rules (2026-11-11).** Saddam video stats: 2.1K impressions, **1.3% CTR** (very
+  low), 2:38 average view duration, big drop at the start. Causes found: the title gave the answer away, the
+  opening said "the answer is a family tree", and then came "before we get to the hunt" plus a biography. Changes:
+  - `SCRIPT_SYSTEM`: never reveal the answer in the opening (tease it), freeze the hook moment, and a new
+    "RIGHT AFTER THE OPENING" section (go straight into the main story, no detours, backstory in small pieces).
+    "but before we get to" / "but first, let's" are banned phrases.
+  - `publish.TITLE_RULES` (also used by `ideas.py`): 3-8 words, under 55 chars, never contains the answer, title
+    shapes distilled from Zenn's and Ink Explainer's titles (their biggest hits: plain questions about
+    something familiar). Thumbnails show the mystery, never the answer.
+  - Ideas should connect to something the viewer already knows.
+  - Suggested next steps: new Saddam title plus YouTube Test & Compare; get retention graphs to find drop points.
 
 - **Find a story opens on "Use my own idea"** (first tab, always the starting tab; the draft text is still restored).
   "Notes for Claude when writing the script" moved from the Research brief panel to the Script panel (only

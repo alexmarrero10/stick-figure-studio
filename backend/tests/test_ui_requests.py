@@ -87,9 +87,22 @@ def test_dropdown_choices_cover_the_current_config(client):
 
 # --- 3: titles -------------------------------------------------------------------------------
 
-def test_suggested_titles_are_short_questions():
-    assert 'short, direct question ending in "?"' in publish.SYSTEM
-    assert "under 60 characters" in publish.SYSTEM
+def test_suggested_titles_are_short_and_never_give_the_answer():
+    assert "under 55 characters" in publish.TITLE_RULES
+    assert "NEVER contains the answer" in publish.TITLE_RULES
+    assert "Why Hasn't Anyone" in publish.TITLE_RULES  # shapes distilled from the top channels
+    assert publish.TITLE_RULES in publish.SYSTEM
+
+
+def test_ideas_use_the_same_title_rules():
+    from pipeline import ideas
+    assert publish.TITLE_RULES in ideas.SYSTEM
+    assert "never gives away the answer" in ideas.SYSTEM
+
+
+def test_thumbnails_show_the_mystery_not_the_answer():
+    for system in (publish.THUMB_ASK_SYSTEM, publish.THUMB_SUGGEST_SYSTEM):
+        assert "Show the mystery, never the answer" in system
 
 
 # --- 4: undo on the Beats step ---------------------------------------------------------------

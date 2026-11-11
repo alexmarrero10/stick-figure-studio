@@ -5,6 +5,7 @@ import re
 from typing import Any
 
 from pipeline.claude_client import STR, Claude, arr, obj
+from pipeline.publish import TITLE_RULES
 
 IDEA = obj({
     "title": STR,
@@ -30,19 +31,25 @@ encounters", "Top 3 unexplained ship disappearances"). Every entry must be docum
 A good topic:
 - Is REAL and well documented (court records, reputable journalism, books, archives, academic work). Never invent events.
 - Has a built-in mystery, reversal, or "how did this happen?" question a viewer must have answered.
+- Connects to something the viewer already knows or lives with (a famous name or event, an \
+everyday thing, their own body or habits). The biggest hits in this niche ask a simple question \
+about something familiar that nobody had thought to ask.
 - Has clear characters, stakes that escalate, and a satisfying payoff that can be told in ~1,400 words.
 - Is visual in a simple way: it can be shown with stick figures, props and simple settings.
 - Is advertiser-friendly: no graphic gore, sexual content, or glorifying violence; tragedy is told respectfully.
 - Is not something every big channel has already covered to death, or has a fresh angle if it is.
 
 Field guide:
-- title: a curiosity-driven YouTube title, under 70 characters, no clickbait lies.
-- hook: the first sentence the narrator would say. Starts in the middle of the story.
+- title: a YouTube title following TITLES below. No clickbait lies.
+- hook: the first sentence the narrator would say. Starts in the middle of the story and never \
+gives away the answer.
 - why_it_works: one or two sentences on what keeps viewers watching.
 - category: e.g. heist, scam, survival, disaster, espionage, science, business, mystery, crime, exploration.
 - era: when it happened.
 - documentation: how well sourced it is and where the facts come from, in one sentence.
-- format: story, topic or list (see above). For a list, name the entries in `documentation`."""
+- format: story, topic or list (see above). For a list, name the entries in `documentation`.
+
+""" + TITLE_RULES
 
 
 TRENDS_SYSTEM = """You scout trends for a faceless YouTube channel that tells true history and true-story videos to viewers aged 13-25. Use web search to find out what history and true-story content is getting a lot of views RIGHT NOW (roughly the last 1-3 months):

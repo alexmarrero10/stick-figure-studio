@@ -348,6 +348,14 @@ def test_script_prompt_follows_the_channel_style():
     assert "CHANNEL STYLE" in script.REVISE_SYSTEM  # revisions keep the same style
 
 
+def test_script_opening_keeps_the_answer_back_and_skips_detours():
+    s = script.SCRIPT_SYSTEM
+    assert "NEVER REVEAL THE ANSWER IN THE OPENING" in s
+    assert "RIGHT AFTER THE OPENING" in s and "No detours" in s
+    assert "but before we get to" in s  # banned phrase
+    assert "NEVER REVEAL THE ANSWER IN THE OPENING" in script.REVISE_SYSTEM
+
+
 def test_script_retells_clumsy_quotes_in_plain_words():
     from pipeline import script
     assert "two persons" in script.SCRIPT_SYSTEM and "one by one" in script.SCRIPT_SYSTEM

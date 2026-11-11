@@ -185,11 +185,30 @@ background, a date on its own or a slow scene-setter.
 - Start inside the action with concrete, visual details: a person, a place, something happening.
 - Within the first three sentences, open a question the viewer needs answered (a mystery, a \
 contradiction, an impossible outcome) and hint at the payoff without giving it away.
+- NEVER REVEAL THE ANSWER IN THE OPENING. The central question is the reason to keep watching, so \
+the opening may promise that the answer is surprising but must not say what it is: not the method, \
+the culprit, the clue, the person who cracked it or how it ends. Tease it in a way that makes the \
+viewer guess ("And the clue that finally cracked it had been sitting in a drawer for nine \
+years."), never name it ("The answer is a bus ticket."). The full answer is built up through the \
+video and lands in the last third.
+- Freeze the moment. When the hook is a scene, stop it at its most tense second and promise to come \
+back ("He had about one second. We'll come back to that second."), then return to it later.
 - Raise the stakes every 2-3 sentences through the opening, so the Short never sags.
 - Somewhere between word 150 and 210, wherever the story's best cliffhanger naturally falls (the \
 Short ends right after that sentence), land on it: a reveal that is just starting or a question left \
 hanging ("And then the search party found something no one expected."), so Short viewers want the \
 full video. Never pad or rush the opening to hit an exact length. The full video carries straight on from it.
+
+RIGHT AFTER THE OPENING (where most viewers decide to leave)
+- Go straight into the main story or the first piece of evidence. Viewers clicked for the \
+mystery, the hunt or the disaster, so the next paragraph must move that forward ("To answer that, \
+we have to start in the ground.").
+- No detours. Never write "but before we get to that", "but first", "to understand this we need \
+to go back", or start a life story ("He was born in..."). A biography right after the hook is the \
+point where most viewers leave.
+- Backstory comes in small pieces inside the main story, at the moment it explains something (who \
+the fugitive was comes out while the search closes in: what he had done, why so many wanted him \
+found). Two or three sentences at a time, never a full section.
 
 RETENTION STRUCTURE
 - Escalate: every 60-90 seconds (about 150-230 words) something changes: a new obstacle, a \
@@ -299,7 +318,7 @@ thing", "turns out", "meanwhile", "a few weeks later". Mix sentence lengths natu
 "in a world where", "a testament to", "delve", "tapestry", "it's worth noting", "buckle up", \
 "fast forward to", "the rest is history", "sent shockwaves", "forever changed", "a chilling \
 reminder", "stood the test of time", "against all odds", "what happened next will shock you", \
-"but here's the kicker", "plot twist".
+"but here's the kicker", "plot twist", "but before we get to", "but first, let's".
 - Avoid the patterns that give it away: more than two "It wasn't X. It was Y." contrasts in a \
 script, lists of three \
 adjectives, a rhetorical question at the end of every paragraph, and the same re-hook line twice. \

@@ -17,13 +17,36 @@ character's name.
   - background: a simple, uncluttered version of the place where that moment happens, in the \
 video's colors and light, with strong contrast against the figure (e.g. "dark navy night sky over \
 dark green orange trees"). Never blank or plain white.
-  Never ask for text, letters, numbers, signs or speech bubbles; the title is added afterwards."""
+  Never ask for text, letters, numbers, signs or speech bubbles; the title is added afterwards.
+  Show the mystery, never the answer: the moment before the reveal, the danger, the impossible \
+situation. The thumbnail adds what the title leaves out; it never just shows the title again."""
+
+# Distilled from the titles of the top channels in this niche (their biggest hits are plain
+# questions about something everyone knows, and never say the answer). Patterns only, no copied titles.
+TITLE_RULES = """TITLES (the title decides whether anyone clicks)
+- Short and plain: 3-8 everyday words, under 55 characters. A 13-year-old understands it at a glance.
+- It asks, the video answers. A title NEVER contains the answer, the twist, the method, the clue or \
+the ending. If the title says how it happened, nobody needs to click.
+- Build it around something the viewer already knows or feels (a famous name, an everyday thing, \
+their own body or life), then add a gap they need closed.
+- Shapes that work (fill them with this story, never copy these examples):
+  - "What Did [people] Actually Do [situation]?" ("Actually" says the common belief is wrong)
+  - "Why Hasn't Anyone [obvious thing]?" / "Why Didn't Anyone [obvious thing]?"
+  - "How Did [famous person or thing] [impossible-sounding outcome]?"
+  - "Why You [surprising fact about the viewer]"
+  - "The [one strong true word: Disturbing, Strange, Clever, Desperate] Way [people] [did something]"
+  - "The [name] Effect" (only when the video explains a real named effect or experiment)
+- At most one emotional word, and only if the video backs it up. No all-caps words, no emojis, \
+no "you won't believe"."""
 
 SYSTEM = f"""You package true-story YouTube videos for publishing. Write metadata that is accurate \
 (no claims the video doesn't support), curiosity-driven and advertiser-friendly.
 
-- titles: 5 options, each a short, direct question ending in "?" (under 60 characters, about 4-9 \
-words, e.g. "How Did One Letter Start a War?"). Curiosity without lying. Vary the angle. Every title is about THIS video.
+{TITLE_RULES}
+
+- titles: 5 options following TITLES, each a different shape and angle, strongest first. Every \
+title is about THIS video. Check each one: if someone read only the title, would they still not \
+know the answer? If they would, rewrite it.
 - description: 2 short hook paragraphs (the first 150 characters show in search, so lead with the \
 mystery). Do NOT include chapters or sources; they are appended automatically.
 - tags: 12-20 search phrases.
