@@ -67,7 +67,7 @@ app.state.reader = None
 app.state.gemini = None
 app.state.chat_limit = RateLimiter(_int("CHAT_PER_HOUR", 10), _int("CHAT_PER_DAY", 30), _int("CHAT_GLOBAL_PER_DAY", 500))
 app.state.search_limit = RateLimiter(_int("SEARCH_PER_HOUR", 60), _int("SEARCH_PER_DAY", 300),
-                                     _int("SEARCH_GLOBAL_PER_DAY", 5000))
+                                     _int("SEARCH_GLOBAL_PER_DAY", 100))
 app.state.cache = AnswerCache()
 
 

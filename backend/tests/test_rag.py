@@ -139,8 +139,21 @@ def test_pick_sources_limits_searches():
 
 # --- embeddings -------------------------------------------------------------
 
-def test_embed_batches_normalizes_and_retries(monkeypatch):
-    monkeypatch.setattr(embeddings.time, "sleep", lambda s: None)
+@pytest.fixture
+def clock(monkeypatch):
+    """Fake clock: sleeping moves time forward instantly."""
+    now = {"t": 1000.0, "slept": 0.0}
+
+    def sleep(s):
+        now["t"] += s
+        now["slept"] += s
+    monkeypatch.setattr(embeddings.time, "monotonic", lambda: now["t"])
+    monkeypatch.setattr(embeddings.time, "sleep", sleep)
+    monkeypatch.setattr(embeddings, "_sent", [])
+    return now
+
+
+def test_embed_batches_normalizes_and_retries(clock):
     calls = {"n": 0}
 
     def handler(req):
@@ -156,6 +169,29 @@ def test_embed_batches_normalizes_and_retries(monkeypatch):
     vecs = embeddings.embed(["a"] * 150, "k", "RETRIEVAL_QUERY", client=client)
     assert len(vecs) == 150 and vecs[0] == [0.6, 0.8]
     assert calls["n"] == 3  # one 429, then two batches (100 + 50)
+
+
+def test_batches_stay_under_token_limit():
+    big = "x" * 3000  # about 1,000 tokens each
+    groups = embeddings.batches([big] * 50)
+    assert [len(g) for g in groups] == [19, 19, 12]
+    assert all(sum(map(embeddings.tokens, g)) <= embeddings.BATCH_TOKENS for g in groups)
+    assert [len(g) for g in embeddings.batches(["a"] * 150)] == [100, 50]
+
+
+def test_embed_waits_to_stay_under_tokens_per_minute(clock):
+    sent = []
+
+    def handler(req):
+        sent.append(clock["t"])
+        body = json.loads(req.content)
+        return httpx.Response(200, json={"embeddings": [{"values": [1.0]} for _ in body["requests"]]})
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    embeddings.embed(["x" * 3000] * 50, "k", client=client)  # ~50K tokens, 3 batches
+    assert len(sent) == 3
+    assert sent[1] - sent[0] >= 60  # 19K + 19K would go over 24K a minute, so it waits
+    assert sent[2] - sent[1] >= 60
 
 
 def test_embed_needs_key():

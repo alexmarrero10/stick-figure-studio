@@ -5,6 +5,7 @@ The public site must use the same model and dimension, or its searches won't mat
 """
 from __future__ import annotations
 
+import threading
 import time
 from typing import Any
 
@@ -16,6 +17,13 @@ API = "https://generativelanguage.googleapis.com/v1beta/models/{model}:batchEmbe
 DEFAULT_MODEL = "gemini-embedding-001"
 DIMENSIONS = 768
 BATCH = 100  # the API's limit per batch request
+# Free tier: 30K tokens and 100 requests a minute (each text in a batch may count as a request).
+# Stay under both with room to spare, across every call in this process.
+BATCH_TOKENS = 20_000
+MINUTE_TOKENS = 24_000
+MINUTE_TEXTS = 90
+_sent: list[tuple[float, int, int]] = []  # (time, tokens, texts) sent in the last minute
+_lock = threading.Lock()
 
 
 class EmbeddingError(RuntimeError):
@@ -32,9 +40,9 @@ def embed(texts: list[str], api_key: str, task: str = "RETRIEVAL_DOCUMENT", mode
     client = client or httpx.Client(timeout=60)
     out: list[list[float]] = []
     try:
-        for i in range(0, len(texts), BATCH):
+        for batch in batches(texts):
             procs.check()
-            batch = texts[i:i + BATCH]
+            _wait_for_room(sum(map(tokens, batch)), len(batch))
             body = {"requests": [{"model": f"models/{model}", "content": {"parts": [{"text": t}]},
                                   "taskType": task, "outputDimensionality": dims} for t in batch]}
             out.extend(_post(client, model, api_key, body, retries))
@@ -42,6 +50,44 @@ def embed(texts: list[str], api_key: str, task: str = "RETRIEVAL_DOCUMENT", mode
         if own:
             client.close()
     return out
+
+
+def tokens(text: str) -> int:
+    """Rough token count. English is about 4 characters per token; counting 3 overestimates to be safe."""
+    return len(text) // 3 + 1
+
+
+def batches(texts: list[str]) -> list[list[str]]:
+    """Group texts into batches of at most BATCH texts and BATCH_TOKENS tokens."""
+    out: list[list[str]] = []
+    cur: list[str] = []
+    size = 0
+    for t in texts:
+        n = tokens(t)
+        if cur and (len(cur) >= BATCH or size + n > BATCH_TOKENS):
+            out.append(cur)
+            cur, size = [], 0
+        cur.append(t)
+        size += n
+    if cur:
+        out.append(cur)
+    return out
+
+
+def _wait_for_room(n_tokens: int, n_texts: int) -> None:
+    """Sleep until sending this batch keeps the last minute under the free tier's limits."""
+    while True:
+        with _lock:
+            now = time.monotonic()
+            _sent[:] = [s for s in _sent if now - s[0] < 60]
+            used_tokens = sum(s[1] for s in _sent)
+            used_texts = sum(s[2] for s in _sent)
+            if not _sent or (used_tokens + n_tokens <= MINUTE_TOKENS and used_texts + n_texts <= MINUTE_TEXTS):
+                _sent.append((now, n_tokens, n_texts))
+                return
+            wait = 60 - (now - _sent[0][0]) + 0.1
+        time.sleep(min(wait, 1.0))  # short naps so Stop still works
+        procs.check()
 
 
 def _post(client: httpx.Client, model: str, api_key: str, body: dict[str, Any], retries: int) -> list[list[float]]:

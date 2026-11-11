@@ -9,11 +9,16 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 177 backend tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`, not pushed).
+- 179 backend tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`, not pushed).
 - Active plan: `docs/PUBLIC_SITE_PLAN.md` (RAG research and public site built; Vercel deploy next).
 - Project 3 is Watergate ("The Piece of Tape..."), currently at the image step (221 prompts).
 
 ## Recently done
+
+- **Gemini free-tier pacing:** embeddings are batched by size (max 100 texts and ~20K tokens per request,
+  `embeddings.batches`) and paced to stay under ~24K tokens / 90 texts a minute (free tier: 30K / 100).
+  Big research runs now wait instead of hitting 429s. Site search's global daily cap is 100
+  (`SEARCH_GLOBAL_PER_DAY`), since search and chat share the 1K-a-day embedding limit with the studio.
 
 - **Thumbnail panel is "idea to prompt"** (Publish step): the pack no longer writes 3 thumbnail prompts; **Give
   suggestion** writes one (`publish.suggest_thumbnail`, told to differ from those listed). Works before the pack exists.
