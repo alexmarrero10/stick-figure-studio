@@ -154,6 +154,12 @@ stories and explains real history as stick-figure animations. A video is one sto
 explained, or a countdown of several true cases (the format is given with each request). A single narrator (an American male voice) reads your script \
 word for word with an AI voice, and every 1-3 seconds of narration gets its own simple illustration.
 
+EXAMPLES IN THESE INSTRUCTIONS SHOW THE IDEA ONLY
+- Never reuse their wording or a close copy ("this is the part I can't get over", "take a guess", \
+"hold on to that...", "go back to that... one more time", "here's what I love about..."). Copied \
+lines make every video sound the same and canned. Write each line fresh for this story, in words \
+that fit this exact moment. The one fixed line is "So here's the full picture." for the recap.
+
 OUTPUT FORMAT
 - Output ONLY the words the narrator will speak. No title, headings, scene directions, speaker labels, \
 timestamps, brackets, emojis or Markdown.
@@ -183,6 +189,19 @@ now, you are warm." / "Imagine you haven't eaten in two days."), said in under 1
 ("In 1845, 129 men sailed into the Arctic, and not one of them came back."). Never open with \
 background, a date on its own or a slow scene-setter.
 - Start inside the action with concrete, visual details: a person, a place, something happening.
+- CLEAR FROM THE FIRST WORD. A viewer who knows nothing must follow every sentence the first time:
+  - Never use he, she, they, his or her before saying who that is. Introduce people by role first \
+("a quiet man in a dark suit", "a flight attendant"). "The flight attendant dropped his note into \
+her purse" fails: whose note? which flight attendant?
+  - Say where and when within the first paragraph.
+  - Say it the way a person tells it out loud, not like the first line of a novel. Good: "Imagine \
+you're a flight attendant in nineteen seventy-one, and a man in a dark suit hands you a note." Avoid \
+"would" chains about the future ("Within hours, he would be holding...").
+- ONE TIMELINE IN THE OPENING: the hook scene, what it led to, then the question. Never cut to a \
+scene from another time (a scene from years later, then "go back to that afternoon"). A later event \
+can be teased in one line, never shown as a scene.
+- Tell each scene once. If the opening shows a scene, the story later picks up from it or briefly \
+refers back to it. Never tell the same moment again in full.
 - Within the first three sentences, open a question the viewer needs answered (a mystery, a \
 contradiction, an impossible outcome) and hint at the payoff without giving it away.
 - NEVER REVEAL THE ANSWER IN THE OPENING. The central question is the reason to keep watching, so \
@@ -303,6 +322,8 @@ someone, say so ("he later said something like...").
 ("one person, then two persons, then three persons came out"), tell it in your own plain words \
 instead ("the men came out one at a time"). Never count people as "1 person, 2 persons"; say \
 "one man", "two of them", "five men", "one by one".
+- Words like "the only", "the first", "the biggest" and "never" must match the research exactly, \
+including the scope ("the only unsolved hijacking in American history" is not "in the world").
 - Never state disputed claims as fact. Treat sensitive events with respect. Keep it advertiser-friendly: \
 no graphic violence or gore, no sexual content, no profanity.
 
@@ -325,7 +346,16 @@ adjectives, a rhetorical question at the end of every paragraph, and the same re
 Each re-hook must be written for that exact moment of this story.
 
 LENGTH
-- Aim for the target word count you are given. It is read at about 180 words per minute."""
+- Aim for the target word count you are given. It is read at about 180 words per minute.
+
+BEFORE YOU ANSWER, READ THE OPENING (first 200 words) AS A STRANGER HEARING IT ONCE
+- Every he, she or they points to someone already introduced.
+- You know who, where and when by the end of the first paragraph.
+- No sentence needs a second listen to make sense.
+- It stays in one timeline, and no scene is told twice anywhere in the script.
+- It sounds like a person talking to a friend, not a novel or a news report.
+- No line is copied from the examples in these instructions.
+Fix anything that fails before you answer."""
 
 
 FORMAT_RULES = {

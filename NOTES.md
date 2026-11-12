@@ -9,7 +9,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 185 backend tests and 24 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
+- 187 backend tests and 24 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
   not pushed). The studio redesign commit (2026-11-11) and the notes commit before it are local, not pushed.
 - **Public site is live: https://stick-figure-studio.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`).
   Vercel redeploys automatically on every push to `main`; check a build with
@@ -19,6 +19,15 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   published to the site.
 
 ## Recently done
+
+- **Clearer script openings (2026-11-11).** Project 4 (D.B. Cooper) v31 opened "The flight attendant dropped
+  his note into her purse..." (pronoun for nobody, four time jumps, the note scene told twice, lines copied
+  from the prompt's examples, "only unsolved hijacking in the world" instead of "in American history").
+  Fixed by hand as **v32** (1,601 words); its 230 beats were made from v31, so re-split beats. New
+  `SCRIPT_SYSTEM` rules: CLEAR FROM THE FIRST WORD (no pronoun before the person is introduced, where/when
+  in the first paragraph, spoken not novel-like), ONE TIMELINE IN THE OPENING, tell each scene once, never
+  reuse example wording (except "So here's the full picture."), superlatives keep the research's scope, and
+  a final read-the-opening-as-a-stranger check.
 
 - **Images step comes before Voice (2026-11-11):** step track is Script, Beats, Images, Voice, Assemble,
   Publishing Pack, Post to Video Site. Only the UI order, Next buttons and home chips changed (images never needed

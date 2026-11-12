@@ -358,6 +358,15 @@ def test_script_opening_keeps_the_answer_back_and_skips_detours():
     assert "not at anyone's birth" in script.FORMAT_RULES["story"]
 
 
+def test_script_opening_is_clear_to_a_stranger_and_never_copies_examples():
+    s = script.SCRIPT_SYSTEM
+    for rule in ("CLEAR FROM THE FIRST WORD", "Never use he, she, they, his or her before saying who",
+                 "ONE TIMELINE IN THE OPENING", "Tell each scene once",
+                 "EXAMPLES IN THESE INSTRUCTIONS SHOW THE IDEA ONLY", "READ THE OPENING", "not \"in the world\""):
+        assert rule in s, rule
+    assert "CLEAR FROM THE FIRST WORD" in script.REVISE_SYSTEM
+
+
 def test_script_retells_clumsy_quotes_in_plain_words():
     from pipeline import script
     assert "two persons" in script.SCRIPT_SYSTEM and "one by one" in script.SCRIPT_SYSTEM
