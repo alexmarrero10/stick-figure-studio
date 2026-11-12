@@ -1,4 +1,4 @@
-"""NextDoorHistorian public site: video library, semantic search, and a chatbot for each video.
+"""Stick Figure Viewer, the public site: video library, semantic search, and a chatbot for each video.
 
 Read-only. Serves the web pages (site/web/dist) and a small API:
   GET  /api/videos             all published videos
@@ -62,7 +62,7 @@ OFF_TOPIC_TEXT = ("I can only answer questions about this video's story and the 
 SOURCE_PASSAGES = 5
 NO_ANSWER_TEXT ="I can't help with that one. Try asking about something in the video."
 
-app = FastAPI(title="NextDoorHistorian", docs_url=None, redoc_url=None)
+app = FastAPI(title="Stick Figure Viewer", docs_url=None, redoc_url=None)
 app.state.reader = None
 app.state.gemini = None
 app.state.chat_limit = RateLimiter(_int("CHAT_PER_HOUR", 10), _int("CHAT_PER_DAY", 30), _int("CHAT_GLOBAL_PER_DAY", 500))

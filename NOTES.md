@@ -20,6 +20,11 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Public site renamed "Stick Figure Viewer" (2026-11-11)** (was "Next Door Historian"; the chatbot still names the
+  YouTube channel NextDoorHistorian, which is correct). README and docs/PUBLIC_SITE.md use the new address
+  https://stick-figure-viewer.vercel.app, which the user still has to add in Vercel (Settings > Domains). Until then
+  the live address is still stick-figure-studio.vercel.app; update CLAUDE.md, NOTES and memory once it's switched.
+
 - **Clearer script openings (2026-11-11).** Project 4 (D.B. Cooper) v31 opened "The flight attendant dropped
   his note into her purse..." (pronoun for nobody, four time jumps, the note scene told twice, lines copied
   from the prompt's examples, "only unsolved hijacking in the world" instead of "in American history").
@@ -233,7 +238,8 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Open issues
 
-- `README.md` is the project overview (resume-facing), written with the user from their draft (2026-11-11); keep its numbers in line with the evals. The old setup guide moved to `docs/SETUP.md`; it and `PROGRESS.md` are partly out of date. They say the "current project" is the public site. CLAUDE.md and this file are correct. The
+- `README.md` is the project overview (resume-facing), written with the user from their draft (2026-11-11), with the
+  public site's full write-up in `docs/PUBLIC_SITE.md`. Keep both in line with the code and `evals/reports/`. The old setup guide moved to `docs/SETUP.md`; it and `PROGRESS.md` are partly out of date. They say the "current project" is the public site. CLAUDE.md and this file are correct. The
   `shots.py` docstring also says "pictures are never zoomed" (zoom now happens in `assemble.py`).
 - `projects/a-han-governor-removed-the-tiger-traps-and-the-tigers-left/` exists on disk but has no project row
   in the database (leftover folder).

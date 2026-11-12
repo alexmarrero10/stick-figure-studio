@@ -3,7 +3,7 @@ import { fmtTime, getJSON, SearchHit, Video } from "./api";
 import { Chat } from "./Chat";
 import { Player, PlayerHandle } from "./Player";
 
-const SITE_NAME = "Next Door Historian";
+const SITE_NAME = "Stick Figure Viewer";
 
 /* Routes (in the URL hash, so any static host works):  #/   #/?q=search   #/watch/12?t=95 */
 interface Route {
