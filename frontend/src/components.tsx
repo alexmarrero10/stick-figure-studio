@@ -140,11 +140,11 @@ export function useJob(resume?: {
   return { run, job, busy: job?.status === "running" || job?.status === "stopping" };
 }
 
-export function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
+export function CopyButton({ text, label = "Copy", className = "secondary small" }: { text: string; label?: string; className?: string }) {
   const [done, setDone] = useState(false);
   return (
     <button
-      className="secondary small"
+      className={className}
       onClick={async () => {
         await navigator.clipboard.writeText(text);
         setDone(true);

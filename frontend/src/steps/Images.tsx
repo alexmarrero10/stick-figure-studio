@@ -516,13 +516,12 @@ export default function ImagesStep({ project, refresh }: StepProps) {
             </div>
             {data.character_sheet ? (
               <div className="sheet">
-                <div>
-                  <h3 className="small">Make the main characters in Flow first, before batch 1</h3>
+                <div className="sheet-text">
+                  <h3>Make the main characters in Flow first, before batch 1</h3>
                   <p className="muted small">
                     These characters are in many pictures, so Flow makes one reference image of each and reuses it in
                     every batch. Characters seen only a few times just use their description.
                   </p>
-                </div>
                 <ol className="sheet-list">
                   {data.main_characters.map((c) => (
                     <li key={c.title}>
@@ -531,12 +530,15 @@ export default function ImagesStep({ project, refresh }: StepProps) {
                     </li>
                   ))}
                 </ol>
-                <div className="row">
-                  <CopyButton text={data.character_sheet} label="Copy the character sheet for Flow" />
-                  <a className="button secondary small" href={`/api/projects/${pid}/prompts/characters`} target="_blank" rel="noreferrer">
-                    characters.txt
-                  </a>
-                  <span className="muted small">Paste it into your Flow agent.</span>
+                </div>
+                <div className="sheet-copy">
+                  <CopyButton text={data.character_sheet} label="Copy the character sheet for Flow" className="primary big" />
+                  <span className="muted small">
+                    Paste it into your Flow agent, or open{" "}
+                    <a href={`/api/projects/${pid}/prompts/characters`} target="_blank" rel="noreferrer">
+                      characters.txt
+                    </a>
+                  </span>
                 </div>
               </div>
             ) : (
