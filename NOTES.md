@@ -11,7 +11,8 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   about 65% on Shorts, and views are low. Recent work targets this.
 - 187 backend tests and 24 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
   not pushed). The studio redesign commit (2026-11-11) and the notes commit before it are local, not pushed.
-- **Public site is live: https://stick-figure-studio.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`).
+- **Public site is live: https://stick-figure-viewer.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`;
+  the old stick-figure-studio.vercel.app address still works).
   Vercel redeploys automatically on every push to `main`; check a build with
   `gh api repos/alexmarrero10/stick-figure-studio/commits/<sha>/status`. No Vercel CLI installed.
   Projects 1, 2 and 3 (Watergate) are published on it.
@@ -21,9 +22,8 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 ## Recently done
 
 - **Public site renamed "Stick Figure Viewer" (2026-11-11)** (was "Next Door Historian"; the chatbot still names the
-  YouTube channel NextDoorHistorian, which is correct). README and docs/PUBLIC_SITE.md use the new address
-  https://stick-figure-viewer.vercel.app, which the user still has to add in Vercel (Settings > Domains). Until then
-  the live address is still stick-figure-studio.vercel.app; update CLAUDE.md, NOTES and memory once it's switched.
+  YouTube channel NextDoorHistorian, which is correct). The user added the domain
+  https://stick-figure-viewer.vercel.app in Vercel the same day; it's the address used everywhere now.
 
 - **Clearer script openings (2026-11-11).** Project 4 (D.B. Cooper) v31 opened "The flight attendant dropped
   his note into her purse..." (pronoun for nobody, four time jumps, the note scene told twice, lines copied
