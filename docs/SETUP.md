@@ -47,9 +47,13 @@ provider, Claude uses your existing `claude` login. If you're logged out, run `c
    - Claude defines a series style and gives each recurring character a fixed visual marker.
    - It writes one prompt per beat, in batches of 24 (`projects/<slug>/prompts/batch_01.txt`, …).
    - Copy a batch into Google Flow and generate **one image per prompt, in order**.
-5. **Images.**
-   - Drop each batch's downloads onto the matching batch tab, or copy them into
-     `projects/<slug>/images/batch_XX/` and click **Rescan**.
+5. **Images.** Prompts and images share one page with three tabs, used in order:
+   - **Prompts and style:** generate or rewrite the prompts; see the style, recurring objects and places.
+   - **Characters:** every character's look. If any are in 8+ pictures, copy the character sheet into Flow
+     before batch 1.
+   - **Batches and images:** bulk upload every batch's download at once, or pick a batch, copy it for Flow
+     and drop its images. You can also copy them into `projects/<slug>/images/batch_XX/` and click
+     **Rescan folders**.
    - Images are ordered by the creation timestamp in their metadata (then file time, then name).
    - Check each picture against its narration and drag any that are out of order.
 6. **Voice.** Josh (ElevenLabs) reads the script with character timestamps, which become start and end

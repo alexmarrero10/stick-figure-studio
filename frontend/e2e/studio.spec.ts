@@ -233,3 +233,33 @@ test("pages fit a phone screen without sideways scrolling", async ({ page }) => 
     expect(extra, `${path} scrolls sideways`).toBeLessThanOrEqual(1);
   }
 });
+
+test("the images step has three tabs in order: prompts, characters, then batches", async ({ page, api }) => {
+  const prompts = fixtures[`/api/projects/${PID}/prompts`];
+  api.on("GET", `/api/projects/${PID}/prompts`, {
+    ...prompts,
+    character_sheet: "C1 Engineer: a stick figure with short black hair",
+    main_characters: [{ title: "C1 Engineer", name: "Engineer", variant: "", images: 30 }],
+  });
+  await page.goto(`/#/p/${PID}/images`);
+  const tabs = page.getByRole("tablist", { name: "Image steps" }).getByRole("tab");
+  await expect(tabs).toHaveText([/Prompts and style/, /Characters/, /Batches and images/]);
+  // Images are already in, so it opens on the batches, with bulk upload beside the batch list.
+  await expect(tabs.nth(2)).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByText("Bulk upload all batches")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copy batch 1 for Flow" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Regenerate all prompts" })).toHaveCount(0);
+
+  await tabs.nth(0).click();
+  await expect(page.getByRole("button", { name: "Regenerate all prompts" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "New style + prompts" })).toBeVisible();
+  await expect(page.getByText("Bulk upload all batches")).toHaveCount(0);
+
+  // The arrow keys move between tabs; Next goes on to the batches.
+  await tabs.nth(0).press("ArrowRight");
+  await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("button", { name: "Copy the character sheet for Flow" })).toBeVisible();
+  await expect(page.getByText("C1 Engineer")).toBeVisible();
+  await page.getByRole("button", { name: /Next: batches/ }).click();
+  await expect(tabs.nth(2)).toHaveAttribute("aria-selected", "true");
+});

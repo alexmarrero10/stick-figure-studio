@@ -225,6 +225,10 @@ for word, so the same person looks the same in all 150-240 pictures.
 I generate the pictures in **Google Flow** by hand, pasting in one batch at a time. Then I upload them,
 batch by batch or all at once as one zip of every batch's download.
 
+The page has three tabs that follow the work in order: **Prompts and style** (write or rewrite the
+prompts, see the style, objects and places), **Characters** (every look, plus the character sheet to copy
+into Flow first) and **Batches and images** (bulk upload, then each batch's prompts beside its pictures).
+
 - **Matching by title** (`images.py`): Flow names each downloaded file after the start of its prompt, so the
   import matches every file name back to its slot. In one big zip, each image goes to the batch whose title
   it matches.
@@ -414,12 +418,12 @@ Every pipeline step is tested without the server or the network:
   the Short's cliffhanger cut, prompt rules (no face features, unique titles), image matching, RAG indexing
   and retrieval, the fact check, posting to the site, and stopping jobs part-way through.
 
-### Studio browser tests (24, Playwright, ~10 seconds)
+### Studio browser tests (25, Playwright, ~10 seconds)
 
 Playwright drives the built studio in Microsoft Edge against a **fake backend** that answers every `/api`
 call from recorded fixtures, so the tests never touch real data. A test fails on any page error, or on any
 API call that gets no answer. The tests open every step and check the step track, editing and saving, the
-chat drawer, saved ideas, stopping a long job, the Publishing Pack layout, and that every page fits a phone
+chat drawer, saved ideas, stopping a long job, the Images tabs, the Publishing Pack layout, and that every page fits a phone
 screen without sideways scrolling.
 
 ### Public site tests (19, pytest)

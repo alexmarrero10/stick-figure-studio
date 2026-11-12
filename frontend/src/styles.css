@@ -398,6 +398,62 @@ button.primary:hover:not(:disabled) { background: var(--marker-hover); border-co
   border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 18px;
   display: flex; flex-direction: column; gap: 10px; background: var(--panel);
 }
+/* The three image tabs are a sequence, so they read like the step track: a numbered dot, a name and
+   where it stands. The open tab is a folder tab joined to the panel below, marked in red on top. */
+.image-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; position: relative; z-index: 1; margin-bottom: -1px; }
+.image-tabs .image-tab, .image-tabs .image-tab:hover:not(:disabled) {
+  justify-content: flex-start; gap: 12px; min-height: 64px; padding: 10px 16px; text-align: left; white-space: normal;
+  background: transparent; color: var(--ink); border: 1px solid transparent; border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0; font-weight: 400;
+}
+.image-tabs .image-tab:hover:not(:disabled) { background: var(--soft); }
+.image-tabs .image-tab.active, .image-tabs .image-tab.active:hover:not(:disabled) {
+  background: var(--panel); border-color: var(--line); box-shadow: inset 0 3px 0 var(--marker);
+}
+.image-tab .dot {
+  flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  font: 700 0.85rem/1 var(--display); font-variant-numeric: tabular-nums;
+  background: var(--paper); border: 2px solid var(--line-strong); color: var(--muted);
+}
+.image-tab.done .dot { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.image-tab.active .dot { box-shadow: 0 0 0 3px var(--panel), 0 0 0 5.5px var(--marker); }
+.image-tab .label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.image-tab .label > span { font: 700 0.98rem/1.2 var(--display); }
+.image-tab.active .label > span { color: var(--marker); }
+.image-tab small { color: var(--muted); font: 400 0.8rem/1.3 var(--display); font-variant-numeric: tabular-nums; }
+.image-tab.done small { color: var(--good); }
+.image-panel { gap: 18px; padding: 22px 24px 24px; }
+.image-panel.first-active { border-top-left-radius: 0; }
+.image-panel .dropzone, .image-panel .flow-section { margin-bottom: 0; }
+.tab-intro { display: flex; flex-direction: column; gap: 4px; max-width: 72ch; }
+.tab-intro h3 { font-size: 1.15rem; }
+.image-panel section { display: flex; flex-direction: column; gap: 6px; }
+.tab-foot { display: flex; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--line); }
+.bible { display: flex; flex-direction: column; gap: 18px; }
+.style-text { padding: 12px 14px; background: var(--soft); border-radius: var(--radius-sm); }
+.bible p { max-width: 90ch; }
+.bible-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px 28px; }
+.look-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.look-list li { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.look-list li:last-child { border-bottom: none; }
+.look-list strong { font-family: var(--display); margin-right: 4px; }
+.look-list strong::after { content: ":"; }
+/* The character sheet is the one thing to do on this tab, so it sits forward with an ink edge. */
+.sheet {
+  display: flex; flex-direction: column; gap: 12px; padding: 18px 20px; border: 1.5px solid var(--ink);
+  border-radius: var(--radius); box-shadow: var(--shadow-lift);
+}
+.sheet-list { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+.sheet-list li {
+  display: inline-flex; align-items: baseline; gap: 8px; padding: 6px 12px; border-radius: 99px; background: var(--soft);
+}
+.sheet-list strong { font-family: var(--display); }
+.sheet-list .muted { font-family: var(--display); font-variant-numeric: tabular-nums; }
+.dropzone.bulk { border-color: var(--ink); border-width: 1.5px; background: color-mix(in srgb, var(--highlight-soft) 55%, var(--panel)); }
+.batch-bar { display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+.batch-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; align-items: stretch; }
+.batch-actions > * { justify-content: space-between; }
+.image-panel .pair-list { margin-top: 0; }
 .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
 .slot {
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px;
@@ -474,6 +530,10 @@ button.primary:hover:not(:disabled) { background: var(--marker-hover); border-co
   .topbar nav a { padding: 8px 9px; }
   .stepper li { min-width: 96px; }
   .panel { padding: 16px; }
+  .image-tabs { gap: 2px; }
+  .image-tabs .image-tab, .image-tabs .image-tab:hover:not(:disabled) { flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px; }
+  .image-tab small { display: none; }
+  .batch-actions { grid-template-columns: 1fr; }
 }
 
 /* ---------- settings ---------- */

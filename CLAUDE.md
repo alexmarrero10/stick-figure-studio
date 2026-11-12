@@ -31,6 +31,8 @@ is the plan for RAG research and the public site (both built and deployed).
 5. **Images** (`images.py`): import. Prompts start with a title unique in its batch and **no number** (numbers
    got drawn into the pictures); Flow names files after it and the import matches the name to its slot. Unmatched
    files go by metadata timestamp, then drag or slot-pick to fix. Old "7 - Title" files still use the number. **Bulk upload** (`POST images/upload-all`) takes one zip of every batch's download and sorts images by title (`images.plan_group`).
+   The page (`Images.tsx`) has three tabs in order: Prompts and style, Characters (character sheet), Batches and images
+   (bulk upload, then per batch: copy for Flow, add images, prompt beside image). It opens on the first tab still to do.
 6. **Voice** (`voice.py`): ElevenLabs with-timestamps (voice set on Settings, now "Brian"; `eleven_v4`), chunked and stitched,
    long pauses trimmed, then sped up with FFmpeg `atempo` (`voice.speed`, 1.1 = 10% faster, pitch kept;
    Eleven v4 has no speed setting) with word timings scaled to the measured length, per-word timings stored.
@@ -75,7 +77,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
-- **Studio browser tests:** `cd frontend && npm run test:e2e` (builds, then 24 Playwright tests in `e2e/`
+- **Studio browser tests:** `cd frontend && npm run test:e2e` (builds, then 25 Playwright tests in `e2e/`
   on Windows' Edge against a fake backend from `e2e/fixtures.json`; never the real server or data, ~10 s).
   Run after any UI change. Refresh fixtures with `node e2e/record-fixtures.mjs 1` (studio running).
 - **Public site:** `cd site/web && npm run build`, then

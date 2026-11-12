@@ -9,7 +9,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 187 backend tests and 24 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
+- 187 backend tests and 25 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
   not pushed). The studio redesign commit (2026-11-11) and the notes commit before it are local, not pushed.
 - **Public site is live: https://stick-figure-viewer.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`;
   the old stick-figure-studio.vercel.app address still works).
@@ -20,6 +20,12 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   published to the site.
 
 ## Recently done
+
+- **Images page in three tabs (2026-11-11)**, at the user's request: Prompts and style (generate, new style,
+  check objects + places, the style/objects/places), Characters (character sheet for Flow + every look),
+  Batches and images (bulk upload and Rescan at the top, then batch picker, "Send to Flow" and "Add images"
+  side by side, then the prompt/image list). Opens on the first tab still to do; arrow keys move between tabs.
+  The "Open batch folder" button was dropped (same os.startfile route as the removed project-folder button).
 
 - **Public site renamed "Stick Figure Viewer" (2026-11-11)** (was "Next Door Historian"; the chatbot still names the
   YouTube channel NextDoorHistorian, which is correct). The user added the domain
