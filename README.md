@@ -9,10 +9,11 @@ videos, search them by meaning and ask a chatbot questions about each story:
 **https://stick-figure-viewer.vercel.app**. See [The public site](#the-public-site) below, or the full
 write-up in [docs/PUBLIC_SITE.md](docs/PUBLIC_SITE.md).
 
-**Setup and how to use the studio:** [docs/SETUP.md](docs/SETUP.md)
+**Want to run it yourself?** See [Getting started](#getting-started).
 
 ## Contents
 
+- [Getting started](#getting-started)
 - [Why I built it](#why-i-built-it)
 - [How it works](#how-it-works)
 - [The studio (local app)](#the-studio-local-app)
@@ -29,6 +30,22 @@ write-up in [docs/PUBLIC_SITE.md](docs/PUBLIC_SITE.md).
 - [Interesting problems I solved](#interesting-problems-i-solved)
 - [Testing and evals](#testing-and-evals)
 - [Next Objectives](#next-objectives)
+
+## Getting started
+
+The studio runs locally on Windows. You need Python 3.11+, Node.js 20+, FFmpeg, Claude (a Claude Code login
+or an Anthropic API key) and an ElevenLabs key. Gemini and Supabase are optional and turn on research from
+downloaded sources.
+
+```powershell
+git clone https://github.com/alexmarrero10/stick-figure-studio.git
+cd stick-figure-studio
+.\start.ps1    # installs everything on the first run, then opens http://127.0.0.1:8765
+```
+
+Then add your keys on the Settings page. The full guide, including the optional RAG database, settings,
+backups and troubleshooting, is in **[docs/SETUP.md](docs/SETUP.md)**. To run the public site yourself, see
+[site/README.md](site/README.md).
 
 ## Why I built it
 
@@ -79,10 +96,10 @@ creates the project and opens the Script step.
 
 ### 1. Script
 
-The Script step turns an idea into a narration script of about 1,550-1,650 words (roughly 8-9 minutes), in
+The Script step turns an idea into a narration script of about 1,550-1,650 words or roughly 8-9 minutes. The length of the generated video can be adjusted in the project settings page. The script section has
 two stages: a research brief, then the script.
 
-#### Research with RAG
+#### **Research with RAG**
 
 With RAG turned on (it needs a Gemini key and a Supabase database), research uses retrieval-augmented
 generation instead of letting Claude browse the web on its own:
@@ -153,8 +170,6 @@ description never cites a broken source.
 
 **The win:** on the same story, sending each step only the retrieved passages instead of the full sources
 cut input tokens by **71%** and the API-equivalent cost by **53%** (see [Testing and evals](#testing-and-evals)).
-
-More detail on the RAG pipeline: [docs/RAG_EXPLAINED.md](docs/RAG_EXPLAINED.md).
 
 #### Writing the script
 
@@ -403,7 +418,7 @@ how search and the chatbot work, the guard rails, hosting on Vercel, and how it'
 
 Four layers of checks, from fast unit tests to evals on real data.
 
-### Backend tests (185, pytest, ~12 seconds)
+### Backend tests (187, pytest, ~12 seconds)
 
 Every pipeline step is tested without the server or the network:
 

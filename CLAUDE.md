@@ -73,7 +73,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (187 passing as of 2026-11-11,
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (187 passing as of 2026-11-12,
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
@@ -161,7 +161,7 @@ who/what/when/where/why for a newcomer.
   change, not just big ones): `README.md`, `docs/PUBLIC_SITE.md`, `docs/SETUP.md`, `site/README.md` and
   `evals/README.md`. Look for step names and order, features, settings, file names, test counts and eval
   numbers the change affects, update what's out of date, and say in the reply what was updated (or that
-  nothing needed it). `README.md` and `docs/PUBLIC_SITE.md` are the user's resume-facing overview: keep their
+  nothing needed it). `README.md` and `docs/PUBLIC_SITE.md` are the public overview (the repo is public): keep their
   tone, keep numbers matching `evals/reports/`, and never overclaim.
 
 ## Always / never (from the user)

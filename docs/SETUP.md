@@ -1,101 +1,122 @@
-# Stick Figure Studio: setup and use
+# Setting up Stick Figure Studio
 
-A local app that takes a true-story video from idea to a DaVinci Resolve timeline. It writes the
-script with Claude, records the voice-over with ElevenLabs, writes Google Flow image prompts, and
-cuts the pictures to the narration.
+How to install and run the studio on your own PC. For what the app does and how each step works, see the
+[README](../README.md).
 
-## Requirements
+The studio is a local app: it runs on your computer and opens in your browser. Everything you make (scripts,
+voice-overs, images, videos) stays on your PC.
 
-- Windows with **Python 3.11+**, **Node.js 20+**, and **FFmpeg** on PATH (`winget install Gyan.FFmpeg`)
-- **Claude**: either **Claude Code** logged in with your Claude Pro/Max subscription (the default; no API key
-  needed, but it uses your plan's usage limits), or an **Anthropic API key**. Choose on the Settings page.
-- An **ElevenLabs API key** (a paid plan is needed for commercial use)
+## What you need
 
-## Start
+| | Needed? | Used for |
+|---|---|---|
+| Windows 10 or 11 | Yes | The start script is PowerShell |
+| [Python 3.11+](https://www.python.org/downloads/) | Yes | The app's backend |
+| [Node.js 20+](https://nodejs.org/) | Yes | Building the app's pages |
+| FFmpeg on PATH | Yes | Rendering the video, the zoom and the voice speed-up. Install with `winget install Gyan.FFmpeg`, then reopen the terminal |
+| Claude | Yes, one of the two | Research, script, beats, prompts and the publishing pack: **Claude Code** logged in with your Claude Pro or Max plan (the default; uses your plan's limits), or an **Anthropic API key** (billed per use) |
+| [ElevenLabs](https://elevenlabs.io) API key | Yes | The voice-over. A paid plan is needed for commercial use |
+| [Google Flow](https://labs.google/flow) | Yes | Making the pictures. You do this by hand; the app writes the prompts |
+| [Gemini](https://aistudio.google.com) API key | Optional | Embeddings for research from downloaded sources (free tier) |
+| [Supabase](https://supabase.com) project | Optional | The vector database for research from downloaded sources (free tier) |
+
+Without Gemini and Supabase, research still works: Claude researches with web search instead.
+
+Use your own accounts and keys for everything. Don't share a Supabase database address with anyone: it
+contains the database password.
+
+## 1. Get the code
+
+```powershell
+git clone https://github.com/alexmarrero10/stick-figure-studio.git
+cd stick-figure-studio
+```
+
+## 2. Start the app
 
 Double-click `start.bat`, or run:
 
 ```powershell
-.\start.ps1          # http://127.0.0.1:8765, opens your browser
-.\start.ps1 -Dev     # hot reload for development (UI at http://localhost:5173)
+.\start.ps1              # http://127.0.0.1:8765, opens your browser
+.\start.ps1 -Port 9000   # if something else already uses port 8765
+.\start.ps1 -Dev         # for development: auto-reload, pages at http://localhost:5173
 ```
 
-Running it again restarts the app: it stops the copy that's already running first. If that copy is in the
-middle of a job (research, voice, assembly...), it doesn't stop it and tells you to wait.
+The first run takes a few minutes. It creates a Python environment (`.venv`), installs the packages, builds
+the pages, and copies `.env.example` to `.env`, where your keys are kept.
 
-The first run creates `.venv`, installs packages, builds the UI, and copies `.env.example` to `.env`.
-Add your ElevenLabs key on the **Settings** page; it is saved to `.env`. With the default Claude Code
-provider, Claude uses your existing `claude` login. If you're logged out, run `claude auth login` once.
+Running it again restarts the app. If the app is in the middle of a job (research, voice, rendering...), it
+doesn't restart, so the work isn't lost; it tells you to wait instead.
 
-## Workflow
+## 3. Add your keys
 
-1. **New project.** Ask Claude for 3 ideas (optionally on a theme) or type your own. Save the ones you
-   like for later. Choosing one creates a project.
-2. **Script.**
-   1. Click **Research the story** first. Claude searches the web and writes a fact sheet (timeline,
-      people, turning points, what is disputed, sources). Fix anything wrong in it.
-   2. Then click **Write script**. It streams in as narration only, with a cold-open hook and no intro,
-      targeting 1,550-1,650 words (~8.5-9 min at Josh's ~180 wpm), in simple, upbeat language.
-   3. Edit the text directly, or ask Claude for changes in the chat box. Each proposed edit is shown
-      as a diff you accept or reject.
-   4. Every save is kept in version history.
-3. **Beats.** The narration is split into 0.5-3 second chunks at commas and sentence ends, and each one
-   records its word range (e.g. words 112-121). Claude can review the boundaries for better pictures.
-   Click a word to split a beat there, merge a beat into the next one, or edit a beat's text
-   (this also updates the script).
-4. **Image prompts.**
-   - Claude defines a series style and gives each recurring character a fixed visual marker.
-   - It writes one prompt per beat, in batches of 24 (`projects/<slug>/prompts/batch_01.txt`, …).
-   - Copy a batch into Google Flow and generate **one image per prompt, in order**.
-5. **Images.** Prompts and images share one page with three tabs, used in order:
-   - **Prompts and style:** generate or rewrite the prompts; see the style, recurring objects and places.
-   - **Characters:** every character's look. If any are in 8+ pictures, copy the character sheet into Flow
-     before batch 1.
-   - **Batches and images:** bulk upload every batch's download at once, or pick a batch, copy it for Flow
-     and drop its images. You can also copy them into `projects/<slug>/images/batch_XX/` and click
-     **Rescan folders**.
-   - Images are ordered by the creation timestamp in their metadata (then file time, then name).
-   - Check each picture against its narration and drag any that are out of order.
-6. **Voice.** Josh (ElevenLabs) reads the script with character timestamps, which become start and end
-   times for every word. Long pauses are trimmed.
-7. **Assemble.**
-   - Each picture appears 0.08 s before its first word and holds until the next beat.
-   - Shots under 0.5 s merge with a neighbour. Shots of 3 s or longer slowly zoom in.
-   - Outputs go to `projects/<slug>/output/`:
-     - `video.mp4`: preview render (1080p30, H.264 + AAC)
-     - `timeline.fcpxml`: in Resolve, **File → Import → Timeline…**; every shot is its own clip on V1 and the voice is on A1
-     - `captions.srt`: upload to YouTube
-     - `short.mp4`: the vertical Short (1080×1920), the opening up to the best cliffhanger between 50 and 70 s,
-       with your channel name under the pictures. Download it and upload it yourself.
-8. **Publish.** Title options, a description with chapters and sources, tags and thumbnail prompts. The general tags from Settings (animation, history, education, …)
-   are added to every video's tags.
+Open **Settings** in the app.
 
-Video types: a project is **one story**, a **topic explained** (e.g. how Blitzkrieg worked), or a
-**countdown list** (e.g. top 5 Navy pilot UFO encounters). Pick it at the top of the Script step before
-researching. Every project can be archived from the home page; only archived projects can be deleted.
+1. **Claude:** the provider is **Claude Code** by default, which uses your existing `claude` login. If
+   you're logged out, run `claude` in a terminal once and log in. To use the API instead, pick
+   **Anthropic API** and paste your Anthropic key.
+2. **ElevenLabs:** paste your API key (elevenlabs.io, your profile, then API keys). You pick the voice
+   later, on the Voice step.
+3. **Channel name:** set the name shown under the pictures on your Shorts.
 
-## Tuning
+Keys are saved to `.env`, which is never committed to git.
 
-Everything is in `config.yaml`, and most of it is on the Settings page:
-- Claude model and effort;
-- script length;
-- beat sizes;
-- voice settings and pause trimming;
-- batch size;
-- cut lead, minimum and maximum shot length, and punch-in zoom;
-- frame rate and quality.
+## 4. Optional: research from downloaded sources (RAG)
 
-## Project layout
+This makes research download 10-15 real sources per story and write the brief from the best passages,
+which uses far fewer Claude tokens (see [Research with RAG](../README.md#research-with-rag)).
+
+1. **Gemini key:** create a free key at [aistudio.google.com](https://aistudio.google.com). Leave billing
+   off on that Google project, so it can never cost money.
+2. **Supabase:** create a free project at [supabase.com](https://supabase.com). In its dashboard, open
+   **SQL Editor**, paste in [`backend/supabase/schema.sql`](../backend/supabase/schema.sql) and run it. It's
+   safe to run again.
+3. **Database address:** in Supabase, click **Connect**, choose **Session pooler**, and copy the URI. Put
+   your database password into it.
+4. In the app's **Settings**, paste the Gemini key and the Supabase address, turn on **Research from
+   downloaded sources**, and click **Test Gemini and Supabase**.
+
+## 5. Optional: your own public site
+
+The studio's **Post to Video Site** step fills the database that the public site reads. To run or host your
+own copy of the site, see [site/README.md](../site/README.md).
+
+## Changing how it works
+
+Every setting lives in `config.yaml`, and most of them are on the Settings page with a short explanation:
+the Claude model and effort, script length, beat sizes, the voice and its speed, image batch size, shot
+timing and zoom, video quality, the Short, and research. Changes apply right away, without a restart.
+
+## Where your files are
 
 ```
-backend/app/        FastAPI app, SQLite access (db.py), routes, migrations
-backend/pipeline/   one module per step: ideas, script, scenes, beat_review, voice, prompts,
-                    images, shots, assemble, fcpxml, captions, publish
-backend/tests/      pytest suite (run: .venv\Scripts\python -m pytest backend\tests)
-frontend/src/       React UI (one component per step in steps/)
-data/app.db         SQLite database (scripts, versions, beats, timings, prompts, …)
-projects/<slug>/    audio, prompts, images and outputs for each video
-PROGRESS.md         stage checklist and development notes
+data/app.db         the database: projects, script versions, beats, word timings, prompts...
+projects/<name>/    each video's files: audio/, prompts/, images/batch_01/..., output/
+.env                your keys
+config.yaml         your settings
 ```
 
-Back up by copying `data/app.db` and the `projects/` folder.
+Each video's finished files are in `projects/<name>/output/`: `video.mp4`, `short.mp4`, `captions.srt` and
+`timeline.fcpxml` (in DaVinci Resolve: **File > Import > Timeline**). None of these are committed to git.
+To back everything up, copy `data/app.db`, the `projects/` folder, `.env` and `config.yaml`.
+
+## Running the tests
+
+From the repo root:
+
+```powershell
+cd backend; ..\.venv\Scripts\python -m pytest -q; cd ..   # backend tests (~12 s)
+cd frontend; npm run test:e2e; cd ..                      # browser tests (~10 s)
+```
+
+The tests never touch your real database, keys or settings. More on what they cover:
+[Testing and evals](../README.md#testing-and-evals).
+
+## Troubleshooting
+
+- **"FFmpeg not found":** install it with `winget install Gyan.FFmpeg`, then close and reopen the terminal.
+- **Port 8765 is in use:** close the other program, or run `.\start.ps1 -Port 9000`.
+- **Claude steps fail with a login error:** run `claude` in a terminal and log in again, or switch the
+  provider to Anthropic API on the Settings page.
+- **Research isn't using downloaded sources:** click **Test Gemini and Supabase** on the Settings page; it
+  says which part is missing. Until both pass, research quietly falls back to web search.

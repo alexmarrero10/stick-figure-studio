@@ -21,6 +21,11 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Docs cleanup for the public repo (2026-11-12):** SETUP.md rewritten as a setup guide only (the workflow
+  walkthrough is gone; the README has it) and linked from a new README "Getting started" section;
+  site/README.md rewritten (it said the site wasn't deployed, and the site-wide search limit is 100, not 5,000);
+  docs/RAG_EXPLAINED.md (interview prep, duplicated the README) removed. Backend tests: 187.
+
 - **Images page in three tabs (2026-11-11)**, at the user's request: Prompts and style (generate, new style,
   check objects + places, the style/objects/places), Characters (character sheet for Flow + every look),
   Batches and images (bulk upload and Rescan at the top, then batch picker, "Send to Flow" and "Add images"
@@ -138,7 +143,6 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   (6d5a8b0).
 - **Public site:** channel name and footer removed, Vercel setup (07c8649); later split into two Vercel services
   (b4fd7de) and the chatbot now answers wider-topic questions (bbb32fd). Not deployed.
-- **docs/RAG_EXPLAINED.md:** study guide on how the RAG works (for the user's resume).
 - **Voice:** Brian at 1.2x; Settings shows the real voice name (cc99488).
 
 - **Check facts** button on the Script step (`fact_check.py`, `POST /script/factcheck`): checks names, dates,
@@ -244,8 +248,10 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Open issues
 
-- `README.md` is the project overview (resume-facing), written with the user from their draft (2026-11-11), with the
-  public site's full write-up in `docs/PUBLIC_SITE.md`. Keep both in line with the code and `evals/reports/`. The old setup guide moved to `docs/SETUP.md`; it and `PROGRESS.md` are partly out of date. They say the "current project" is the public site. CLAUDE.md and this file are correct. The
+- Docs (public on GitHub): `README.md` is the project overview with a short Getting started; `docs/SETUP.md` is
+  install/keys/RAG setup only (no workflow, that's in the README); `docs/PUBLIC_SITE.md` explains the site;
+  `site/README.md` is how to run and host the site. Keep them in line with the code and `evals/reports/`.
+  `PROGRESS.md` is partly out of date (it says the "current project" is the public site). The
   `shots.py` docstring also says "pictures are never zoomed" (zoom now happens in `assemble.py`).
 - `projects/a-han-governor-removed-the-tiger-traps-and-the-tigers-left/` exists on disk but has no project row
   in the database (leftover folder).
