@@ -135,8 +135,8 @@ export default function BeatsStep({ project, refresh }: StepProps) {
             <Icon name="undo" /> Undo{undoSteps > 0 ? ` (${undoSteps})` : ""}
           </button>
           {beats.length > 0 && (
-            <a className="button" href={`#/p/${pid}/voice`}>
-              Next: voice <Icon name="next" />
+            <a className="button" href={`#/p/${pid}/images`}>
+              Next: images <Icon name="next" />
             </a>
           )}
         </div>

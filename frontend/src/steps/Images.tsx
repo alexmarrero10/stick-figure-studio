@@ -352,8 +352,8 @@ export default function ImagesStep({ project, refresh }: StepProps) {
             Rescan folders
           </button>
           {totalImages > 0 && (
-            <a className="button" href={`#/p/${pid}/assemble`}>
-              Next: assemble <Icon name="next" />
+            <a className="button" href={`#/p/${pid}/voice`}>
+              Next: voice <Icon name="next" />
             </a>
           )}
         </div>

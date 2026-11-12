@@ -16,8 +16,8 @@ import SiteStep from "./steps/Site";
 export const STEPS = [
   { key: "script", label: "Script" },
   { key: "beats", label: "Beats" },
-  { key: "voice", label: "Voice" },
   { key: "images", label: "Images" },
+  { key: "voice", label: "Voice" },
   { key: "assemble", label: "Assemble" },
   { key: "publish", label: "Publishing Pack" },
   { key: "site", label: "Post to Video Site" },

@@ -61,8 +61,8 @@ export default function VoiceStep({ project, refresh }: StepProps) {
           {busy ? "Generating…" : voice ? "Regenerate voice-over" : "Generate voice-over"}
         </button>
         {voice && (
-          <a className="button" href={`#/p/${pid}/images`}>
-            Next: images <Icon name="next" />
+          <a className="button" href={`#/p/${pid}/assemble`}>
+            Next: assemble <Icon name="next" />
           </a>
         )}
       </div>

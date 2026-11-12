@@ -200,12 +200,12 @@ function ProjectCard({ p, children }: { p: Project; children: React.ReactNode })
         {p.format && p.format !== "story" && <span className="chip">{FORMAT_LABELS[p.format]}</span>}
         <Chip on={p.status.script} label={p.status.script ? `${p.status.script_words} words` : "No script"} />
         <Chip on={p.status.beats > 0 && !p.status.beats_stale} label="Beats" />
-        <Chip on={p.status.voice && !p.status.voice_stale} label="Voice" />
         <Chip
           on={p.status.images_complete}
           part={!p.status.images_complete}
           label={`Images ${p.status.images_filled}/${p.status.beats || "?"}`}
         />
+        <Chip on={p.status.voice && !p.status.voice_stale} label="Voice" />
         <Chip on={p.status.shots > 0} label="Assembled" />
         <Chip on={p.status.publish} label="Publish pack" />
         <Chip on={p.status.site} label="On your site" />

@@ -20,13 +20,17 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Images step comes before Voice (2026-11-11):** step track is Script, Beats, Images, Voice, Assemble,
+  Publishing Pack, Post to Video Site. Only the UI order, Next buttons and home chips changed (images never needed
+  the voice). CLAUDE.md, README.md and docs/SETUP.md list the steps in the new order.
+
 - **Downloaded sources count goes up live:** each source is saved and linked to the project as soon as it's
   stored (`rag.index_documents(on_stored=...)`), and the Script step's sources panel reloads at each research
   progress step. Before, the count stayed at 0 until every source was done. A stopped job now keeps what it stored.
 
 - **Publish tweaks (2026-11-11):** the publishing pack writes ONE suggested title (schema `title`, stored as
   `titles: [title]` so old 5-title packs still load), plus description and tags. The thumbnail panel sits beside
-  the pack (`.publish-layout`, sticky; stacks under 900 px). "Your video site" is now "Publish to Video Site";
+  the pack (`.publish-layout`, sticky; stacks under 900 px). "Your video site" is now "Post to Video Site" and the Publish step is "Publishing Pack";
   its title starts as the pack's suggested title (summary already started from the description). The "Open
   project folder" button was removed (it did nothing). The "Open output folder" (Assemble) and "Open batch
   folder" (Images) buttons use the same `os.startfile` route and probably do nothing either; not touched yet.
@@ -220,7 +224,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Open issues
 
-- `README.md` is now a project overview the user is writing themselves (template with hints; don't write it for them). The old setup guide moved to `docs/SETUP.md`; it and `PROGRESS.md` are partly out of date. They say the "current project" is the public site. CLAUDE.md and this file are correct. The
+- `README.md` is the project overview (resume-facing), written with the user from their draft (2026-11-11); keep its numbers in line with the evals. The old setup guide moved to `docs/SETUP.md`; it and `PROGRESS.md` are partly out of date. They say the "current project" is the public site. CLAUDE.md and this file are correct. The
   `shots.py` docstring also says "pictures are never zoomed" (zoom now happens in `assemble.py`).
 - `projects/a-han-governor-removed-the-tiger-traps-and-the-tigers-left/` exists on disk but has no project row
   in the database (leftover folder).

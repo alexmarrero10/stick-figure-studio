@@ -1,4 +1,4 @@
-# Stick Figure Studio
+# Stick Figure Studio: setup and use
 
 A local app that takes a true-story video from idea to a DaVinci Resolve timeline. It writes the
 script with Claude, records the voice-over with ElevenLabs, writes Google Flow image prompts, and
@@ -43,17 +43,17 @@ provider, Claude uses your existing `claude` login. If you're logged out, run `c
    records its word range (e.g. words 112-121). Claude can review the boundaries for better pictures.
    Click a word to split a beat there, merge a beat into the next one, or edit a beat's text
    (this also updates the script).
-4. **Voice.** Josh (ElevenLabs) reads the script with character timestamps, which become start and end
-   times for every word. Long pauses are trimmed.
-5. **Image prompts.**
+4. **Image prompts.**
    - Claude defines a series style and gives each recurring character a fixed visual marker.
    - It writes one prompt per beat, in batches of 24 (`projects/<slug>/prompts/batch_01.txt`, …).
    - Copy a batch into Google Flow and generate **one image per prompt, in order**.
-6. **Images.**
+5. **Images.**
    - Drop each batch's downloads onto the matching batch tab, or copy them into
      `projects/<slug>/images/batch_XX/` and click **Rescan**.
    - Images are ordered by the creation timestamp in their metadata (then file time, then name).
    - Check each picture against its narration and drag any that are out of order.
+6. **Voice.** Josh (ElevenLabs) reads the script with character timestamps, which become start and end
+   times for every word. Long pauses are trimmed.
 7. **Assemble.**
    - Each picture appears 0.08 s before its first word and holds until the next beat.
    - Shots under 0.5 s merge with a neighbour. Shots of 3 s or longer slowly zoom in.

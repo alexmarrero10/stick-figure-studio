@@ -8,8 +8,8 @@ const project = fixtures[`/api/projects/${PID}`];
 const STEPS = [
   { key: "script", heading: "Script" },
   { key: "beats", heading: "Beats" },
-  { key: "voice", heading: "Voice-over (ElevenLabs)" },
   { key: "images", heading: "Image prompts and images" },
+  { key: "voice", heading: "Voice-over (ElevenLabs)" },
   { key: "assemble", heading: "Assemble the video" },
   { key: "publish", heading: "Publishing Pack" },
   { key: "site", heading: "Post to Video Site" },

@@ -24,16 +24,16 @@ is the plan for RAG research and the public site (both built and deployed).
    The style rules live in `SCRIPT_SYSTEM` (see "Script style" below).
 3. **Beats** (`scenes.py`, `beat_review.py`): split into 2-13 word picture chunks; Claude can review the
    boundaries; manual split/merge/edit with undo.
-4. **Voice** (`voice.py`): ElevenLabs with-timestamps (voice set on Settings, now "Brian"; `eleven_v4`), chunked and stitched,
-   long pauses trimmed, then sped up with FFmpeg `atempo` (`voice.speed`, 1.1 = 10% faster, pitch kept;
-   Eleven v4 has no speed setting) with word timings scaled to the measured length, per-word timings stored.
-5. **Image prompts** (`prompts.py`): style guide, cast/characters/props/places, one prompt per beat in batches
+4. **Image prompts** (`prompts.py`): style guide, cast/characters/props/places, one prompt per beat in batches
    of 24. The user generates the images **manually in Google Flow** and uploads them. Characters in 8+ pictures
    (`prompts.reference_min_images`) first get a **character sheet** (`characters.txt`, C1, C2...) that every batch
    tells Flow to reuse.
-6. **Images** (`images.py`): import. Prompts start with a title unique in its batch and **no number** (numbers
+5. **Images** (`images.py`): import. Prompts start with a title unique in its batch and **no number** (numbers
    got drawn into the pictures); Flow names files after it and the import matches the name to its slot. Unmatched
    files go by metadata timestamp, then drag or slot-pick to fix. Old "7 - Title" files still use the number. **Bulk upload** (`POST images/upload-all`) takes one zip of every batch's download and sorts images by title (`images.plan_group`).
+6. **Voice** (`voice.py`): ElevenLabs with-timestamps (voice set on Settings, now "Brian"; `eleven_v4`), chunked and stitched,
+   long pauses trimmed, then sped up with FFmpeg `atempo` (`voice.speed`, 1.1 = 10% faster, pitch kept;
+   Eleven v4 has no speed setting) with word timings scaled to the measured length, per-word timings stored.
 7. **Shots + Assemble** (`shots.py`, `assemble.py`, `fcpxml.py`, `captions.py`): shots locked to word timings,
    FFmpeg renders `output/video.mp4`, plus `timeline.fcpxml` and `captions.srt`. Shots of 3 s or longer
    slowly zoom in (`video.zoom_min_seconds`, `video.zoom_per_second`, capped at 12%). The same job also
