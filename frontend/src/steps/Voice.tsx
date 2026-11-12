@@ -47,8 +47,17 @@ export default function VoiceStep({ project, refresh }: StepProps) {
   return (
     <div>
     <Preview pid={pid} disabled={busy || !s.script} />
-    <div className="panel">
-      <h2>Voice-over (ElevenLabs)</h2>
+    <section className="panel panel-main" aria-labelledby="voiceover-heading">
+      <div className="row between">
+        <h2 id="voiceover-heading">Voice-over (ElevenLabs)</h2>
+        {voice ? (
+          <span className={`save-status ${voice.stale ? "bad" : "good"}`}>
+            {voice.stale ? "Out of date" : `Ready, ${fmtTime(voice.duration_s)}`}
+          </span>
+        ) : (
+          <span className="save-status idle">Not made yet</span>
+        )}
+      </div>
       <p className="muted small">
         Sends the current script to ElevenLabs with timestamps. Every word gets a start and end time, and long pauses are
         trimmed so there is little dead air. About {s.script_words} words, roughly{" "}
@@ -57,7 +66,7 @@ export default function VoiceStep({ project, refresh }: StepProps) {
       <Stale show={!!voice?.stale}>The script changed after this voice-over was made. Generate it again.</Stale>
       <Stale show={s.beats_stale || (!s.beats && s.script)}>Build (or rebuild) the beats before or after this step.</Stale>
       <div className="row">
-        <button onClick={generate} disabled={busy || !s.script}>
+        <button className="primary" onClick={generate} disabled={busy || !s.script}>
           {busy ? "Generating…" : voice ? "Regenerate voice-over" : "Generate voice-over"}
         </button>
         {voice && (
@@ -82,7 +91,7 @@ export default function VoiceStep({ project, refresh }: StepProps) {
           ))}
         </div>
       )}
-    </div>
+    </section>
     </div>
   );
 }
@@ -240,6 +249,22 @@ function Preview({ pid, disabled }: { pid: number; disabled: boolean }) {
 
   const changed = saved !== null && (["model_id", "voice_id", ...SLIDERS.map((x) => x.key)] as const).some((k) => saved[k] !== vals[k]);
   const hasStyle = !vals.model_id.startsWith("eleven_v4") && !vals.model_id.startsWith("eleven_v3");
+  // Length sits where Stability used to be, and Stability moves to the end of the grid.
+  const shown = [...SLIDERS.filter(({ key }) => key !== "stability"), ...SLIDERS.filter(({ key }) => key === "stability")].filter(
+    ({ key }) => key !== "style" || hasStyle,
+  );
+  const lengthPicker = (
+    <label>
+      <span>Length</span>
+      <select value={seconds} onChange={(e) => setSeconds(Number(e.target.value))}>
+        {[15, 30, 45, 60].map((n) => (
+          <option key={n} value={n}>
+            ~{n} seconds
+          </option>
+        ))}
+      </select>
+    </label>
+  );
 
   return (
     <div className="panel">
@@ -282,7 +307,8 @@ function Preview({ pid, disabled }: { pid: number; disabled: boolean }) {
             ))}
           </select>
         </label>
-        {SLIDERS.filter(({ key }) => key !== "style" || hasStyle).map(({ key, label, hint }) => (
+        {lengthPicker}
+        {shown.map(({ key, label, hint }) => (
           <label key={key} title={hint}>
             <span>
               {label}: <strong>{vals[key].toFixed(2)}</strong>
@@ -299,21 +325,12 @@ function Preview({ pid, disabled }: { pid: number; disabled: boolean }) {
             <span className="muted small">{hint}</span>
           </label>
         ))}
-        <label>
-          <span>Length</span>
-          <select value={seconds} onChange={(e) => setSeconds(Number(e.target.value))}>
-            {[15, 30, 45, 60].map((n) => (
-              <option key={n} value={n}>
-                ~{n} seconds
-              </option>
-            ))}
-          </select>
-        </label>
       </div>
-      <div className="row">
+      <div className="preview-play">
         <button onClick={make} disabled={disabled || busy}>
           {busy ? "Generating preview…" : result ? "New preview" : "Generate preview"}
         </button>
+        {result && <audio controls autoPlay={!!result.text} src={result.audio_url} aria-label="Voice preview" />}
         {changed && (
           <button className="secondary" onClick={keep}>
             Use these settings for the full voice-over
@@ -322,9 +339,8 @@ function Preview({ pid, disabled }: { pid: number; disabled: boolean }) {
       </div>
       <ErrorBox error={error} onClose={() => setError(null)} />
       {note && <div className="ok">{note}</div>}
-      {result && (
+      {result && (result.duration !== undefined || result.text) && (
         <div className="voice-result">
-          <audio controls autoPlay={!!result.text} src={result.audio_url} />
           {result.duration !== undefined && (
             <p className="muted small">
               {fmtTime(result.duration)} · {result.chars} characters{result.model_id ? ` · ${result.model_id}` : ""}

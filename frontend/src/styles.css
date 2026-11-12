@@ -359,6 +359,18 @@ main:has(.script-step) { max-width: 1680px; }
 .follow-list li.timed:hover { background: var(--soft); }
 .follow-list li.now { background: var(--highlight); color: var(--on-highlight); }
 .follow-list li.now .muted { color: color-mix(in srgb, var(--on-highlight) 75%, transparent); }
+/* The full voice-over is the step's real output, so its panel sits forward: ink edge, lifted
+   shadow, a bigger heading and the one red button on the page. */
+.panel-main {
+  border: 1.5px solid var(--ink); box-shadow: var(--shadow-lift); padding: 24px 26px; gap: 14px;
+}
+.panel-main h2 { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.02em; }
+button.primary { background: var(--marker); border-color: var(--marker); color: var(--on-marker); min-height: 42px; padding: 0 20px; }
+button.primary:hover:not(:disabled) { background: var(--marker-hover); border-color: var(--marker-hover); }
+.save-status.idle { background: var(--soft); color: var(--muted); }
+/* Preview: the player sits right beside the button that makes it. */
+.preview-play { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.preview-play audio { flex: 1 1 280px; min-width: 0; max-width: 520px; height: 40px; border-radius: 99px; }
 .sliders { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
 .sliders input[type="range"] { padding: 0; accent-color: var(--marker); background: none; border: none; box-shadow: none; }
 
