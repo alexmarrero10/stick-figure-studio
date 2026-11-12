@@ -155,9 +155,12 @@ who/what/when/where/why for a newcomer.
 - Commit messages: one short plain sentence saying what changed for the user (e.g. "Zoom in on shots of 3 s
   or more"), ending with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - Keep `NOTES.md` current at the end of each piece of work.
-- **Update `README.md` after any major change** (a new or removed step or feature, a new tool in the stack,
-  new test counts or eval results). It's the user's resume-facing project overview: keep its tone, keep
-  numbers matching `evals/reports/`, and never overclaim. Small fixes and UI tweaks don't need it.
+- **After every change, check whether the README files need updating** (the user asked for this on every
+  change, not just big ones): `README.md`, `docs/PUBLIC_SITE.md`, `docs/SETUP.md`, `site/README.md` and
+  `evals/README.md`. Look for step names and order, features, settings, file names, test counts and eval
+  numbers the change affects, update what's out of date, and say in the reply what was updated (or that
+  nothing needed it). `README.md` and `docs/PUBLIC_SITE.md` are the user's resume-facing overview: keep their
+  tone, keep numbers matching `evals/reports/`, and never overclaim.
 
 ## Always / never (from the user)
 
