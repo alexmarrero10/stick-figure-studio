@@ -532,7 +532,7 @@ export default function ImagesStep({ project, refresh }: StepProps) {
                 </ol>
                 </div>
                 <div className="sheet-copy">
-                  <CopyButton text={data.character_sheet} label="Copy the character sheet for Flow" className="primary big" />
+                  <CopyButton text={data.character_sheet} label="Copy the character sheet for Flow" className="secondary big" />
                   <span className="muted small">
                     Paste it into your Flow agent, or open{" "}
                     <a href={`/api/projects/${pid}/prompts/characters`} target="_blank" rel="noreferrer">

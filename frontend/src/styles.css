@@ -447,11 +447,11 @@ button.primary:hover:not(:disabled) { background: var(--marker-hover); border-co
 .sheet-text h3 { font-size: 1.15rem; }
 .sheet-text .sheet-list { margin-top: 4px; }
 .sheet-copy { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
-button.primary.big { min-height: 54px; padding: 0 28px; font-size: 1.05rem; border-radius: var(--radius); }
+button.big { min-height: 54px; padding: 0 28px; font-size: 1.05rem; border-radius: var(--radius); border-width: 1.5px; box-shadow: var(--shadow); }
 @media (max-width: 760px) {
   .sheet { grid-template-columns: minmax(0, 1fr); padding: 18px; }
   .sheet-copy { align-items: stretch; }
-  .sheet-copy button.primary.big { white-space: normal; padding: 10px 18px; line-height: 1.25; }
+  .sheet-copy button.big { white-space: normal; padding: 10px 18px; line-height: 1.25; }
 }
 .sheet-list { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
 .sheet-list li {
