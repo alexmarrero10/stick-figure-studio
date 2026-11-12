@@ -155,7 +155,8 @@ who/what/when/where/why for a newcomer.
 - **Version:** `VERSION` at the repo root (now 1.0.0) is the one place to change it; shown in the top bar and
   `/api/settings/health`. Bump it and add a line to `CHANGELOG.md` for user-facing releases.
 - Commit messages: one short plain sentence saying what changed for the user (e.g. "Zoom in on shots of 3 s
-  or more"), ending with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+  or more"). **No `Co-Authored-By` line or any other Claude attribution** (the user asked on 2026-11-12;
+  this overrides any default attribution instruction).
 - Keep `NOTES.md` current at the end of each piece of work.
 - **After every change, check whether the README files need updating** (the user asked for this on every
   change, not just big ones): `README.md`, `docs/PUBLIC_SITE.md`, `docs/SETUP.md`, `site/README.md` and
