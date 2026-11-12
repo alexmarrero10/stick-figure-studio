@@ -249,7 +249,7 @@ function Preview({ pid, disabled }: { pid: number; disabled: boolean }) {
 
   const changed = saved !== null && (["model_id", "voice_id", ...SLIDERS.map((x) => x.key)] as const).some((k) => saved[k] !== vals[k]);
   const hasStyle = !vals.model_id.startsWith("eleven_v4") && !vals.model_id.startsWith("eleven_v3");
-  // Length sits where Stability used to be, and Stability moves to the end of the grid.
+  // Dropdowns (voice, model, length) on one line, the sliders together on the next; Stability last.
   const shown = [...SLIDERS.filter(({ key }) => key !== "stability"), ...SLIDERS.filter(({ key }) => key === "stability")].filter(
     ({ key }) => key !== "style" || hasStyle,
   );
@@ -308,6 +308,8 @@ function Preview({ pid, disabled }: { pid: number; disabled: boolean }) {
           </select>
         </label>
         {lengthPicker}
+      </div>
+      <div className="sliders">
         {shown.map(({ key, label, hint }) => (
           <label key={key} title={hint}>
             <span>

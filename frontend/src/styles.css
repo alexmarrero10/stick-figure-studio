@@ -371,7 +371,8 @@ button.primary:hover:not(:disabled) { background: var(--marker-hover); border-co
 /* Preview: the player sits right beside the button that makes it. */
 .preview-play { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .preview-play audio { flex: 1 1 280px; min-width: 0; max-width: 520px; height: 40px; border-radius: 99px; }
-.sliders { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+/* Voice preview controls: dropdowns share one line, sliders the next; each fills the width (stacks on a phone). */
+.sliders { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
 .sliders input[type="range"] { padding: 0; accent-color: var(--marker); background: none; border: none; box-shadow: none; }
 
 /* ---------- images ---------- */
