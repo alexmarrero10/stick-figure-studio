@@ -39,8 +39,8 @@ is the plan for RAG research and the public site (both built and deployed).
    slowly zoom in (`video.zoom_min_seconds`, `video.zoom_per_second`, capped at 12%). The same job also
    renders the vertical Short (`shorts.py`, `output/short.mp4`): 50-70 s, black background (`shorts.background`), ending on the best cliffhanger
    (Claude picks it once per voice-over), channel name under the pictures. If the Short fails, the video is kept.
-8. **Publish** (`publish.py`): one suggested title, description with chapters and sources, tags. Thumbnail panel (always beside the pack): your idea to a prompt, or **Give suggestion** (one at a time, each different).
-9. **Publish to Video Site** (`site_publish.py`, UI step 7, `Site.tsx`; title and summary start from the publishing pack): stores the video and its narration in
+8. **Publishing Pack** (`publish.py`): one suggested title, description with chapters and sources, tags. Thumbnail panel (always beside the pack): your idea to a prompt, or **Give suggestion** (one at a time, each different).
+9. **Post to Video Site** (`site_publish.py`, UI step 7, `Site.tsx`; title and summary start from the publishing pack): stores the video and its narration in
    30-45 s timed windows in Supabase `videos` / `video_chunks` for the public site.
 
 ## Tech stack
@@ -155,6 +155,9 @@ who/what/when/where/why for a newcomer.
 - Commit messages: one short plain sentence saying what changed for the user (e.g. "Zoom in on shots of 3 s
   or more"), ending with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - Keep `NOTES.md` current at the end of each piece of work.
+- **Update `README.md` after any major change** (a new or removed step or feature, a new tool in the stack,
+  new test counts or eval results). It's the user's resume-facing project overview: keep its tone, keep
+  numbers matching `evals/reports/`, and never overclaim. Small fixes and UI tweaks don't need it.
 
 ## Always / never (from the user)
 

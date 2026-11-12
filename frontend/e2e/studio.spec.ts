@@ -11,8 +11,8 @@ const STEPS = [
   { key: "voice", heading: "Voice-over (ElevenLabs)" },
   { key: "images", heading: "Image prompts and images" },
   { key: "assemble", heading: "Assemble the video" },
-  { key: "publish", heading: "Publishing pack" },
-  { key: "site", heading: "Publish to Video Site" },
+  { key: "publish", heading: "Publishing Pack" },
+  { key: "site", heading: "Post to Video Site" },
 ];
 
 test("home lists every video with its progress", async ({ page, api }) => {
@@ -189,7 +189,7 @@ test("Claude's latest suggestions are still there when the page is reopened", as
 test("the thumbnail panel sits beside the publishing pack, which suggests one title", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 900 });
   await page.goto(`/#/p/${PID}/publish`);
-  const pack = page.getByRole("heading", { name: "Publishing pack" });
+  const pack = page.getByRole("heading", { name: "Publishing Pack" });
   const thumbs = page.getByRole("heading", { name: "Thumbnail: idea to prompt" });
   await expect(thumbs).toBeVisible();
   const [a, b] = [await pack.boundingBox(), await thumbs.boundingBox()];

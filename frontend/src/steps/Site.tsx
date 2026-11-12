@@ -75,7 +75,7 @@ export default function SiteStep({ project, refresh }: StepProps) {
   return (
     <div className="panel">
       <div className="row between">
-        <h2>Publish to Video Site</h2>
+        <h2>Post to Video Site</h2>
         {view.published && (
           <span className={`save-status ${view.stale ? "bad" : "good"}`}>
             {view.stale ? "Voice re-recorded since publishing: update it" : `On the site since ${view.published_at} UTC`}

@@ -67,7 +67,7 @@ export default function PublishStep({ project, refresh }: StepProps) {
     <div className="publish-layout">
       <div>
         <div className="panel">
-          <h2>Publishing pack</h2>
+          <h2>Publishing Pack</h2>
           <p className="muted small">
             A suggested title, a description with chapters and sources, and tags.
           </p>

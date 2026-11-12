@@ -19,8 +19,8 @@ export const STEPS = [
   { key: "voice", label: "Voice" },
   { key: "images", label: "Images" },
   { key: "assemble", label: "Assemble" },
-  { key: "publish", label: "Publish" },
-  { key: "site", label: "Publish to Video Site" },
+  { key: "publish", label: "Publishing Pack" },
+  { key: "site", label: "Post to Video Site" },
 ] as const;
 
 type Route =
