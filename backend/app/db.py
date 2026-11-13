@@ -501,14 +501,6 @@ def replace_shots(project_id: int, shots: list[dict[str, Any]]) -> None:
         )
 
 
-def list_shots(project_id: int) -> list[dict[str, Any]]:
-    with tx() as conn:
-        rows = _rows(conn.execute("SELECT * FROM shots WHERE project_id = ? ORDER BY idx", (project_id,)).fetchall())
-    for r in rows:
-        r["beat_ids"] = json.loads(r["beat_ids"])
-    return rows
-
-
 def save_publish_meta(project_id: int, content: dict[str, Any]) -> None:
     with tx() as conn:
         conn.execute(

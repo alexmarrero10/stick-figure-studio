@@ -170,8 +170,6 @@ label.inline select { width: auto; }
 /* ---------- layout helpers ---------- */
 .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .row.between { justify-content: space-between; }
-.grow { flex: 1; min-width: 200px; }
-.grid2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
 .panel {
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 20px 22px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 12px;
@@ -221,7 +219,7 @@ summary::marker { color: var(--marker); }
 /* ---------- home: project cards ---------- */
 .home { display: flex; flex-direction: column; gap: 18px; }
 .home > .row.between { margin-bottom: 4px; }
-.cards, .idea-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px; }
 .card {
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px;
   display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow);
@@ -376,9 +374,6 @@ button.primary:hover:not(:disabled) { background: var(--marker-hover); border-co
 .sliders input[type="range"] { padding: 0; accent-color: var(--marker); background: none; border: none; box-shadow: none; }
 
 /* ---------- images ---------- */
-.prompt-list { display: flex; flex-direction: column; gap: 12px; padding-left: 28px; margin: 0; }
-.prompt-list li { border-bottom: 1px solid var(--line); padding-bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
-.prompt-list li::marker { font-family: var(--display); color: var(--muted); }
 .narration { color: var(--muted); font-style: italic; }
 .scene { white-space: pre-wrap; }
 .scene .title { font-weight: 700; font-family: var(--display); }
@@ -533,7 +528,7 @@ button.big { min-height: 54px; padding: 0 28px; font-size: 1.05rem; border-radiu
   .phone { max-width: 260px; }
   .project-head { flex-direction: column; gap: 10px; }
   .project-head h1 { font-size: 1.5rem; }
-  .cards, .idea-list { grid-template-columns: 1fr; }
+  .cards { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
   .version, .brand span { display: none; }

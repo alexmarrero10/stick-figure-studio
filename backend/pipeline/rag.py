@@ -226,11 +226,6 @@ def brief_queries(brief: str, idea: dict[str, Any], limit: int = 10) -> list[str
     return [f"{title}: {p}" for p in picks]
 
 
-SCRIPT_EXCERPT_RULE = ("SOURCE EXCERPTS: below the brief are excerpts from the downloaded sources. Use them "
-                       "to check facts and to add vivid, accurate detail. Every fact must come from the brief "
-                       "or these excerpts.")
-
-
 def script_excerpts(store: Store, embed: EmbedFn, key: str, brief: str, idea: dict[str, Any], k: int = 10,
                     max_words: int = 2500) -> str:
     chunks = retrieve(store, embed, key, brief_queries(brief, idea), k=k, per_query=3)

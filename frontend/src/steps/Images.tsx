@@ -28,7 +28,7 @@ interface Look {
 interface PromptsResp {
   style: {
     style_prefix: string;
-    characters: { name: string; look?: string; marker?: string; variants?: { when: string; look: string }[] }[];
+    characters: { name: string; look?: string; variants?: { when: string; look: string }[] }[];
     props: Look[];
     locations: Look[];
     setting_notes: string;
@@ -555,7 +555,7 @@ export default function ImagesStep({ project, refresh }: StepProps) {
                 <ul className="look-list small">
                   {characters.map((c) => (
                     <li key={c.name}>
-                      <strong>{c.name}</strong> {c.look || `stick figure with ${c.marker}`}
+                      <strong>{c.name}</strong> {c.look}
                       {c.variants?.map((v) => (
                         <div key={v.when} className="muted">
                           {v.when}: {v.look}

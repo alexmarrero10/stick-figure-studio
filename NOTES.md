@@ -1,4 +1,4 @@
-# Notes: current state (updated 2026-11-11)
+# Notes: current state (updated 2026-11-13)
 
 Read CLAUDE.md first for how the project works and the rules. This file is what's happening now.
 
@@ -9,7 +9,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 187 backend tests and 25 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
+- 188 backend tests and 25 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
   not pushed). The studio redesign commit (2026-11-11) and the notes commit before it are local, not pushed.
 - **Public site is live: https://stick-figure-viewer.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`;
   the old stick-figure-studio.vercel.app address still works).
@@ -20,6 +20,15 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   published to the site.
 
 ## Recently done
+
+- **Old code cleanup (2026-11-13):** migration `012_tidy_old_data.sql` rewrites data saved by older versions
+  (old "thin black stick limbs" style text, marker-only characters, the old three thumbnail prompts) and drops
+  the unused `social_posts` table, so the code that converted that data on every read is gone (`OLD_LIMBS`,
+  `with_body_rule`, the marker fallback, the head-color fix on load, the thumbnail pop). Also removed: unused
+  `db.list_shots`, `rag.SCRIPT_EXCERPT_RULE`, unused imports and CSS classes, orphaned `.pyc` files from the
+  removed social modules, and the `social:` section of config.yaml. The startup hook uses FastAPI's lifespan
+  (the old `on_event` was deprecated). Kept on purpose: matching "7 - Title" file names (the app stores images
+  that way). Backend tests: 188.
 
 - **Docs cleanup for the public repo (2026-11-12):** SETUP.md rewritten as a setup guide only (the workflow
   walkthrough is gone; the README has it) and linked from a new README "Getting started" section;
@@ -183,7 +192,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   video (shown side by side on the Assemble step; download and upload it yourself). Deleted the Short step,
   `routes/shorts.py`, `routes/social.py`, `pipeline/social/`, `SocialAccounts.tsx`, the Short title/caption
   writer and the social settings. Kept the `shorts` table (cut point, rendered time) and left the
-  `social_posts` table and any social tokens in `.env` alone. The `social:` section in config.yaml is unused.
+  `social_posts` table and any social tokens in `.env` alone (the table and the `social:` config were removed 2026-11-13).
 
 - **`SITE_DATABASE_URL` on Settings** (4e8eeac): the read-only `site_reader` address is saved to `.env` from
   the Settings page; the local site reads it (falls back to `SUPABASE_DB_URL` when empty). The user's local

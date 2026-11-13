@@ -121,8 +121,8 @@ def test_thumbnail_prompt_uses_the_videos_style():
     thumb = publish.thumbnail_prompt("A shocked stick figure holds a huge silver fork", "deep navy blue")
     assert thumb.startswith("A shocked stick figure holds a huge silver fork. Background: deep navy blue. YouTube thumbnail")
     assert prompts.BODY in thumb  # no style guide yet: the default video style
-    style = "Minimalist stick figure illustration, thin black stick limbs, flat colors (sand beige)."
-    assert publish.thumbnail_prompt("A", "B", style).endswith(prompts.with_body_rule(style))
+    style = "Minimalist stick figure illustration, flat colors (sand beige)."
+    assert publish.thumbnail_prompt("A", "B", style).endswith(style)
 
 
 def test_projects_store_their_format(client, temp_db):

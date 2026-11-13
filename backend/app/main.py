@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import asyncio
-from pathlib import Path
-from typing import Any
+from contextlib import asynccontextmanager
+from typing import Any, AsyncIterator
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,14 +18,6 @@ from pipeline.claude_client import ClaudeError
 from pipeline.ffmpeg import FFmpegError
 from pipeline.voice import VoiceError
 
-app = FastAPI(title="Stick Figure Video Studio", version=VERSION)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 
 def _quiet_resets(loop: asyncio.AbstractEventLoop, context: dict[str, Any]) -> None:
     """Windows logs a ConnectionResetError whenever the browser drops a media request early
@@ -35,10 +27,20 @@ def _quiet_resets(loop: asyncio.AbstractEventLoop, context: dict[str, Any]) -> N
     loop.default_exception_handler(context)
 
 
-@app.on_event("startup")
-async def startup() -> None:
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     db.migrate()
     asyncio.get_running_loop().set_exception_handler(_quiet_resets)
+    yield
+
+
+app = FastAPI(title="Stick Figure Video Studio", version=VERSION, lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.exception_handler(ClaudeError)

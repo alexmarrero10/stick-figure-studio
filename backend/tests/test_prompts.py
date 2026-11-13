@@ -40,12 +40,10 @@ def test_characters_have_full_looks_and_story_variants():
     guide = {"characters": [
         {"name": "Saddam", "look": "stick figure, stocky, thick black mustache, olive beret",
          "variants": [{"when": "in hiding, 2003", "look": "stick figure, stocky, long scruffy gray-black beard, no hat"}]},
-        {"name": "Old", "marker": "a red scarf"},
     ], "props": [], "locations": [], "setting_notes": ""}
     bible = prompts.visual_bible(guide)
     assert "- Saddam: stick figure, stocky, thick black mustache, olive beret" in bible
     assert "    in hiding, 2003: stick figure, stocky, long scruffy gray-black beard, no hat" in bible
-    assert "- Old: stick figure, white head and hands, with a red scarf" in bible
     assert "variants" in prompts.STYLE_SYSTEM and 'no "now with a beard"' in prompts.SCENE_SYSTEM
 
 
@@ -105,11 +103,7 @@ def test_look_is_added_when_claude_keeps_leaving_it_out():
                                "stick figure, stocky, long scruffy gray-black beard, no hat.")
 
 
-def test_old_style_guides_get_the_arms_and_hands_rule():
-    old = "round white heads, thin black stick limbs, flat colors"
-    text = prompts.full_prompt(old, "a man waves")
-    assert prompts.BODY in text and prompts.OLD_LIMBS not in text
-    assert prompts.with_body_rule(prompts.with_body_rule(old)) == prompts.with_body_rule(old)
+def test_the_style_has_the_arms_and_hands_rule():
     assert prompts.BODY in prompts.BASE_STYLE
 
 

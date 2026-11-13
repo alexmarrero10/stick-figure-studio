@@ -140,3 +140,23 @@ def test_extract_zip_flattens_and_skips_junk(tmp_path):
     saved = images.extract_zip(buf.getvalue(), out)
     assert saved == ["1 - Street.png", "1 - Street (1).png"]
     assert sorted(p.name for p in out.iterdir()) == ["1 - Street (1).png", "1 - Street.png"]
+
+
+def test_migration_brings_old_saved_data_up_to_date(temp_db):
+    from pipeline import prompts
+    db = temp_db
+    pid = db.create_project("Old Project")["id"]
+    keep = {"name": "New", "look": "stick figure, white head and hands, red cap"}
+    db.save_style_guide(pid, "round white heads, thin black stick limbs, flat colors", [{"name": "Old", "marker": "a red scarf"}, keep])
+    db.save_publish_meta(pid, {"titles": ["T"], "thumbnail_prompts": ["a", "b", "c"]})
+    with db.tx() as conn:  # run 012 again over the old-format rows
+        conn.execute("CREATE TABLE social_posts (id INTEGER PRIMARY KEY)")
+        conn.execute("DELETE FROM schema_migrations WHERE name = '012_tidy_old_data.sql'")
+    db.migrate()
+    guide = db.get_style_guide(pid)
+    assert guide["style_prefix"] == f"round white heads, {prompts.BODY}, flat colors"
+    assert guide["characters"][0]["look"] == "stick figure, white head and hands, with a red scarf"
+    assert guide["characters"][1] == keep
+    assert db.get_publish_meta(pid) == {"titles": ["T"]}
+    with db.tx() as conn:
+        assert not conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'social_posts'").fetchone()

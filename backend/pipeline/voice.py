@@ -20,7 +20,7 @@ import httpx
 from pipeline import ffmpeg
 
 API = "https://api.elevenlabs.io/v1"
-DEFAULT_JOSH_ID = "ZoiZ8fuDWInAcwPXaVeq"  # "Josh - Warm, Smooth and Steady" (the old premade Josh ID now belongs to another voice)
+DEFAULT_VOICE_ID = "ZoiZ8fuDWInAcwPXaVeq"  # used until a voice is picked on the Voice step
 
 
 class VoiceError(RuntimeError):
@@ -345,7 +345,7 @@ def preview_text(text: str, seconds: float = 30, wpm: float = 180) -> str:
 def preview(text: str, out_path: Path, api_key: str, cfg: dict[str, Any]) -> float:
     """Generate a short sample that sounds like the final voice-over: long pauses trimmed and played at the
     narration speed, exactly as generate() does. Returns its length in seconds."""
-    resp, _ = _tts_request(api_key, cfg.get("voice_id", DEFAULT_JOSH_ID), cfg, text, None, None)
+    resp, _ = _tts_request(api_key, cfg.get("voice_id", DEFAULT_VOICE_ID), cfg, text, None, None)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     raw = out_path.with_name(out_path.stem + "_raw.mp3")
     raw.write_bytes(base64.b64decode(resp["audio_base64"]))
@@ -380,7 +380,7 @@ def generate(text: str, out_dir: Path, api_key: str, cfg: dict[str, Any],
              progress: Callable[[str, float], None] = lambda m, f: None) -> dict[str, Any]:
     """Generate the voice-over. Writes voice.wav (master), voice.mp3, alignment.json into out_dir."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    voice_id = cfg.get("voice_id", DEFAULT_JOSH_ID)
+    voice_id = cfg.get("voice_id", DEFAULT_VOICE_ID)
     chunks = chunk_text(text, cfg.get("chunk_chars", 4000))
     raw: list[dict[str, Any]] = []
     wavs: list[Path] = []

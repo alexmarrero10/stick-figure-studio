@@ -33,7 +33,7 @@ is the plan for RAG research and the public site (both built and deployed).
    files go by metadata timestamp, then drag or slot-pick to fix. Old "7 - Title" files still use the number. **Bulk upload** (`POST images/upload-all`) takes one zip of every batch's download and sorts images by title (`images.plan_group`).
    The page (`Images.tsx`) has three tabs in order: Prompts and style, Characters (character sheet), Batches and images
    (bulk upload, then per batch: copy for Flow, add images, prompt beside image). It opens on the first tab still to do.
-6. **Voice** (`voice.py`): ElevenLabs with-timestamps (voice set on Settings, now "Brian"; `eleven_v4`), chunked and stitched,
+6. **Voice** (`voice.py`): ElevenLabs with-timestamps (voice picked on the Voice step; `eleven_v4`), chunked and stitched,
    long pauses trimmed, then sped up with FFmpeg `atempo` (`voice.speed`, 1.1 = 10% faster, pitch kept;
    Eleven v4 has no speed setting) with word timings scaled to the measured length, per-word timings stored.
 7. **Shots + Assemble** (`shots.py`, `assemble.py`, `fcpxml.py`, `captions.py`): shots locked to word timings,
@@ -73,7 +73,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (187 passing as of 2026-11-12,
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (188 passing as of 2026-11-13,
   ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
@@ -95,7 +95,7 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 
 ```
 backend/app/            FastAPI app: main.py, config.py (config.yaml + .env), db.py, jobs.py (background
-                        jobs with stop), storage.py, routes/ (one file per step), migrations/ (001-011 .sql)
+                        jobs with stop), storage.py, routes/ (one file per step), migrations/ (001-012 .sql)
 backend/pipeline/       one module per step (see Pipeline), claude_client.py (API), claude_code.py (CLI),
                         ffmpeg.py, procs.py
 backend/tests/          pytest suite + fixtures/
@@ -110,7 +110,7 @@ config.yaml             all tunables; most are on the Settings page (frontend/sr
 .env                    API keys (gitignored)
 data/app.db             SQLite DB (gitignored). Tables: projects, ideas, research_briefs, script_versions,
                         revision_messages, beats, beat_undo, voiceovers, words, style_guides, image_prompts,
-                        prompt_batches, images, shots, publish_meta, shorts, social_posts (unused since posting was removed), project_sources,
+                        prompt_batches, images, shots, publish_meta, shorts, project_sources,
                         site_videos
 projects/<slug>/        per-video media: audio/, prompts/, images/batch_XX/, output/ (gitignored)
 channel_model_transcripts.txt   other channels' transcripts the script style was distilled from.

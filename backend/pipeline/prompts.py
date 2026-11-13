@@ -13,7 +13,6 @@ from typing import Any, Callable
 
 from pipeline.claude_client import INT, STR, Claude, arr, cached, obj
 
-OLD_LIMBS = "thin black stick limbs"
 BODY = (
     "thin black stick arms and legs that show as plain black lines wherever clothing does not cover them, "
     "with sleeves and trousers drawn as flat colored clothing over them, and simple round cartoon hands "
@@ -172,8 +171,7 @@ def make_style_guide(claude: Claude, script: str) -> dict[str, Any]:
 
 
 def character_look(c: dict[str, Any]) -> str:
-    # Guides made before full looks only had a short marker.
-    return c.get("look") or with_head_color(f"stick figure with {c.get('marker', '')}")
+    return c.get("look", "")
 
 
 _LEAD = re.compile(r"(stick figures?)\b[,\s]*", re.I)
@@ -662,15 +660,8 @@ def batch_titles(rows: list[dict[str, Any]], batch_size: int = 24) -> dict[int, 
     return out
 
 
-def with_body_rule(style_prefix: str) -> str:
-    """Style guides made before the arms-and-hands rule get it in place of their old limbs phrase."""
-    if BODY in style_prefix:
-        return style_prefix
-    return style_prefix.replace(OLD_LIMBS, BODY, 1)
-
-
 def full_prompt(style_prefix: str, scene: str, title: str = "") -> str:
-    body = f"{scene.rstrip('.')}. {with_body_rule(style_prefix)}"
+    body = f"{scene.rstrip('.')}. {style_prefix}"
     return f"{title}. {body}" if title else body
 
 
@@ -737,7 +728,7 @@ def character_sheet_text(style_prefix: str, refs: list[dict[str, Any]]) -> str:
             f"same hair, clothes, colors, build and face.")
     body = [f"{r['title']}. Character reference of one character only: {r['look'].rstrip('.')}. Full body, standing "
             f"straight and facing the viewer, arms relaxed at the sides, centered, on a plain light gray background "
-            f"(for this reference image only, instead of a scene). {with_body_rule(style_prefix)}" for r in refs]
+            f"(for this reference image only, instead of a scene). {style_prefix}" for r in refs]
     foot = (f"REMINDER (do not make an image for this paragraph): name all {len(refs)} images exactly with their "
             f"prompt's title (e.g. \"{refs[0]['title']}\"), never with names or numbers of your own.")
     return "\n\n".join([head, *body, foot]) + "\n"

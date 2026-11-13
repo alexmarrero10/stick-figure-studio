@@ -176,12 +176,6 @@ def _save_characters(project_id: int, old: list[dict[str, Any]], new: list[dict[
 def list_prompts(project_id: int) -> dict[str, Any]:
     project_or_404(project_id)
     guide = db.get_style_guide(project_id)
-    if guide and prompts_mod.add_head_colors(guide["characters"]) != guide["characters"]:
-        # made before every look stated its head color: add it to the guide and the prompts
-        _save_characters(project_id, guide["characters"], guide["characters"], guide["style_prefix"])
-        guide = db.get_style_guide(project_id)
-    if guide:
-        guide["style_prefix"] = prompts_mod.with_body_rule(guide["style_prefix"])
     items = db.list_prompts(project_id)
     batch = load_config()["prompts"]["batch_size"]
     titles = prompts_mod.batch_titles(items, batch)

@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from pipeline.claude_client import INT, STR, Claude, arr, obj
-from pipeline.prompts import BASE_STYLE, visual_bible, with_body_rule
+from pipeline.prompts import BASE_STYLE, visual_bible
 
 THUMB_RULES = """A thumbnail is seen tiny on a phone, so keep each one SIMPLE:
   - scene: One stick figure (two at most) with ONE big, exaggerated emotion (shock, terror, \
@@ -82,7 +82,7 @@ THUMB_FRAMING = (
 
 
 def thumbnail_prompt(scene: str, background: str, style_prefix: str | None = None) -> str:
-    style = with_body_rule(style_prefix) if style_prefix else BASE_STYLE.format(palette="bold flat colors")
+    style = style_prefix if style_prefix else BASE_STYLE.format(palette="bold flat colors")
     return (f"{scene.strip().rstrip('.')}. Background: {background.strip().rstrip('.') or 'a simple bold backdrop'}. "
             f"{THUMB_FRAMING} {style}")
 

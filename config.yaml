@@ -58,7 +58,3 @@ shorts:
   margin: 24
   text_color: '#1A1A1A'
   text_size: 46
-social:
-  meta_graph_version: v24.0
-  youtube_privacy: public
-  tiktok_privacy: PUBLIC_TO_EVERYONE

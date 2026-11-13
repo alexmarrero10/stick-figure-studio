@@ -418,7 +418,7 @@ how search and the chatbot work, the guard rails, hosting on Vercel, and how it'
 
 Four layers of checks, from fast unit tests to evals on real data.
 
-### Backend tests (187, pytest, ~12 seconds)
+### Backend tests (188, pytest, ~12 seconds)
 
 Every pipeline step is tested without the server or the network:
 

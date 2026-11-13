@@ -115,7 +115,7 @@ class FakeClaude:
         self.calls.append((sys_text, ask))
         if "props" in schema["properties"]:
             return {"palette": "navy blue, mustard gold", "setting_notes": "Arctic, 1840s.",
-                    "characters": [{"name": "Franklin", "marker": "a plaid tartan scarf"}],
+                    "characters": [{"name": "Franklin", "look": "stick figure with a plaid tartan scarf"}],
                     "props": [{"name": "Erebus", "look": "a three-masted ship with a black hull and one gold stripe"}],
                     "locations": [{"name": "Tundra", "look": "flat white snowy tundra under a pale gray sky"}]}
         if "beats" in schema["properties"]:  # the cast step: Franklin is in every image
@@ -130,7 +130,7 @@ class FakeClaude:
 
 def test_scenes_are_written_in_order_with_previous_scenes():
     fake = FakeClaude()
-    guide = {"characters": [{"name": "F", "marker": "a scarf"}],
+    guide = {"characters": [{"name": "F", "look": "stick figure with a scarf"}],
              "props": [{"name": "Erebus", "look": "a black-hulled ship"}], "locations": [], "setting_notes": ""}
     beats = [{"idx": i, "text": f"w{i}."} for i in range(100)]
     out = prompts.write_scenes(fake, "script", guide, beats, group=40)
@@ -237,17 +237,16 @@ class ThumbFake:
 
 def test_thumbnail_from_your_idea_or_one_suggestion(client, temp_db, monkeypatch):
     pid = project_with_beats(temp_db, 3)
-    temp_db.save_style_guide(pid, "Stick figure style, thin black stick limbs, flat colors.", [])
+    temp_db.save_style_guide(pid, "Stick figure style, flat colors.", [])
     fake = ThumbFake()
     monkeypatch.setattr("app.routes.assemble.claude", lambda: fake)
     assert client.post(f"/api/projects/{pid}/publish/thumbnails", json={"request": " "}).status_code == 400
     # Works before the publishing pack exists.
     meta = client.post(f"/api/projects/{pid}/publish/thumbnails", json={"request": "Him peeking out of the hole"}).json()
-    assert "thumbnail_prompts" not in meta
     [custom] = meta["custom_thumbnails"]
     assert custom["request"] == "Him peeking out of the hole"
     assert custom["prompt"].startswith("A stick figure peeks out of a hole, a flashlight on his face. Background: dark navy night.")
-    assert custom["prompt"].endswith(prompts.with_body_rule("Stick figure style, thin black stick limbs, flat colors."))
+    assert custom["prompt"].endswith("Stick figure style, flat colors.")
     assert "THE CREATOR'S IDEA FOR THE THUMBNAIL\nHim peeking out of the hole" in fake.asks[-1]
     # Give suggestion adds exactly one, and the next one is told to differ from what's listed.
     meta = client.post(f"/api/projects/{pid}/publish/thumbnails/suggest").json()

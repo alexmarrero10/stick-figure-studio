@@ -151,12 +151,9 @@ def make_publish(project_id: int) -> dict[str, Any]:
 
 
 def _meta(project_id: int) -> dict[str, Any]:
-    """The stored publishing pack (may hold only thumbnails). The old three auto-suggested thumbnail
-    prompts were dropped in Nov 2026; one suggestion at a time replaces them."""
-    meta = {"titles": [], "description": "", "tags": [], "chapters": [], "custom_thumbnails": [],
+    """The stored publishing pack (may hold only thumbnails)."""
+    return {"titles": [], "description": "", "tags": [], "chapters": [], "custom_thumbnails": [],
             **(db.get_publish_meta(project_id) or {})}
-    meta.pop("thumbnail_prompts", None)
-    return meta
 
 
 @router.get("/publish")
