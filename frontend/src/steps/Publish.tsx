@@ -102,47 +102,54 @@ export default function PublishStep({ project, refresh }: StepProps) {
           </>
         )}
       </div>
-      <div className="panel publish-thumbs">
-        <h3>Thumbnail: idea to prompt</h3>
+      <section className="panel panel-main publish-thumbs" aria-labelledby="thumb-heading">
+        <h2 id="thumb-heading">Thumbnail: idea to prompt</h2>
         <p className="muted small">
-          Describe the thumbnail you have in mind and Claude writes the image prompt, in the video's style and with its
-          characters' looks. No idea yet? Give suggestion writes one for you; press it again for a different one.
+          Describe the picture you want and Claude writes the image prompt, in the video's style and with its characters'
+          looks. No idea yet? Give suggestion writes one; press it again for a different one.
         </p>
-        <textarea
-          rows={3}
-          value={idea}
-          onChange={(e) => setIdea(e.target.value)}
-          placeholder="Your idea for this video's thumbnail, e.g. the main character frozen in shock next to the one object the story turns on"
-        />
-        <div className="row">
-          <button onClick={() => askThumbnail("idea")} disabled={!!asking || !idea.trim()}>
+        <label className="thumb-idea">
+          <span>Your idea</span>
+          <textarea
+            rows={7}
+            value={idea}
+            onChange={(e) => setIdea(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && idea.trim() && !asking) askThumbnail("idea");
+            }}
+            placeholder="e.g. the main character frozen in shock next to the one object the story turns on"
+          />
+        </label>
+        <div className="row thumb-actions">
+          <button className="primary" onClick={() => askThumbnail("idea")} disabled={!!asking || !idea.trim()}>
             {asking === "idea" ? "Writing…" : "Write the prompt"}
           </button>
           <button className="secondary" onClick={() => askThumbnail("suggest")} disabled={!!asking}>
             {asking === "suggest" ? "Thinking…" : "Give suggestion"}
           </button>
+          <span className="muted small thumb-hint">Ctrl + Enter writes it too</span>
         </div>
         {thumbs.length > 0 && (
-          <ul className="copy-list">
+          <ul className="thumb-list">
             {thumbs.map((t, n) => ({ t, n })).reverse().map(({ t, n }) => ( // newest first; n stays the stored index for Remove
               <li key={n}>
-                <span className="small">
-                  <span className="muted">
-                    {t.suggested ? "Claude's suggestion" : "Your idea"}: {t.request}
-                  </span>
-                  <br />
-                  {t.prompt}
-                </span>{" "}
-                <CopyButton text={t.prompt} />
-                <button className="link danger small" onClick={() => removeThumbnail(n)}>
-                  Remove
-                </button>
+                <div className="thumb-from">
+                  <span className="chip">{t.suggested ? "Claude's suggestion" : "Your idea"}</span>
+                  <span className="muted small">{t.request}</span>
+                </div>
+                <p className="thumb-prompt">{t.prompt}</p>
+                <div className="row">
+                  <CopyButton text={t.prompt} />
+                  <button className="link danger small" onClick={() => removeThumbnail(n)}>
+                    Remove
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
         )}
         <p className="muted small">Add the title text to the thumbnail yourself, since image models garble lettering.</p>
-      </div>
+      </section>
     </div>
   );
 }
