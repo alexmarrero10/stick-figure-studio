@@ -20,7 +20,7 @@ Replaces the earlier plan (2026-11-03) that started with a local gallery and Voy
 | B | RAG in research (brief from sources), script and chat | ✅ Done, research used for real |
 | C | "Publish to site": narration chunks with timestamps, thumbnails | ✅ Built (no video published yet) |
 | D | Public site: gallery, semantic search, watch page + chatbot (Gemini Flash-Lite) | ✅ Built, tested locally against real Supabase + Gemini |
-| E | Deploy (one Docker service on Render or Fly.io) | Files ready (`site/Dockerfile`, `site/README.md`); not deployed |
+| E | Deploy | ✅ Live on Vercel (`site/vercel.json`, `site/index.py`) |
 
 ## Decisions (made with the owner, 2026-11-06)
 
@@ -88,10 +88,9 @@ pooler URI (with the database password) into Settings, add a Gemini key from ais
 
 ## Phase E: Deploy
 
-- [x] `site/Dockerfile` (builds pages, runs API) and deploy steps in `site/README.md` (Render, free).
-      Docker build not tried yet (Docker Desktop wasn't running).
-- [ ] Owner: run `002_site_reader.sql` with a chosen password, publish at least one video, push to GitHub,
-      create the Render service. Nothing is deployed without the owner's go-ahead.
+- [x] Deployed on Vercel instead of Render (deploy steps in `site/README.md`). A `site/Dockerfile` for
+      Render was written first, never built, and removed on 2026-11-15.
+- [x] Owner: ran `002_site_reader.sql`, published videos, pushed to GitHub, connected Vercel.
 
 ---
 

@@ -13,7 +13,7 @@ How it works (search, the chatbot, guard rails, hosting and tests) is in
 - `server/`: the FastAPI app. `app.py` serves the API and the pages, `store.py` reads Supabase, `gemini.py`
   calls Gemini, `limits.py` holds the rate limits and the answer cache.
 - `web/`: the React + Vite pages.
-- `index.py`, `vercel.json`, `requirements.txt`: hosting on Vercel. `Dockerfile`: hosting anywhere else.
+- `index.py`, `vercel.json`, `requirements.txt`: hosting on Vercel.
   The app folder is `server/`, not `api/`, because Vercel turns every file in an `api/` folder into its own
   function.
 
@@ -67,10 +67,3 @@ Tests: `cd site/server && ../../.venv/Scripts/python -m pytest -q`
 
 Rate-limit counts are kept in memory, and Vercel runs several short-lived copies of the app, so they reset
 more often than on one server. The real cost guard is the Gemini key with billing off.
-
-## Other hosts (Render, Fly.io)
-
-The `Dockerfile` builds the same site as one container. On render.com: **New > Web Service**, pick the repo,
-**Language:** Docker, **Root directory:** `site`, and the same environment variables (use the Session pooler
-address). Free Render services sleep after 15 minutes without visitors, so the first visit after that takes
-about a minute.

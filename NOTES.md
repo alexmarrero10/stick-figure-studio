@@ -21,6 +21,9 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Site Dockerfile removed (2026-11-15):** `site/Dockerfile` and `site/.dockerignore` (a Render option that was
+  never built; the site runs on Vercel) and the "Other hosts" section of site/README.md.
+
 - **Send batch N to Flow stands out (2026-11-15):** on the Batches tab, step 1 is a bold card (ink border,
   yellow step badge, prompt count) with a big full-width copy button that shows a check and "Copied. Now paste
   it into Flow". Once a batch's images are all in, the card steps back (plain border, "Copy batch N again").
