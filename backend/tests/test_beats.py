@@ -1,3 +1,5 @@
+"""Beats: splitting the script into picture beats, Claude's boundary review, and undo."""
+
 import pytest
 
 from pipeline import scenes
@@ -16,6 +18,25 @@ def coverage_ok(beats, n):
         assert b["word_end"] >= b["word_start"]
         expected = b["word_end"] + 1
     assert expected == n
+
+
+def _ranges(client, pid):
+    return [(b["word_start"], b["word_end"]) for b in client.get(f"/api/projects/{pid}/beats").json()]
+
+
+def _two_word_beats(db, n):
+    p = db.create_project("Undo test")
+    text = " ".join(f"w{i}." for i in range(2 * n))
+    v = db.save_script(p["id"], text, "generated")
+    db.replace_beats(p["id"], v["id"], [{"idx": i, "word_start": 2 * i, "word_end": 2 * i + 1,
+                                         "text": f"w{2 * i}. w{2 * i + 1}."} for i in range(n)])
+    beats = db.list_beats(p["id"])
+    db.upsert_prompts(p["id"], [{"beat_id": b["id"], "batch_no": 1, "scene": f"scene {b['idx']}",
+                                 "label": f"Label {b['idx']}", "characters": [{"name": "Saddam", "variant": ""}]}
+                                for b in beats[:3]])
+    db.upsert_prompts(p["id"], [{"beat_id": beats[3]["id"], "batch_no": 1, "scene": "hand edited", "label": "Mine"}],
+                      edited=True)
+    return p["id"]
 
 
 def test_beats_cover_every_word_in_order():
@@ -112,3 +133,47 @@ def test_beat_review_follows_the_configured_beat_length():
     beat_review.review(fake, [], min_words=2, max_words=13, wpm=180)
     assert "about 2-13 words" in fake.system and "longer than 13 words" in fake.system
     assert "0.5-4 seconds" in fake.system and "{" not in fake.system
+
+
+def test_undo_puts_back_the_last_split_and_merge(client, temp_db):
+    pid = _two_word_beats(temp_db, 5)
+    start = _ranges(client, pid)
+    assert client.get(f"/api/projects/{pid}/beats/undo").json() == {"steps": 0}
+    assert client.post(f"/api/projects/{pid}/beats/undo").status_code == 400
+
+    client.post(f"/api/projects/{pid}/beats/ops", json={"ops": [{"op": "split", "beat": 1, "at": 3}]})
+    after_split = _ranges(client, pid)
+    assert len(after_split) == 6
+    client.post(f"/api/projects/{pid}/beats/ops", json={"ops": [{"op": "merge", "beat": 3}]})
+    assert client.get(f"/api/projects/{pid}/beats/undo").json() == {"steps": 2}
+
+    # Undo the merge, then the split: back where we started, prompts and all.
+    client.post(f"/api/projects/{pid}/beats/undo")
+    assert _ranges(client, pid) == after_split
+    client.post(f"/api/projects/{pid}/beats/undo")
+    assert _ranges(client, pid) == start
+    prompts = {p["idx"]: p for p in client.get(f"/api/projects/{pid}/prompts").json()["prompts"]}
+    assert prompts[1]["scene"] == "scene 1" and prompts[1]["label"] == "Label 1"
+    assert prompts[1]["characters"] == [{"name": "Saddam", "variant": ""}]
+    assert prompts[3]["scene"] == "hand edited" and prompts[3]["edited"]
+    assert client.get(f"/api/projects/{pid}/beats/undo").json() == {"steps": 0}
+
+
+def test_rebuilding_or_editing_text_clears_undo(client, temp_db, monkeypatch):
+    pid = _two_word_beats(temp_db, 5)
+    client.post(f"/api/projects/{pid}/beats/ops", json={"ops": [{"op": "split", "beat": 0, "at": 1}]})
+    assert client.get(f"/api/projects/{pid}/beats/undo").json()["steps"] == 1
+    client.put(f"/api/projects/{pid}/beats/2/text", json={"text": "new words."})
+    assert client.get(f"/api/projects/{pid}/beats/undo").json()["steps"] == 0
+
+    client.post(f"/api/projects/{pid}/beats/ops", json={"ops": [{"op": "split", "beat": 0, "at": 1}]})
+    client.post(f"/api/projects/{pid}/beats/build", json={"review": False})
+    assert client.get(f"/api/projects/{pid}/beats/undo").json()["steps"] == 0
+
+
+def test_undo_keeps_only_the_latest_steps(temp_db):
+    pid = temp_db.create_project("Cap")["id"]
+    for i in range(temp_db.BEAT_UNDO_STEPS + 5):
+        temp_db.push_beat_undo(pid, {"n": i})
+    assert temp_db.beat_undo_steps(pid) == temp_db.BEAT_UNDO_STEPS
+    assert temp_db.pop_beat_undo(pid) == {"n": temp_db.BEAT_UNDO_STEPS + 4}

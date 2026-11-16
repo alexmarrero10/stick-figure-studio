@@ -1,6 +1,8 @@
 from pipeline.shots import build_shots
 
 CFG = {"cut_lead_s": 0.1, "min_shot_s": 1.0, "max_shot_s": 5.0, "punch_in_scale": 1.15, "tail_s": 0.5}
+
+
 FPS = 30
 
 

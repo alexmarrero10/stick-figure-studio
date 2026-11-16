@@ -106,7 +106,7 @@ From the repo root:
 
 ```powershell
 cd backend; ..\.venv\Scripts\python -m pytest -q; cd ..   # backend tests (~12 s)
-cd frontend; npm run test:e2e; cd ..                      # browser tests (~10 s)
+cd frontend; npm test; cd ..                              # browser tests (~10 s)
 ```
 
 The tests never touch your real database, keys or settings. More on what they cover:

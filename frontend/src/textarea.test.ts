@@ -1,4 +1,4 @@
-// Run with: node --experimental-strip-types --test src/textarea.test.ts (the backend tests run it too).
+// Run with: npm run test:unit (also part of npm test).
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { findPassage } from "./textarea.ts";

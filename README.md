@@ -418,12 +418,14 @@ how search and the chatbot work, the guard rails, hosting on Vercel, and how it'
 
 Four layers of checks, from fast unit tests to evals on real data.
 
-### Backend tests (188, pytest, ~12 seconds)
+### Backend tests (187, pytest, ~12 seconds)
 
-Every pipeline step is tested without the server or the network:
+Every pipeline step is tested without the server or the network, with one test file per step
+(`test_script.py`, `test_beats.py`, `test_images.py`, `test_voice.py`...):
 
-- **Isolation:** tests use a temporary SQLite database and temporary folders, so they never touch the real
-  database, `.env` or `config.yaml`.
+- **Isolation:** tests use a temporary SQLite database and temporary folders, and the API tests share one
+  client (in `conftest.py`) that points at copies, so they never touch the real database, `.env` or
+  `config.yaml`.
 - **Fakes instead of services:** Claude, ElevenLabs, Gemini and web pages are replaced by small fake classes
   and mocked HTTP transports. Supabase is replaced by `MemoryStore`, an in-memory version of the vector store
   with the same interface, hybrid search and RRF included.
@@ -439,7 +441,8 @@ Playwright drives the built studio in Microsoft Edge against a **fake backend** 
 call from recorded fixtures, so the tests never touch real data. A test fails on any page error, or on any
 API call that gets no answer. The tests open every step and check the step track, editing and saving, the
 chat drawer, saved ideas, stopping a long job, the Images tabs, the Publishing Pack layout, and that every page fits a phone
-screen without sideways scrolling.
+screen without sideways scrolling. `npm test` runs these plus a small unit test of the script editor's
+passage finder.
 
 ### Public site tests (19, pytest)
 

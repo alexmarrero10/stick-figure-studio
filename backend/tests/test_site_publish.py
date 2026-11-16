@@ -1,12 +1,22 @@
 """Publishing a video to the public site's database: YouTube links, timed narration windows, and the routes.
 The database is the in-memory MemoryStore; embeddings are faked."""
-import time
 
 import pytest
 
 from pipeline import site_publish
 from pipeline.vector_store import MemoryStore
-from tests.test_rag import fake_embed
+from tests.helpers import fake_embed, wait_job
+
+
+def timed_words(n_sentences=40, words_per=10, sec_per_word=0.35):
+    """Sentences of `words_per` words; every sentence ends with a period."""
+    out, t = [], 0.0
+    for s in range(n_sentences):
+        for i in range(words_per):
+            text = f"s{s}w{i}" + ("." if i == words_per - 1 else "")
+            out.append({"idx": len(out), "text": text, "start": round(t, 2), "end": round(t + 0.3, 2)})
+            t += sec_per_word
+    return out
 
 
 @pytest.mark.parametrize("url,vid", [
@@ -21,17 +31,6 @@ from tests.test_rag import fake_embed
 ])
 def test_youtube_id(url, vid):
     assert site_publish.youtube_id(url) == vid
-
-
-def timed_words(n_sentences=40, words_per=10, sec_per_word=0.35):
-    """Sentences of `words_per` words; every sentence ends with a period."""
-    out, t = [], 0.0
-    for s in range(n_sentences):
-        for i in range(words_per):
-            text = f"s{s}w{i}" + ("." if i == words_per - 1 else "")
-            out.append({"idx": len(out), "text": text, "start": round(t, 2), "end": round(t + 0.3, 2)})
-            t += sec_per_word
-    return out
 
 
 def test_narration_chunks_are_30_to_45_s_and_end_on_sentences():
@@ -88,28 +87,6 @@ def test_build_video_needs_a_link_and_title():
         site_publish.build_video({"youtube_url": "dQw4w9WgXcQ", "title": " "}, None, 1)
 
 
-# --- routes -----------------------------------------------------------------
-
-@pytest.fixture
-def client(temp_db, tmp_path, monkeypatch):
-    from fastapi.testclient import TestClient
-    from app import storage
-    monkeypatch.setattr(storage, "PROJECTS_DIR", tmp_path / "projects")
-    from app.main import app
-    with TestClient(app) as c:
-        yield c
-
-
-def _wait(job_id):
-    from app import jobs
-    for _ in range(200):
-        j = jobs.get(job_id)
-        if j["status"] != "running":
-            return j
-        time.sleep(0.02)
-    return jobs.get(job_id)
-
-
 def test_site_routes_publish_update_and_unpublish(client, temp_db, monkeypatch):
     from app.routes import site as site_routes
     store = MemoryStore()
@@ -134,7 +111,7 @@ def test_site_routes_publish_update_and_unpublish(client, temp_db, monkeypatch):
 
     temp_db.save_voiceover(pid, v["id"], "a.mp3", 140.0, timed_words(), [])
     job = client.post(f"/api/projects/{pid}/site/publish", json=body).json()
-    assert _wait(job["id"])["status"] == "done"
+    assert wait_job(job["id"])["status"] == "done"
     view = client.get(f"/api/projects/{pid}/site").json()
     assert view["published"] is True and view["chunks"] >= 3 and view["stale"] is False
     assert temp_db.project_status(pid)["site"] is True  # the home page chip

@@ -1,29 +1,18 @@
 """RAG research: source gathering, chunking, embeddings, the vector store, retrieval and the routes.
 No network: Wikipedia, web pages and Gemini are faked with httpx.MockTransport; the vector database is
 the in-memory MemoryStore."""
-import hashlib
 import json
+import time
 from types import SimpleNamespace
 
 import httpx
 import pytest
 
+from app import jobs
 from pipeline import chunking, embeddings, rag, sources
 from pipeline import script as script_mod
 from pipeline.vector_store import MemoryStore, rrf
-
-
-def fake_embed(texts, task):
-    """Deterministic bag-of-words vectors: texts sharing words point the same way."""
-    out = []
-    for t in texts:
-        v = [0.0] * 512
-        for w in t.lower().split():
-            w = w.strip(".,:;!?()[]\"'")
-            if len(w) > 2:
-                v[int(hashlib.md5(w.encode()).hexdigest(), 16) % 512] += 1.0
-        out.append(v)
-    return out
+from tests.helpers import doc, fake_embed
 
 
 class FakeClaude:
@@ -40,28 +29,6 @@ def para(word, n):
     return " ".join(f"{word}{i} is a fact about the ships." for i in range(n))
 
 
-# --- chunking ---------------------------------------------------------------
-
-def test_chunks_respect_size_overlap_and_headings():
-    text = "Intro sentence one. Intro sentence two.\n\n== Search ==\n" + para("Erebus", 80)
-    chunks = chunking.chunk_text(text, chunk_words=100, overlap_words=20)
-    assert len(chunks) > 3
-    assert all(len(c["text"].split()) <= 110 for c in chunks)
-    assert chunks[0]["heading"] == ""
-    assert chunks[-1]["heading"] == "Search"
-    # The next chunk begins with the end of the previous one.
-    last_sentence = chunks[1]["text"].split(". ")[-1]
-    assert last_sentence in chunks[2]["text"]
-    assert "==" not in " ".join(c["text"] for c in chunks)
-
-
-def test_short_text_is_one_chunk():
-    chunks = chunking.chunk_text("Just one short paragraph. Two sentences.", 300, 50)
-    assert [c["text"] for c in chunks] == ["Just one short paragraph. Two sentences."]
-
-
-# --- picking and downloading sources ----------------------------------------
-
 PICKS = """## Wikipedia
 - Franklin's lost expedition
 - HMS Erebus (1826)
@@ -71,15 +38,6 @@ PICKS = """## Wikipedia
 2. [Inuit testimony - Museum](https://museum.example.org/inuit/)
 3. [Wiki link](https://en.wikipedia.org/wiki/John_Rae_(explorer))
 """
-
-
-def test_parse_picks_and_normalize():
-    wiki, other = sources.parse_picks(PICKS)
-    assert wiki == ["Franklin's lost expedition", "HMS Erebus (1826)", "John Rae (explorer)"]
-    assert [o["url"] for o in other] == ["https://parks.canada.ca/franklin?utm_source=x",
-                                         "https://museum.example.org/inuit/"]
-    assert sources.normalize_url("https://Museum.example.org/inuit/#top") == "https://museum.example.org/inuit"
-    assert sources.normalize_url("https://a.org/p?utm_source=x&id=3") == "https://a.org/p?id=3"
 
 
 def wiki_text(title):
@@ -104,6 +62,51 @@ def make_transport(pages):
 
 ARTICLE = ("<html><head><title>Inuit testimony</title></head><body><nav>Menu</nav><article><h1>Inuit testimony</h1>"
            + "".join(f"<p>{para(f'Testimony{j}x', 8)}</p>" for j in range(12)) + "</article></body></html>")
+
+
+@pytest.fixture
+def clock(monkeypatch):
+    """Fake clock: sleeping moves time forward instantly."""
+    now = {"t": 1000.0, "slept": 0.0}
+
+    def sleep(s):
+        now["t"] += s
+        now["slept"] += s
+    monkeypatch.setattr(embeddings.time, "monotonic", lambda: now["t"])
+    monkeypatch.setattr(embeddings.time, "sleep", sleep)
+    monkeypatch.setattr(embeddings, "_sent", [])
+    return now
+
+
+# --- chunking ---------------------------------------------------------------
+
+def test_chunks_respect_size_overlap_and_headings():
+    text = "Intro sentence one. Intro sentence two.\n\n== Search ==\n" + para("Erebus", 80)
+    chunks = chunking.chunk_text(text, chunk_words=100, overlap_words=20)
+    assert len(chunks) > 3
+    assert all(len(c["text"].split()) <= 110 for c in chunks)
+    assert chunks[0]["heading"] == ""
+    assert chunks[-1]["heading"] == "Search"
+    # The next chunk begins with the end of the previous one.
+    last_sentence = chunks[1]["text"].split(". ")[-1]
+    assert last_sentence in chunks[2]["text"]
+    assert "==" not in " ".join(c["text"] for c in chunks)
+
+
+def test_short_text_is_one_chunk():
+    chunks = chunking.chunk_text("Just one short paragraph. Two sentences.", 300, 50)
+    assert [c["text"] for c in chunks] == ["Just one short paragraph. Two sentences."]
+
+
+# --- picking and downloading sources ----------------------------------------
+
+def test_parse_picks_and_normalize():
+    wiki, other = sources.parse_picks(PICKS)
+    assert wiki == ["Franklin's lost expedition", "HMS Erebus (1826)", "John Rae (explorer)"]
+    assert [o["url"] for o in other] == ["https://parks.canada.ca/franklin?utm_source=x",
+                                         "https://museum.example.org/inuit/"]
+    assert sources.normalize_url("https://Museum.example.org/inuit/#top") == "https://museum.example.org/inuit"
+    assert sources.normalize_url("https://a.org/p?utm_source=x&id=3") == "https://a.org/p?id=3"
 
 
 def test_gather_downloads_wikipedia_and_pages():
@@ -138,20 +141,6 @@ def test_pick_sources_limits_searches():
 
 
 # --- embeddings -------------------------------------------------------------
-
-@pytest.fixture
-def clock(monkeypatch):
-    """Fake clock: sleeping moves time forward instantly."""
-    now = {"t": 1000.0, "slept": 0.0}
-
-    def sleep(s):
-        now["t"] += s
-        now["slept"] += s
-    monkeypatch.setattr(embeddings.time, "monotonic", lambda: now["t"])
-    monkeypatch.setattr(embeddings.time, "sleep", sleep)
-    monkeypatch.setattr(embeddings, "_sent", [])
-    return now
-
 
 def test_embed_batches_normalizes_and_retries(clock):
     calls = {"n": 0}
@@ -203,10 +192,6 @@ def test_embed_needs_key():
 
 def test_rrf_rewards_items_in_both_lists():
     assert rrf([1, 2, 3], [3, 4])[0] == 3
-
-
-def doc(url, title, text):
-    return {"url": url, "title": title, "source_type": "web", "text": text, "status": "ok", "words": 999}
 
 
 def test_index_reuses_unchanged_documents_and_links_project():
@@ -309,16 +294,6 @@ def test_script_and_revise_messages_carry_excerpts():
 
 # --- routes -----------------------------------------------------------------
 
-@pytest.fixture
-def client(temp_db, tmp_path, monkeypatch):
-    from fastapi.testclient import TestClient
-    from app import storage
-    monkeypatch.setattr(storage, "PROJECTS_DIR", tmp_path / "projects")
-    from app.main import app
-    with TestClient(app) as c:
-        yield c
-
-
 def test_sources_routes_and_rag_research(client, temp_db, monkeypatch):
     from app import deps
     from app.routes import script as script_routes
@@ -337,8 +312,6 @@ def test_sources_routes_and_rag_research(client, temp_db, monkeypatch):
 
     pid = temp_db.create_project("Franklin")["id"]
     job = client.post(f"/api/projects/{pid}/research").json()
-    from app import jobs
-    import time
     for _ in range(100):
         if jobs.get(job["id"])["status"] != "running":
             break
@@ -356,30 +329,6 @@ def test_sources_routes_and_rag_research(client, temp_db, monkeypatch):
     assert client.delete(f"/api/projects/{pid}/sources/{sid}").json() == {"ok": True}
     assert len(store.project_documents(f"owner:{pid}")) == 1
     assert len(client.get(f"/api/projects/{pid}/sources").json()["sources"]) == 2
-
-
-def test_settings_show_rag_defaults_and_save_the_new_section(temp_db, tmp_path, monkeypatch):
-    import shutil
-    import yaml
-    from fastapi.testclient import TestClient
-    from app import config
-    cfg = tmp_path / "config.yaml"  # never the real config.yaml
-    shutil.copy(config.CONFIG_PATH, cfg)
-    monkeypatch.setattr(config, "CONFIG_PATH", cfg)
-    monkeypatch.setattr(config, "_cache", None)
-    from app.main import app
-    try:
-        with TestClient(app) as c:
-            s = c.get("/api/settings").json()
-            assert s["config"]["rag"]["docs_min"] == 10
-            assert "GEMINI_API_KEY" in s["keys"] and "SUPABASE_DB_URL" in s["keys"]
-            assert "SITE_DATABASE_URL" in s["keys"]
-            assert c.put("/api/settings/config", json={"rag": {"docs_max": 12}}).status_code == 200
-            assert yaml.safe_load(cfg.read_text(encoding="utf-8"))["rag"]["docs_max"] == 12
-            assert c.put("/api/settings/config", json={"nonsense": {"a": 1}}).status_code == 200
-            assert "nonsense" not in yaml.safe_load(cfg.read_text(encoding="utf-8"))
-    finally:
-        config._cache = None
 
 
 def test_rag_check_reports_missing_keys(client, monkeypatch):

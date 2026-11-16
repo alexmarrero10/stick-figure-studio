@@ -9,7 +9,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 188 backend tests and 25 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
+- 187 backend tests and 25 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
   not pushed). The studio redesign commit (2026-11-11) and the notes commit before it are local, not pushed.
 - **Public site is live: https://stick-figure-viewer.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`;
   the old stick-figure-studio.vercel.app address still works).
@@ -20,6 +20,13 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   published to the site.
 
 ## Recently done
+
+- **Tests regrouped (2026-11-15):** backend tests are now one file per pipeline step (test_script, test_beats,
+  test_prompts, test_images, test_voice, test_shorts, test_publish, test_ideas, test_app, test_db, test_jobs,
+  test_projects...); nothing in a test changed. One shared `client` fixture in conftest.py replaces 7 copies
+  (5 of them didn't point config.yaml at a copy) and also points `.env` at a temp file; `tests/helpers.py`
+  holds helpers used by several files, including one `wait_job` instead of three. The Node test
+  `textarea.test.ts` moved out of pytest into `npm test` (`test:unit`), so the backend count is 187.
 
 - **Site Dockerfile removed (2026-11-15):** `site/Dockerfile` and `site/.dockerignore` (a Render option that was
   never built; the site runs on Vercel) and the "Other hosts" section of site/README.md.

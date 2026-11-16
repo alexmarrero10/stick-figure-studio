@@ -1,12 +1,8 @@
 """Fact check: the same check with RAG (stored passages, no tools) or without (brief + web search)."""
-import shutil
-
-import pytest
-from fastapi.testclient import TestClient
 
 from pipeline import fact_check, rag
 from pipeline.vector_store import MemoryStore
-from tests.test_rag import doc, fake_embed
+from tests.helpers import doc, fake_embed
 
 SCRIPT = ("The tank burst on January 15, 1919.\n\n"
           "A wave of molasses moved at 35 miles an hour. Twenty one people died.")
@@ -65,20 +61,6 @@ def test_fact_check_passages_come_from_the_project_sources():
     rag.index_documents(store, fake_embed, "owner:2", [other], chunk_words=50, overlap_words=5)
     out = rag.fact_check_excerpts(store, fake_embed, "owner:1", SCRIPT)
     assert "North End" in out and "Roman" not in out
-
-
-@pytest.fixture
-def client(temp_db, tmp_path, monkeypatch):
-    from app import config, storage
-    monkeypatch.setattr(storage, "PROJECTS_DIR", tmp_path / "projects")
-    cfg = tmp_path / "config.yaml"
-    shutil.copy(config.CONFIG_PATH, cfg)
-    monkeypatch.setattr(config, "CONFIG_PATH", cfg)
-    monkeypatch.setattr(config, "_cache", None)
-    from app.main import app
-    with TestClient(app) as c:
-        yield c
-    config._cache = None
 
 
 def test_route_puts_fixes_in_the_chat(client, temp_db, monkeypatch):

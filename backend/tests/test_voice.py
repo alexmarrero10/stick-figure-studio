@@ -1,10 +1,10 @@
 import array
-import math
 import wave
 
 import pytest
 
 from pipeline import ffmpeg, voice
+from tests.helpers import make_wav
 
 
 def alignment_for(text, char_s=0.05, gaps=None):
@@ -55,19 +55,6 @@ def test_align_fuzzy_fills_missing_words():
     starts = [w["start"] for w in words]
     assert starts == sorted(starts)
     assert words[3]["start"] >= words[2]["end"] - 1e-6
-
-
-def make_wav(path, seconds, rate=44100, tone_spans=()):
-    n = int(seconds * rate)
-    a = array.array("h", [0] * n)
-    for s, e in tone_spans:
-        for i in range(int(s * rate), int(e * rate)):
-            a[i] = int(8000 * math.sin(i / 10))
-    with wave.open(str(path), "wb") as w:
-        w.setnchannels(1)
-        w.setsampwidth(2)
-        w.setframerate(rate)
-        w.writeframes(a.tobytes())
 
 
 def test_trim_pauses_shortens_gaps_and_shifts_words(tmp_path):

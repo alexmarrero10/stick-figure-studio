@@ -1,4 +1,144 @@
+"""Image prompts: the style guide, cast, scenes, titles, character looks and the prompt routes."""
+import time
+
 from pipeline import prompts
+from tests.helpers import ROOT, FakeClaude, project_with_beats, wait_job
+
+
+class PlaceFake(FakeClaude):
+    """Like FakeClaude, but the staging step also puts every image on the tundra."""
+
+    def json(self, system, messages, schema, max_tokens=32000, effort=None):
+        res = super().json(system, messages, schema, max_tokens, effort)
+        for b in res.get("beats", []):
+            b["place"] = "tundra"
+        return res
+
+
+SADDAM = {"characters": [
+    {"name": "Saddam Hussein", "look": "stick figure, stocky, thick black mustache, black beret",
+     "variants": [{"when": "in hiding, December 2003", "look": "stick figure, stocky, long scruffy gray-black beard, no hat"}]},
+    {"name": "American soldiers", "look": "stick figure, sandy khaki helmet, black rifle", "variants": []},
+], "props": [], "locations": [], "setting_notes": ""}
+
+
+class CastFake:
+    """Casts Saddam (in hiding) into every beat; the first scenes leave his look out ("a dusty figure")."""
+
+    def __init__(self, fix_on_retry=True):
+        self.fix_on_retry = fix_on_retry
+        self.asks: list[str] = []
+
+    def json(self, system, messages, schema, max_tokens=32000, effort=None):
+        ask = messages[-1]["content"]
+        self.asks.append(ask)
+        if "beats" in schema["properties"]:
+            idxs = [int(l.split(":")[0]) for l in ask.split("BEATS TO CAST:")[1].strip().splitlines()]
+            return {"beats": [{"idx": i, "cast": [{"name": "Saddam Hussein", "variant": "in hiding, December 2003"}]}
+                              for i in idxs]}
+        retry = len([a for a in self.asks if "BEATS TO ILLUSTRATE" in a]) > 1
+        look = "stick figure, stocky, long scruffy gray-black beard, no hat"
+        text = f"Soldiers stare down at {look}." if retry and self.fix_on_retry else "Soldiers stare down at a dusty figure."
+        return {"scenes": [{"idx": 0, "label": "Dusty figure", "scene": text}]}
+
+
+HOLE = ("from above: a square dark opening in brown dirt, a white slab lid beside it. "
+        "From the side: a narrow shaft two stick figures deep, one small yellow bulb")
+
+
+STAGED = {**SADDAM, "props": [{"name": "the spider hole", "look": HOLE}, {"name": "the rope", "look": "a coiled tan rope"}],
+          "locations": [{"name": "orange grove", "look": "rows of dark green orange trees at night"}]}
+
+
+class StageFake:
+    def __init__(self, fix_on_retry=True):
+        self.fix_on_retry = fix_on_retry
+        self.asks: list[str] = []
+
+    def json(self, system, messages, schema, max_tokens=32000, effort=None):
+        ask = messages[-1]["content"]
+        self.asks.append(ask)
+        if "beats" in schema["properties"]:
+            return {"beats": [{"idx": 0, "cast": [], "objects": [{"name": "the rope", "view": ""}],
+                               "place": "orange grove"}]}
+        retry = len(self.asks) > 2
+        text = ("Soldiers lift a coiled tan rope among rows of dark green orange trees at night."
+                if retry and self.fix_on_retry else "Soldiers lift the rope in the grove.")
+        return {"scenes": [{"idx": 0, "label": "Rope", "scene": text}]}
+
+
+def test_batch_checkmarks(client, temp_db):
+    pid = project_with_beats(temp_db, 30)
+    assert client.put(f"/api/projects/{pid}/prompts/batch/2/done", json={"done": True}).json() == {"done_batches": [2]}
+    client.put(f"/api/projects/{pid}/prompts/batch/1/done", json={"done": True})
+    client.put(f"/api/projects/{pid}/prompts/batch/2/done", json={"done": False})
+    assert client.get(f"/api/projects/{pid}/prompts").json()["done_batches"] == [1]
+
+
+def test_scenes_are_written_in_order_with_previous_scenes():
+    fake = FakeClaude()
+    guide = {"characters": [{"name": "F", "look": "stick figure with a scarf"}],
+             "props": [{"name": "Erebus", "look": "a black-hulled ship"}], "locations": [], "setting_notes": ""}
+    beats = [{"idx": i, "text": f"w{i}."} for i in range(100)]
+    out = prompts.write_scenes(fake, "script", guide, beats, group=40)
+    assert sorted(out) == list(range(100))
+    asks = [a for _, a in fake.calls]
+    assert len(asks) == 3
+    assert "already written" not in asks[0]
+    # The second request sees the last scenes of the first group, so the images carry on.
+    assert "Scenes already written" in asks[1] and "  39: Beat 39" in asks[1] and "  31: Beat 31" not in asks[1]
+    assert "  79: Beat 79" in asks[2]
+    # The visual bible tells Claude to reuse the fixed look word for word.
+    assert "RECURRING OBJECTS (use the look text word for word)\n- Erebus: a black-hulled ship" in fake.calls[0][0]
+
+
+def test_generate_route_stores_props_and_batch_text(client, temp_db, monkeypatch):
+    pid = project_with_beats(temp_db, 30)
+    fake = FakeClaude()
+    monkeypatch.setattr("app.routes.prompts.claude", lambda: fake)
+    job = client.post(f"/api/projects/{pid}/prompts/generate", json={}).json()
+    for _ in range(100):
+        job = client.get(f"/api/jobs/{job['id']}").json()
+        if job["status"] != "running":
+            break
+        time.sleep(0.05)
+    assert job["status"] == "done", job
+    data = client.get(f"/api/projects/{pid}/prompts").json()
+    assert data["style"]["props"][0]["name"] == "Erebus"
+    assert data["style"]["locations"][0]["name"] == "Tundra"
+    assert len(data["prompts"]) == 30
+    # Who is in each image was decided first, saved with the prompt, and their look is in the scene.
+    assert fake.calls[1][1].startswith("BEATS TO CAST:")
+    assert all(p["characters"] == [{"name": "Franklin", "variant": ""}] for p in data["prompts"])
+    assert "in this image (copy each look, not the name): Franklin = stick figure, white head and hands, with a plaid tartan scarf" in fake.calls[2][1]
+    assert all("stick figure, white head and hands, with a plaid tartan scarf" in p["scene"] for p in data["prompts"])
+    text2 = data["batch_texts"]["2"]
+    assert text2.startswith("INSTRUCTIONS FOR BATCH 2 OF 2")
+    assert "continue the same video" in text2
+    assert "\n\nScene. Beat 24: a three-masted ship" in text2  # titles have no numbers
+    assert text2.count("\n\n") == 7  # header + 6 prompts + naming reminder
+    assert text2.rstrip().endswith("never with names or numbers of your own.")
+
+
+def test_check_looks_adds_missing_places_and_skips_hand_edited_prompts(client, temp_db, monkeypatch):
+    pid = project_with_beats(temp_db, 30)
+    monkeypatch.setattr("app.routes.prompts.claude", lambda: FakeClaude())
+    wait_job(client.post(f"/api/projects/{pid}/prompts/generate", json={}).json(), "done")
+    first = client.get(f"/api/projects/{pid}/prompts").json()["prompts"][0]
+    client.put(f"/api/projects/{pid}/prompts/{first['beat_id']}", json={"scene": "My own scene."})
+    monkeypatch.setattr("app.routes.prompts.claude", lambda: PlaceFake())
+    job = wait_job(client.post(f"/api/projects/{pid}/prompts/check-looks").json(), "done")
+    assert job["result"]["fixed"] == 29 and job["result"]["skipped_edited"] == 1 and job["result"]["batches"] == [1, 2]
+    rows = client.get(f"/api/projects/{pid}/prompts").json()["prompts"]
+    assert rows[0]["scene"] == "My own scene."
+    assert all(r["things"] == {"objects": [], "place": "Tundra"} for r in rows)
+    assert all("flat white snowy tundra under a pale gray sky" in r["scene"] for r in rows[1:])
+    assert all(r["characters"] == [{"name": "Franklin", "variant": ""}] for r in rows)
+
+
+def test_prompt_rules_forbid_text_bubbles_and_camera_moves():
+    assert "no look may contain writing" in prompts.STYLE_SYSTEM
+    assert "speech bubbles" in prompts.SCENE_SYSTEM and "never camera movement" in prompts.SCENE_SYSTEM
 
 
 def test_prompt_text_starts_with_its_title_and_no_number():
@@ -47,13 +187,6 @@ def test_characters_have_full_looks_and_story_variants():
     assert "variants" in prompts.STYLE_SYSTEM and 'no "now with a beard"' in prompts.SCENE_SYSTEM
 
 
-SADDAM = {"characters": [
-    {"name": "Saddam Hussein", "look": "stick figure, stocky, thick black mustache, black beret",
-     "variants": [{"when": "in hiding, December 2003", "look": "stick figure, stocky, long scruffy gray-black beard, no hat"}]},
-    {"name": "American soldiers", "look": "stick figure, sandy khaki helmet, black rifle", "variants": []},
-], "props": [], "locations": [], "setting_notes": ""}
-
-
 def test_cast_is_matched_to_the_guide_and_its_variants():
     cast = prompts.resolve_cast(SADDAM, [{"name": "saddam", "variant": "In hiding, December 2003"},
                                          {"name": "Saddam Hussein", "variant": ""},  # duplicate, dropped
@@ -63,26 +196,6 @@ def test_cast_is_matched_to_the_guide_and_its_variants():
                     {"name": "American soldiers", "variant": ""}]
     looks = prompts.cast_looks(SADDAM, cast)
     assert looks[0] == ("Saddam Hussein", "stick figure, stocky, long scruffy gray-black beard, no hat")
-
-
-class CastFake:
-    """Casts Saddam (in hiding) into every beat; the first scenes leave his look out ("a dusty figure")."""
-
-    def __init__(self, fix_on_retry=True):
-        self.fix_on_retry = fix_on_retry
-        self.asks: list[str] = []
-
-    def json(self, system, messages, schema, max_tokens=32000, effort=None):
-        ask = messages[-1]["content"]
-        self.asks.append(ask)
-        if "beats" in schema["properties"]:
-            idxs = [int(l.split(":")[0]) for l in ask.split("BEATS TO CAST:")[1].strip().splitlines()]
-            return {"beats": [{"idx": i, "cast": [{"name": "Saddam Hussein", "variant": "in hiding, December 2003"}]}
-                              for i in idxs]}
-        retry = len([a for a in self.asks if "BEATS TO ILLUSTRATE" in a]) > 1
-        look = "stick figure, stocky, long scruffy gray-black beard, no hat"
-        text = f"Soldiers stare down at {look}." if retry and self.fix_on_retry else "Soldiers stare down at a dusty figure."
-        return {"scenes": [{"idx": 0, "label": "Dusty figure", "scene": text}]}
 
 
 def test_scene_that_leaves_out_a_characters_look_is_rewritten():
@@ -124,12 +237,6 @@ def test_every_look_gets_a_head_color_and_prompts_follow():
     assert out.count("white head and hands") == 2 and "Stick figure, white head and hands, burly, a checkered" in out
 
 
-HOLE = ("from above: a square dark opening in brown dirt, a white slab lid beside it. "
-        "From the side: a narrow shaft two stick figures deep, one small yellow bulb")
-STAGED = {**SADDAM, "props": [{"name": "the spider hole", "look": HOLE}, {"name": "the rope", "look": "a coiled tan rope"}],
-          "locations": [{"name": "orange grove", "look": "rows of dark green orange trees at night"}]}
-
-
 def test_objects_seen_from_several_sides_are_split_into_views():
     assert prompts.look_views(HOLE) == [
         ("from above", "a square dark opening in brown dirt, a white slab lid beside it."),
@@ -141,23 +248,6 @@ def test_objects_seen_from_several_sides_are_split_into_views():
     assert prompts.thing_looks(STAGED, t) == [
         ("the spider hole (From the side)", "a narrow shaft two stick figures deep, one small yellow bulb"),
         ("orange grove", "rows of dark green orange trees at night")]
-
-
-class StageFake:
-    def __init__(self, fix_on_retry=True):
-        self.fix_on_retry = fix_on_retry
-        self.asks: list[str] = []
-
-    def json(self, system, messages, schema, max_tokens=32000, effort=None):
-        ask = messages[-1]["content"]
-        self.asks.append(ask)
-        if "beats" in schema["properties"]:
-            return {"beats": [{"idx": 0, "cast": [], "objects": [{"name": "the rope", "view": ""}],
-                               "place": "orange grove"}]}
-        retry = len(self.asks) > 2
-        text = ("Soldiers lift a coiled tan rope among rows of dark green orange trees at night."
-                if retry and self.fix_on_retry else "Soldiers lift the rope in the grove.")
-        return {"scenes": [{"idx": 0, "label": "Rope", "scene": text}]}
 
 
 def test_scene_that_leaves_out_an_object_or_place_is_rewritten_then_patched():
@@ -234,3 +324,14 @@ def test_style_rules_ask_for_variety_between_similar_characters_and_inside_group
     assert "no two characters share the same main clothing color" in s
     assert "at least three things" in s and "never one look copied for every member" in s
     assert "may wear exactly the same clothes" in s and "Never vary noses" in s
+
+
+def test_regenerating_all_prompts_keeps_batch_checkmarks(client, temp_db, monkeypatch):
+    pid = project_with_beats(temp_db, 30)
+    monkeypatch.setattr("app.routes.prompts.claude", lambda: FakeClaude())
+    wait_job(client.post(f"/api/projects/{pid}/prompts/generate", json={}).json(), "done")
+    client.put(f"/api/projects/{pid}/prompts/batch/1/done", json={"done": True})
+    wait_job(client.post(f"/api/projects/{pid}/prompts/generate", json={"only_missing": False}).json(), "done")
+    assert client.get(f"/api/projects/{pid}/prompts").json()["done_batches"] == [1]
+    page = (ROOT / "frontend" / "src" / "steps" / "Images.tsx").read_text(encoding="utf-8")
+    assert "batch checkmarks are cleared" not in page

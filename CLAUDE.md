@@ -73,11 +73,13 @@ All commands from the project root (Windows; PowerShell or Git Bash).
 - **Before restarting the server**, check for running jobs: `GET /api/jobs?project_id=N`. Never kill a running job.
 - **Config changes don't need a restart:** `PUT /api/settings/config` with `{"section": {"key": value}}`.
   `GET /api/settings` returns `{config: ...}`.
-- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (188 passing as of 2026-11-13,
-  ~12 s). They also run the small Node test `frontend/src/textarea.test.ts`.
+- **Backend tests:** `cd backend && ../.venv/Scripts/python -m pytest -q` (187 passing as of 2026-11-15,
+  ~12 s). One file per pipeline step; the shared `client` fixture (temp DB, projects folder, config.yaml copy and
+  .env) is in `conftest.py`, helpers used by several files in `tests/helpers.py` (incl. `wait_job`).
 - **Frontend build / type check:** `cd frontend && npm run build`. The served UI is `frontend/dist`, so
   rebuild after frontend changes.
-- **Studio browser tests:** `cd frontend && npm run test:e2e` (builds, then 25 Playwright tests in `e2e/`
+- **Studio browser tests:** `cd frontend && npm test` (the Node unit test `src/textarea.test.ts`, then builds and
+  runs 25 Playwright tests in `e2e/`
   on Windows' Edge against a fake backend from `e2e/fixtures.json`; never the real server or data, ~10 s).
   Run after any UI change. Refresh fixtures with `node e2e/record-fixtures.mjs 1` (studio running).
 - **Public site:** `cd site/web && npm run build`, then
@@ -98,7 +100,7 @@ backend/app/            FastAPI app: main.py, config.py (config.yaml + .env), db
                         jobs with stop), storage.py, routes/ (one file per step), migrations/ (001-012 .sql)
 backend/pipeline/       one module per step (see Pipeline), claude_client.py (API), claude_code.py (CLI),
                         ffmpeg.py, procs.py
-backend/tests/          pytest suite + fixtures/
+backend/tests/          pytest suite: one test_<step>.py per pipeline step, conftest.py, helpers.py
 backend/supabase/       SQL the user runs in Supabase: schema.sql, 002_site_reader.sql (read-only site user)
 site/server/            public site API (FastAPI: videos, search, chat) + serves site/web/dist
 site/index.py, vercel.json  Vercel hosting (pages built to site/public on the CDN; never name the folder api/)

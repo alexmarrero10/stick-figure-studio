@@ -1,18 +1,22 @@
-"""Offline end-to-end: script → beats → (fake) word timings → shots → MP4 + FCPXML. Needs ffmpeg."""
+"""Assemble: real FFmpeg renders checked for exact frame counts, audio sync and the zoom."""
 import json
 import subprocess
 
 import pytest
 from PIL import Image, ImageDraw
 
-from pipeline import assemble, captions, fcpxml, ffmpeg, scenes, shots
-from tests.test_voice import make_wav
-
-pytestmark = pytest.mark.skipif(not ffmpeg.available(), reason="ffmpeg not installed")
+from pipeline import assemble, captions, fcpxml, scenes, shots
+from tests.helpers import make_wav
 
 TEXT = ("Picture this. A man walks into a bank with nothing but a pen, a smile, and a plan "
         "so simple it should never have worked. He signs his name, waits patiently, and leaves "
         "with a briefcase full of cash. Nobody stops him.")
+
+
+def _frame_at(video, n, dst):
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(video), "-vf", rf"select=eq(n\,{n})",
+                    "-frames:v", "1", str(dst)], check=True)
+    return Image.open(dst).convert("L")
 
 
 def test_render_matches_audio(tmp_path):
@@ -62,12 +66,6 @@ def test_zoom_only_on_long_shots():
     assert assemble.zoom_for(30 * 20, 30, cfg) == 0.12  # capped, so very long shots don't crawl in too far
     assert assemble.zoom_for(300, 30, {**cfg, "zoom_per_second": 0}) == 0.0  # 0 turns it off
     assert assemble.zoom_for(150, 30, {}) == pytest.approx(0.075)  # defaults when config predates zoom
-
-
-def _frame_at(video, n, dst):
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(video), "-vf", f"select=eq(n\,{n})",
-                    "-frames:v", "1", str(dst)], check=True)
-    return Image.open(dst).convert("L")
 
 
 def test_zoomed_segment_keeps_exact_frames_and_moves_in(tmp_path):
