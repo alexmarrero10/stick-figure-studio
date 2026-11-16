@@ -389,10 +389,6 @@ button.primary:hover:not(:disabled) { background: var(--marker-hover); border-co
 .dropzone .button, .dropzone button { white-space: nowrap; }
 .dropzone.busy { opacity: 0.6; }
 .dropzone-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
-.flow-section {
-  border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 18px;
-  display: flex; flex-direction: column; gap: 10px; background: var(--panel);
-}
 /* The three image tabs are a sequence, so they read like the step track: a numbered dot, a name and
    where it stands. The open tab is a folder tab joined to the panel below, marked in red on top. */
 .image-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; position: relative; z-index: 1; margin-bottom: -1px; }
@@ -419,7 +415,7 @@ button.primary:hover:not(:disabled) { background: var(--marker-hover); border-co
 .image-tab.done small { color: var(--good); }
 .image-panel { gap: 18px; padding: 22px 24px 24px; }
 .image-panel.first-active { border-top-left-radius: 0; }
-.image-panel .dropzone, .image-panel .flow-section { margin-bottom: 0; }
+.image-panel .dropzone { margin-bottom: 0; }
 .tab-intro { display: flex; flex-direction: column; gap: 4px; max-width: 72ch; }
 .tab-intro h3 { font-size: 1.15rem; }
 .image-panel section { display: flex; flex-direction: column; gap: 6px; }
@@ -458,6 +454,39 @@ button.big { min-height: 54px; padding: 0 28px; font-size: 1.05rem; border-radiu
 .batch-bar { display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
 .batch-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; align-items: stretch; }
 .batch-actions > * { justify-content: space-between; }
+.batch-actions .dropzone { margin-bottom: 0; }
+
+/* Send batch N to Flow is the next thing to do, so it gets the strong card (ink border, lifted shadow,
+   a yellow step badge) and a full-width copy button. A batch whose images are all in steps back. */
+.flow-send {
+  display: flex; flex-direction: column; gap: 14px; padding: 20px 22px;
+  background: var(--panel); border: 1.5px solid var(--ink); border-radius: var(--radius); box-shadow: var(--shadow-lift);
+}
+.flow-send-head { display: flex; gap: 14px; align-items: flex-start; }
+.flow-send-head h3 { font-size: 1.1rem; margin-bottom: 2px; }
+.step-badge {
+  flex: none; display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+  background: var(--highlight); color: var(--on-highlight); border: 1.5px solid var(--ink);
+  font: 800 1rem/1 var(--display);
+}
+.dropzone .step-badge { background: var(--panel); color: var(--ink); border-color: var(--line-strong); }
+button.flow-copy { width: 100%; border-color: var(--ink); }
+button.flow-copy.big { border-width: 2px; box-shadow: 0 3px 0 var(--ink); }
+button.flow-copy.big:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 0 var(--ink); }
+button.flow-copy.big:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+button.flow-copy.copied, button.flow-copy.copied:hover:not(:disabled) {
+  background: var(--highlight-soft); border-color: var(--ink); color: var(--ink);
+}
+button.flow-copy.copied .icon { color: var(--good); }
+.flow-send-foot { margin: 0; color: var(--muted); }
+.flow-send.sent { border: 1px solid var(--line); box-shadow: none; }
+.flow-send.sent .step-badge { background: var(--soft); border-color: var(--line-strong); }
+@media (max-width: 760px) {
+  button.flow-copy.big { white-space: normal; padding: 10px 18px; line-height: 1.25; }
+}
+@media (prefers-reduced-motion: reduce) {
+  button.flow-copy.big:hover:not(:disabled), button.flow-copy.big:active:not(:disabled) { transform: none; }
+}
 .image-panel .pair-list { margin-top: 0; }
 .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
 .slot {

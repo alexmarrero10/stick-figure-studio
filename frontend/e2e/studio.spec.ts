@@ -247,7 +247,8 @@ test("the images step has three tabs in order: prompts, characters, then batches
   // Images are already in, so it opens on the batches, with bulk upload beside the batch list.
   await expect(tabs.nth(2)).toHaveAttribute("aria-selected", "true");
   await expect(page.getByText("Bulk upload all batches")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Copy batch 1 for Flow" })).toBeVisible();
+  // Batch 1's images are all in, so its copy button steps back; a batch still to do gets the big one.
+  await expect(page.getByRole("button", { name: "Copy batch 1 again" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Regenerate all prompts" })).toHaveCount(0);
 
   await tabs.nth(0).click();

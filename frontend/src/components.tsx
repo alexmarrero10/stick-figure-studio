@@ -9,6 +9,7 @@ const ICONS = {
   folder: "M3 7.5A1.5 1.5 0 014.5 6h4l2 2.5h9A1.5 1.5 0 0121 10v8.5a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 18.5z",
   chevron: "M9 6l6 6-6 6",
   plus: "M12 5v14M5 12h14",
+  copy: "M9 9.5A1.5 1.5 0 0110.5 8h8A1.5 1.5 0 0120 9.5v9a1.5 1.5 0 01-1.5 1.5h-8A1.5 1.5 0 019 18.5zM15 8V5.5A1.5 1.5 0 0013.5 4h-8A1.5 1.5 0 004 5.5v9A1.5 1.5 0 005.5 16H9",
 };
 
 /** A small line icon drawn in the text color (one stroke weight everywhere). */
@@ -140,18 +141,32 @@ export function useJob(resume?: {
   return { run, job, busy: job?.status === "running" || job?.status === "stopping" };
 }
 
-export function CopyButton({ text, label = "Copy", className = "secondary small" }: { text: string; label?: string; className?: string }) {
+export function CopyButton({
+  text,
+  label = "Copy",
+  className = "secondary small",
+  doneLabel = "Copied",
+  icon = false,
+}: {
+  text: string;
+  label?: string;
+  className?: string;
+  doneLabel?: string;
+  /** Show a copy icon that turns into a check once copied. */
+  icon?: boolean;
+}) {
   const [done, setDone] = useState(false);
   return (
     <button
-      className={className}
+      className={`${className}${done ? " copied" : ""}`}
       onClick={async () => {
         await navigator.clipboard.writeText(text);
         setDone(true);
-        setTimeout(() => setDone(false), 1200);
+        setTimeout(() => setDone(false), icon ? 2000 : 1200);
       }}
     >
-      {done ? "Copied" : label}
+      {icon && <Icon name={done ? "check" : "copy"} size={20} />}
+      <span aria-live="polite">{done ? doneLabel : label}</span>
     </button>
   );
 }

@@ -315,6 +315,8 @@ export default function ImagesStep({ project, refresh }: StepProps) {
   const missing = data.beats - data.prompts.length;
   const batchText = data.batch_texts[String(active)] ?? "";
   const complete = (b?: Batch) => !!b && b.expected > 0 && b.count >= b.expected;
+  // Once a batch's images are all in, its copy card steps back so it no longer reads as the next thing to do.
+  const activeDone = complete(batches.find((b) => b.batch_no === active));
   const totalImages = batches.reduce((a, b) => a + Math.min(b.count, b.expected), 0);
   const expectedImages = batches.reduce((a, b) => a + b.expected, 0) || data.prompts.length;
   const characters = data.style?.characters ?? [];
@@ -652,28 +654,39 @@ export default function ImagesStep({ project, refresh }: StepProps) {
 
             <div className="batch-actions">
               {batchText && (
-                <div className="flow-section">
-                  <h3 className="small">1. Send batch {active} to Flow</h3>
-                  <p className="muted small">Paste it into your Flow agent.</p>
-                  {active === 1 && data.character_sheet && (
-                    <p className="small">
-                      Made the main characters first?{" "}
-                      <button className="link small" onClick={() => go("characters")}>
-                        Character sheet
-                      </button>
-                    </p>
-                  )}
-                  <div className="dropzone-row">
-                    <CopyButton text={batchText} label={`Copy batch ${active} for Flow`} />
-                    <a
-                      className="button secondary small"
-                      href={`/api/projects/${pid}/prompts/batch/${active}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      batch_{String(active).padStart(2, "0")}.txt
-                    </a>
+                <div className={`flow-send ${activeDone ? "sent" : ""}`}>
+                  <div className="flow-send-head">
+                    <span className="step-badge" aria-hidden="true">1</span>
+                    <div>
+                      <h3>Send batch {active} to Flow</h3>
+                      <p className="muted small">
+                        {rows.length > 0 && `${rows.length} prompts, images ${rows[0].idx + 1} to ${rows[rows.length - 1].idx + 1}. `}
+                        Paste them into your Flow agent.
+                      </p>
+                    </div>
                   </div>
+                  <CopyButton
+                    key={active}
+                    text={batchText}
+                    label={activeDone ? `Copy batch ${active} again` : `Copy batch ${active} for Flow`}
+                    doneLabel="Copied. Now paste it into Flow"
+                    className={activeDone ? "secondary flow-copy" : "secondary big flow-copy"}
+                    icon
+                  />
+                  <p className="flow-send-foot small">
+                    {active === 1 && data.character_sheet && (
+                      <>
+                        Made the main characters first?{" "}
+                        <button className="link small" onClick={() => go("characters")}>
+                          Character sheet
+                        </button>
+                        {" or "}
+                      </>
+                    )}
+                    <a href={`/api/projects/${pid}/prompts/batch/${active}`} target="_blank" rel="noreferrer">
+                      open batch_{String(active).padStart(2, "0")}.txt
+                    </a>
+                  </p>
                 </div>
               )}
               <div
@@ -684,9 +697,12 @@ export default function ImagesStep({ project, refresh }: StepProps) {
                   if (e.dataTransfer.files.length) upload(e.dataTransfer.files);
                 }}
               >
-                <div>
-                  <h3 className="small">{batchText ? "2. " : ""}Add batch {active} images</h3>
-                  <p className="muted small">Drop images or a .zip anywhere in this box. Re-uploading only adds the ones still missing.</p>
+                <div className="flow-send-head">
+                  {batchText && <span className="step-badge" aria-hidden="true">2</span>}
+                  <div>
+                    <h3>Add batch {active} images</h3>
+                    <p className="muted small">Drop images or a .zip anywhere in this box. Re-uploading only adds the ones still missing.</p>
+                  </div>
                 </div>
                 <div className="dropzone-row">
                   <label className="button secondary small">
