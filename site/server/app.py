@@ -238,6 +238,16 @@ def _sse(obj: dict[str, Any]) -> str:
     return f"data: {json.dumps(obj)}\n\n"
 
 
+def source_links(sources: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """Title and web address of each research source given to the model, so the page can link its [Source: X]."""
+    out: dict[str, dict[str, str]] = {}
+    for s in sources:
+        url = (s.get("url") or "").strip()
+        if url.startswith(("https://", "http://")) and s.get("title") and url not in out:
+            out[url] = {"title": s["title"], "url": url}
+    return list(out.values())
+
+
 @app.post("/api/chat")
 def chat(body: ChatBody, request: Request) -> StreamingResponse:
     question = body.question.strip()
@@ -255,7 +265,10 @@ def chat(body: ChatBody, request: Request) -> StreamingResponse:
 
     def events() -> Iterator[str]:
         if cached is not None:
-            yield _sse({"type": "text", "text": cached})
+            answer, links = cached
+            if links:
+                yield _sse({"type": "sources", "sources": links})
+            yield _sse({"type": "text", "text": answer})
             yield _sse({"type": "done", "cached": True})
             return
         try:
@@ -266,6 +279,9 @@ def chat(body: ChatBody, request: Request) -> StreamingResponse:
                 yield _sse({"type": "text", "text": OFF_TOPIC_TEXT})
                 yield _sse({"type": "done", "cached": False, "off_topic": True})
                 return
+            links = source_links(found["sources"])
+            if links:
+                yield _sse({"type": "sources", "sources": links})
             contents = chat_contents([t.model_dump() for t in body.history], found["context"], question)
             parts: list[str] = []
             for text in gemini().stream_answer(CHAT_SYSTEM, contents):
@@ -275,7 +291,7 @@ def chat(body: ChatBody, request: Request) -> StreamingResponse:
             if not answer:  # Gemini's safety filter blocked it, or nothing came back
                 yield _sse({"type": "text", "text": NO_ANSWER_TEXT})
             if first and answer:
-                app.state.cache.put(v["id"], cache_q, answer)
+                app.state.cache.put(v["id"], cache_q, (answer, links))
             yield _sse({"type": "done", "cached": False})
         except GeminiError as e:
             msg = "The assistant is busy right now. Please try again in a minute." if str(e) == "busy" \

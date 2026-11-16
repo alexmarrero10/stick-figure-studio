@@ -21,6 +21,12 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Recently done
 
+- **Site chat sources are links (2026-11-16):** `/api/chat` first sends a `sources` event (title + http(s) URL
+  of each research source given to Gemini, also kept with cached answers). `Chat.tsx` turns `[Source: X]` into
+  a chip linking to the best word-overlap match (Gemini sometimes changes a letter in the title), showing the
+  site name after the last " - ". The search box placeholder is now "Search stories".
+- **Thumbnail panel (2026-11-16):** bigger idea box (7 rows, Ctrl+Enter), half-width panel, each prompt in its
+  own card. Long URLs in the description wrap on phones.
 - **Tests regrouped (2026-11-15):** backend tests are now one file per pipeline step (test_script, test_beats,
   test_prompts, test_images, test_voice, test_shorts, test_publish, test_ideas, test_app, test_db, test_jobs,
   test_projects...); nothing in a test changed. One shared `client` fixture in conftest.py replaces 7 copies

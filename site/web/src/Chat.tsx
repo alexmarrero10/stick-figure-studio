@@ -1,5 +1,7 @@
 import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
-import { ask, fmtTime, parseTime, Turn } from "./api";
+import { ask, fmtTime, parseTime, SourceLink, Turn } from "./api";
+
+type Shown = Turn & { sources?: SourceLink[] };
 
 const STARTERS = [
   "What is this video about, in a few sentences?",
@@ -8,8 +10,33 @@ const STARTERS = [
   "What is still uncertain or disputed?",
 ];
 
-/** Turns "[3:42]" into a button that jumps the video there, and "[Source: X]" into a small label. */
-function render(text: string, seek: (s: number) => void): ReactNode[] {
+const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+const words = (t: string) => new Set(norm(t).split(" ").filter(Boolean));
+
+/** The source the model meant by "[Source: X]". It may shorten the title or change a letter, so the
+ *  source sharing the most words wins, if it shares most of them. */
+export function findSource(name: string, sources: SourceLink[]): SourceLink | undefined {
+  const a = words(name);
+  let best: SourceLink | undefined;
+  let bestScore = 0;
+  for (const s of sources) {
+    const b = words(s.title);
+    const shared = [...a].filter((w) => b.has(w)).length;
+    const score = shared / Math.max(1, Math.min(a.size, b.size));
+    if (score > bestScore) [best, bestScore] = [s, score];
+  }
+  return bestScore >= 0.6 ? best : undefined;
+}
+
+/** A short name for the chip: the site after the last " - " ("... - Wikipedia"), else the whole title. */
+function shortName(title: string): string {
+  const i = title.lastIndexOf(" - ");
+  return i > 0 && title.length - i > 4 ? title.slice(i + 3) : title;
+}
+
+/** Turns "[3:42]" into a button that jumps the video there, and "[Source: X]" into a link to that source. */
+function render(text: string, seek: (s: number) => void, sources: SourceLink[] = []): ReactNode[] {
   text = text.replace(/\*\*?([^*\n]+)\*\*?/g, "$1"); // drop Markdown bold/italic stars
   const out: ReactNode[] = [];
   const T = "\\d{1,2}:\\d{1,2}(?::\\d{2})?"; // Gemini sometimes writes "0:0"
@@ -28,11 +55,22 @@ function render(text: string, seek: (s: number) => void): ReactNode[] {
         );
       }
     } else {
-      out.push(
-        <span key={m.index} className="src">
-          {m[2]}
-        </span>,
-      );
+      // "[Source: A; B]" can name more than one.
+      for (const name of m[2].split(/\s*;\s*/)) {
+        const src = findSource(name, sources);
+        out.push(
+          src ? (
+            <a key={`${m.index}-${name}`} className="src" href={src.url} target="_blank" rel="noopener noreferrer" title={src.title}>
+              <span className="src-name">{shortName(src.title)}</span>
+              <span className="visually-hidden"> (opens in a new tab)</span>
+            </a>
+          ) : (
+            <span key={`${m.index}-${name}`} className="src" title={name}>
+              <span className="src-name">{shortName(name)}</span>
+            </span>
+          ),
+        );
+      }
     }
     last = m.index + m[0].length;
   }
@@ -51,7 +89,7 @@ export function Chat({
   time: () => number | null;
   onClose: () => void;
 }) {
-  const [turns, setTurns] = useState<Turn[]>([]);
+  const [turns, setTurns] = useState<Shown[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,14 +113,22 @@ export function Chat({
     setTurns([...history, { role: "user", text: question }, { role: "model", text: "" }]);
     setBusy(true);
     let answer = "";
+    let sources: SourceLink[] = [];
+    const show = () => setTurns([...history, { role: "user", text: question }, { role: "model", text: answer, sources }]);
     try {
-      await ask({ video_id: videoId, question, history, at_s: time() }, (piece) => {
-        answer += piece;
-        setTurns([...history, { role: "user", text: question }, { role: "model", text: answer }]);
-      });
+      const sent = history.map(({ role, text }) => ({ role, text }));
+      await ask(
+        { video_id: videoId, question, history: sent, at_s: time() },
+        (piece) => {
+          answer += piece;
+          show();
+        },
+        (s) => (sources = s),
+      );
     } catch (e) {
       setError((e as Error).message);
-      setTurns(answer ? [...history, { role: "user", text: question }, { role: "model", text: answer }] : history);
+      if (answer) show();
+      else setTurns(history);
       if (!answer) setInput(question);
     } finally {
       setBusy(false);
@@ -115,7 +161,7 @@ export function Chat({
         )}
         {turns.map((t, i) => (
           <div key={i} className={`msg ${t.role}`}>
-            {t.role === "model" ? (t.text ? render(t.text, seek) : <span className="typing">Thinking…</span>) : t.text}
+            {t.role === "model" ? (t.text ? render(t.text, seek, t.sources) : <span className="typing">Thinking…</span>) : t.text}
           </div>
         ))}
         {error && <div className="msg error">{error}</div>}

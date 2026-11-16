@@ -5,6 +5,7 @@ Kept in memory, which is fine for one small server. A restart resets the counter
 from __future__ import annotations
 
 import threading
+from typing import Any
 import time
 from collections import OrderedDict, deque
 
@@ -47,14 +48,14 @@ class AnswerCache:
 
     def __init__(self, size: int = 1000, ttl_s: float = 7 * 86400, clock=time.time):
         self.size, self.ttl, self.clock = size, ttl_s, clock
-        self._items: OrderedDict[tuple[int, str], tuple[float, str]] = OrderedDict()
+        self._items: OrderedDict[tuple[int, str], tuple[float, Any]] = OrderedDict()
         self._lock = threading.Lock()
 
     @staticmethod
     def key(video_id: int, question: str) -> tuple[int, str]:
         return video_id, " ".join("".join(ch for ch in question.lower() if ch.isalnum() or ch.isspace()).split())
 
-    def get(self, video_id: int, question: str) -> str | None:
+    def get(self, video_id: int, question: str) -> Any:
         k = self.key(video_id, question)
         with self._lock:
             item = self._items.get(k)
@@ -63,7 +64,7 @@ class AnswerCache:
             self._items.move_to_end(k)
             return item[1]
 
-    def put(self, video_id: int, question: str, answer: str) -> None:
+    def put(self, video_id: int, question: str, answer: Any) -> None:
         with self._lock:
             self._items[self.key(video_id, question)] = (self.clock(), answer)
             self._items.move_to_end(self.key(video_id, question))

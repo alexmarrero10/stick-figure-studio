@@ -41,7 +41,7 @@ chatbot beside the player.
 
 **The chatbot.** Visitors ask questions in plain language: "Who was Frank Wills?", "What happened to Nixon after he resigned?". Answers are short (2-5 sentences), cite the
 moments they come from as clickable timestamps like `[3:42]` that jump the player there, and name research
-sources like `[Source: Watergate scandal - Wikipedia]`. The chatbot also knows where the viewer is in the
+sources like `[Source: Watergate scandal - Wikipedia]`, shown as links to the source page. The chatbot also knows where the viewer is in the
 video, so "what just happened?" works. Questions that go beyond the video, such as a person's later life,
 get a straight answer from the research sources or general history knowledge.
 
@@ -191,9 +191,11 @@ from evidence instead of from memory.
 6. **Build the context.** The narration windows are sorted into story order, each labelled with its
    timestamp, followed by the source passages labelled with their titles.
 7. **Generate.** Gemini Flash-Lite gets strict instructions, the last few turns of the conversation, the
-   context and the question. The answer streams back word by word as server-sent events.
+   context and the question. The answer streams back word by word as server-sent events, after one event
+   listing the title and web address of each research source it was given.
 8. **Make citations clickable.** The page turns every `[m:ss]` in the answer into a button that seeks the
-   YouTube player to that second, and shows `[Source: ...]` as a source label.
+   YouTube player to that second, and turns `[Source: ...]` into a link to that source's page (matched by
+   the words in its title, since the model sometimes shortens a title or changes a letter).
 
 The heart of it is `gather()` in `site/server/app.py`:
 

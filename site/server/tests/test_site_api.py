@@ -153,6 +153,19 @@ def test_research_passages_reach_the_model_even_when_the_narration_barely_matche
     assert "[Source: 1972 election] Nixon beat George McGovern in 1972." in prompt
 
 
+def test_chat_sends_the_link_of_each_source_so_the_page_can_link_it(client, monkeypatch):
+    monkeypatch.setattr(site.app.state.reader, "search_sources", lambda *a, **k: [
+        {"id": 1, "text": "a", "heading": "", "title": "National Archives", "url": "https://archives.gov"},
+        {"id": 2, "text": "b", "heading": "", "title": "National Archives", "url": "https://archives.gov"},
+        {"id": 3, "text": "c", "heading": "", "title": "Bad", "url": "javascript:alert(1)"}])
+    body = {"video_id": 1, "question": "Who was Wills?"}
+    ev = events(client.post("/api/chat", json=body))
+    links = [{"title": "National Archives", "url": "https://archives.gov"}]  # once, and only web addresses
+    assert ev[0] == {"type": "sources", "sources": links}
+    ev = events(client.post("/api/chat", json=body))  # a cached answer keeps its links
+    assert ev[0] == {"type": "sources", "sources": links} and ev[-1]["cached"] is True
+
+
 def test_repeated_first_question_comes_from_the_cache_without_counting(client):
     body = {"video_id": 1, "question": "Who was Frank Wills?"}
     client.post("/api/chat", json=body)

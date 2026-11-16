@@ -102,7 +102,7 @@ function SearchBar({ initial, big }: { initial: string; big?: boolean }) {
         type="search"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder={big ? "Search a name, place or event" : "Search the stories"}
+        placeholder={big ? "Search a name, place or event" : "Search stories"}
         aria-label="Search the videos"
         maxLength={200}
       />

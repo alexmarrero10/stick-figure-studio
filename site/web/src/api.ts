@@ -35,9 +35,15 @@ export async function getJSON<T>(url: string): Promise<T> {
 }
 
 /** Ask the chatbot; calls onText for each piece of the answer as it streams in. */
+export interface SourceLink {
+  title: string;
+  url: string;
+}
+
 export async function ask(
   body: { video_id: number; question: string; history: Turn[]; at_s: number | null },
   onText: (t: string) => void,
+  onSources: (s: SourceLink[]) => void = () => {},
 ): Promise<void> {
   const r = await fetch("/api/chat", {
     method: "POST",
@@ -59,6 +65,7 @@ export async function ask(
       if (!line.startsWith("data:")) continue;
       const e = JSON.parse(line.slice(5));
       if (e.type === "text") onText(e.text);
+      else if (e.type === "sources") onSources(e.sources);
       else if (e.type === "error") throw new Error(e.error);
     }
   }

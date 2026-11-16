@@ -242,7 +242,14 @@ button.link:hover:not(:disabled) { background: none; color: var(--marker); }
 .msg.error { align-self: stretch; color: var(--danger); background: none; padding: 0; }
 .msg .ts { cursor: pointer; margin: 0 2px; vertical-align: 1px; }
 .msg .ts:hover:not(:disabled) { background: var(--ink); color: var(--paper); border: 0; }
-.msg .src { font-size: 13px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; margin: 0 2px; white-space: nowrap; }
+.msg .src { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; vertical-align: 1px; font-size: 13px; line-height: 1.5; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 9px; margin: 0 2px; white-space: nowrap; }
+.src-name { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+/* A source the answer names, linked to the page it came from. */
+a.src { color: var(--ink); background: var(--panel); text-decoration: none; font-weight: 700; transition: border-color 0.15s, color 0.15s; }
+a.src::after { content: "\2197"; flex: none; font-size: 11px; color: var(--marker); }
+a.src:hover { border-color: var(--marker); color: var(--marker); }
+a.src:focus-visible { outline: 2px solid var(--marker); outline-offset: 2px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .typing { color: var(--muted); font-style: italic; }
 .chat form { display: flex; gap: 8px; padding: 14px 14px 8px; border-top: 1px solid var(--line); }
 .chat form input {
