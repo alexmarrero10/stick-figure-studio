@@ -181,6 +181,8 @@ who/what/when/where/why for a newcomer.
 - **Don't build:** posting to social apps (removed 2026-11-06 at the user's request), or YouTube draft upload. (A character sheet and file-name matching were on this list; the user asked for
   both in Nov 2026 and they're built.)
 - Don't commit `channel_model_transcripts.txt` (other channels' content).
+- **No LICENSE file** (decided 2026-11-19): the repo is public for viewing only and the user doesn't want the
+  code reused, so it stays "all rights reserved". Don't add MIT or any open-source license.
 - Leave the user's own uncommitted `config.yaml` edits alone unless asked.
 - When the user says they're just brainstorming ("don't execute anything"), only discuss.
 - Keep answers short and direct; the user asks for shorter replies when they get long.

@@ -1,4 +1,4 @@
-# Notes: current state (updated 2026-11-15)
+# Notes: current state (updated 2026-11-19)
 
 Read CLAUDE.md first for how the project works and the rules. This file is what's happening now.
 
@@ -10,7 +10,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
 - 187 backend tests, 25 studio browser tests and 20 site tests pass; the frontend builds. Version 1.0.0
-  (local tag `v1.0.0`, not pushed). Everything else is pushed to GitHub as of 2026-11-16 (`8711aca`).
+  (local tag `v1.0.0`, not pushed). Everything up to `8711aca` is pushed; the notes commits after it are local.
 - **Public site is live: https://stick-figure-viewer.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`;
   the old stick-figure-studio.vercel.app address still works).
   Vercel redeploys automatically on every push to `main`; check a build with
@@ -23,6 +23,12 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   so **re-split beats, then regenerate prompts**, before images (0 so far) and voice.
 
 ## Recently done
+
+- **Q&A only, no code changes (2026-11-17 to 2026-11-19):** explained the evals, the assemble step (frame math:
+  each cut point is rounded against the start of the video, so error stays under half a frame and never adds
+  up) and the layering (routes = controllers, pipeline = service layer that never imports `app/`, db.py = data
+  access). **License decision:** no LICENSE file on purpose (default "all rights reserved"; the user doesn't want
+  the code reused). Offered, not answered: a one-line "All rights reserved, shared for viewing" note in README.md.
 
 - **Site chat sources are links (2026-11-16):** `/api/chat` first sends a `sources` event (title + http(s) URL
   of each research source given to Gemini, also kept with cached answers). `Chat.tsx` turns `[Source: X]` into
@@ -267,6 +273,9 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   session start, after each Edit/Write and at stop; `/impeccable hooks off` turns it off per project),
   `ui-ux-pro-max@ui-ux-pro-max-skill`. Skills copied from vercel-labs/agent-skills into `~/.claude/skills`:
   `web-design-guidelines`, `react-best-practices`, `composition-patterns` (deploy/account skills skipped).
+- `ponytail` plugin v5.3.3 (installed 2026-11-13): SessionStart, SubagentStart and UserPromptSubmit hooks; its
+  ledger is in `~/.config/ponytail/band/`, webhook off. The app's own Claude calls aren't affected
+  (`--setting-sources ""`).
 - Playwright MCP works for screenshots (save under `.playwright-mcp/`, gitignored). The first screenshot
   after a navigation is often a stale frame: take a second one.
 
