@@ -9,8 +9,8 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 187 backend tests and 25 studio browser tests pass; the frontend builds. Version 1.0.0 (local tag `v1.0.0`,
-  not pushed). The studio redesign commit (2026-11-11) and the notes commit before it are local, not pushed.
+- 187 backend tests, 25 studio browser tests and 20 site tests pass; the frontend builds. Version 1.0.0
+  (local tag `v1.0.0`, not pushed). Everything else is pushed to GitHub as of 2026-11-16 (`8711aca`).
 - **Public site is live: https://stick-figure-viewer.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`;
   the old stick-figure-studio.vercel.app address still works).
   Vercel redeploys automatically on every push to `main`; check a build with
@@ -18,6 +18,9 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   Projects 1, 2 and 3 (Watergate) are published on it.
 - Project 3 is Watergate ("The Piece of Tape That Brought Down a President"): all 221 images in, assembled,
   published to the site.
+- **Project 4 (D.B. Cooper)**, "He Hijacked a Jet, Jumped With $200,000, and Was Never Found": script v32
+  (1,601 words, opening rewritten by hand on 2026-11-11) is current. Its 230 beats and 226 prompts are from v31,
+  so **re-split beats, then regenerate prompts**, before images (0 so far) and voice.
 
 ## Recently done
 
@@ -247,17 +250,16 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
 
 ## Next
 
-1. Site is deployed. Confirm with the user that they ran `backend/supabase/002_site_reader.sql`, then restore
-   its placeholder with `git checkout` (it holds their real password: never commit it). `v1.0.0` tag is local only.
-2. Finish project 3 (Watergate): user recopies batches (old copies had numbers), makes images in Flow.
-   Open question to the user: should Frank Wills (Black security guard) get a brown head?
-3. Full speed test (`evals/speed.py --ways rag,full,old`) paused on 2026-11-09 for the user's usage limits;
+1. Project 4 (D.B. Cooper): re-split beats for script v32, regenerate prompts, then images in Flow and voice.
+2. Confirm with the user that they ran `backend/supabase/002_site_reader.sql`, then restore its placeholder with
+   `git checkout` (it holds their real password: never commit it). `v1.0.0` tag is local only.
+3. Watch whether the new script, title and thumbnail rules (2026-11-11) lift CTR and early retention on the
+   next video; the Saddam video had 1.3% CTR and a big drop in the first minute.
+4. Full speed test (`evals/speed.py --ways rag,full,old`) paused on 2026-11-09 for the user's usage limits;
    rerun when they say so.
-4. Possibly re-assemble projects 1 and 2 to see the zoom (only if the user wants new versions).
-5. Push to GitHub only when the user asks (`alexmarrero10/stick-figure-studio`, private). A push redeploys
-   the public site.
-6. Open questions to the user (no answer yet): fix the Watergate script's clumsy Frank Wills quote (means
-   redoing beats and voice)? Quick Playwright browser checks after UI changes, or real Playwright tests?
+5. Push to GitHub only when the user asks (`alexmarrero10/stick-figure-studio`). A push redeploys the public site.
+6. Offered, not taken up: a warning when a script runs over the word target; `.claude/` hooks and permissions;
+   tracking stale images (user said no on 2026-11-11).
 
 ## Claude tools installed (2026-11-10, user scope)
 
