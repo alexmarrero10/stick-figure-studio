@@ -6,7 +6,7 @@ claude:
   effort: high
   use_fallbacks: true
   web_search: true
-  research_depth: quick
+  research_depth: thorough
 script:
   target_words_min: 1550
   target_words_max: 1650
@@ -15,18 +15,20 @@ beats:
   min_words: 2
   max_words: 13
 voice:
-  voice_id: ZoiZ8fuDWInAcwPXaVeq
-  voice_name: Josh
+  voice_id: UgBBYS2sOqTuMpoF3BR0
+  voice_name: Mark
   model_id: eleven_v4
   output_format: mp3_44100_128
   chunk_chars: 4000
-  stability: 0.5
-  similarity_boost: 0.9
+  stability: 0.6
+  similarity_boost: 0.8
   style: 0
   trim_pauses: true
   max_pause_s: 0.45
+  speed: 1.2
 prompts:
   batch_size: 24
+  reference_min_images: 8
 shots:
   cut_lead_s: 0.08
   min_shot_s: 0.5
@@ -56,5 +58,16 @@ shorts:
   height: 1920
   image_aspect: 1.5
   margin: 24
-  text_color: '#1A1A1A'
+  text_color: '#FFFFFF'
   text_size: 46
+  background: '#000000'
+rag:
+  enabled: true
+  docs_min: 10
+  docs_max: 15
+  chunk_words: 300
+  overlap_words: 50
+  brief_chunks: 30
+  script_chunks: 10
+  use_shared: true
+  owner: owner

@@ -224,16 +224,13 @@ for word, so the same person looks the same in all 150-240 pictures.
 
 - **Characters:** faces are always simple (dot eyes, eyebrows, a line mouth, no nose). Early versions that
   described facial features produced caricatures, so the app now strips face details from every look.
-  Hair is pinned down exactly instead (color, length, texture, how it sits), since hair, clothes and build
+  Hair is pinned down exactly instead (color, length, texture, how it sits), since hair, clothes, and build
   are what make a character recognizable.
-- **Prompts:** Claude writes one prompt per beat, in story order and in batches of 24. Each group of prompts
+- **Prompts:** Claude writes one prompt per beat in story order and in batches of 24. Each group of prompts
   sees the scenes written before it, so neighbouring pictures flow into each other. Code checks that every
   character's look appears in full, and asks Claude to fix any prompt that leaves one out.
 - **Character sheet:** characters who appear in 8 or more pictures get a reference sheet, which I generate
   first in Google Flow. Every batch tells Flow to reuse it.
-- **Titles instead of numbers:** each prompt starts with a short title that's unique in its batch, like
-  "Oval Office desk". Numbered prompts made the image model draw numbers into the pictures, so titles
-  replaced them.
 
 #### Generating and importing
 

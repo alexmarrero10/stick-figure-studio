@@ -69,7 +69,7 @@ older build log. The public video library plan in [docs/PUBLIC_SITE_PLAN.md](doc
 
   Media and human-facing exports live in `projects/<slug>/`:
   - `script.md` mirror;
-  - `audio/voice.wav` (master) and `voice.mp3`;
+  - `audio/voice.wav` (master) and `voice.mp3`, plus `alignment.json` (raw ElevenLabs character timings per chunk);
   - `prompts/batch_XX.txt`;
   - `images/batch_XX/`;
   - `output/`.

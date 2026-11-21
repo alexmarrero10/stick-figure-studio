@@ -35,7 +35,8 @@ is the plan for RAG research and the public site (both built and deployed).
    (bulk upload, then per batch: copy for Flow, add images, prompt beside image). It opens on the first tab still to do.
 6. **Voice** (`voice.py`): ElevenLabs with-timestamps (voice picked on the Voice step; `eleven_v4`), chunked and stitched,
    long pauses trimmed, then sped up with FFmpeg `atempo` (`voice.speed`, 1.1 = 10% faster, pitch kept;
-   Eleven v4 has no speed setting) with word timings scaled to the measured length, per-word timings stored.
+   Eleven v4 has no speed setting) with word timings scaled to the measured length, per-word timings stored
+   in the `words` table (raw ElevenLabs character alignment kept in `projects/<slug>/audio/alignment.json`).
 7. **Shots + Assemble** (`shots.py`, `assemble.py`, `fcpxml.py`, `captions.py`): shots locked to word timings,
    FFmpeg renders `output/video.mp4`, plus `timeline.fcpxml` and `captions.srt`. Shots of 3 s or longer
    slowly zoom in (`video.zoom_min_seconds`, `video.zoom_per_second`, capped at 12%). The same job also
