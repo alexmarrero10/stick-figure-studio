@@ -1,4 +1,4 @@
-# Notes: current state (updated 2026-11-19)
+# Notes: current state (updated 2026-11-23)
 
 Read CLAUDE.md first for how the project works and the rules. This file is what's happening now.
 
@@ -9,7 +9,7 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   2. **Project 2:** "How a Hand-Drawn Family Tree Found Saddam in a Hole" (238 shots)
 - Channel problem being worked on: **low retention.** Average view duration is about 25% on long videos and
   about 65% on Shorts, and views are low. Recent work targets this.
-- 187 backend tests, 25 studio browser tests and 20 site tests pass; the frontend builds. Version 1.0.0
+- 187 backend tests, 25 studio browser tests and 21 site tests pass; the frontend builds. Version 1.0.0
   (local tag `v1.0.0`, not pushed). Everything up to `8711aca` is pushed; the notes commits after it are local.
 - **Public site is live: https://stick-figure-viewer.vercel.app** (Vercel project `alex-2f75/stick-figure-studio`;
   the old stick-figure-studio.vercel.app address still works).
@@ -23,6 +23,10 @@ Read CLAUDE.md first for how the project works and the rules. This file is what'
   so **re-split beats, then regenerate prompts**, before images (0 so far) and voice.
 
 ## Recently done
+
+- **Site answers are CDN-cached (2026-11-23):** `/api/videos`, `/api/videos/{id}` and `/api/search` send
+  `Cache-Control: public, s-maxage=300, stale-while-revalidate=86400` on success only (errors and 429s never
+  cached), so repeat visits skip the server and the Gemini quota. A new or removed video can take ~5 min to show.
 
 - **Q&A only, no code changes (2026-11-17 to 2026-11-19):** explained the evals, the assemble step (frame math:
   each cut point is rounded against the start of the video, so error stays under half a frame and never adds

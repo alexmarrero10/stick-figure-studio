@@ -96,6 +96,12 @@ def test_search_returns_each_video_once_with_its_best_moment(client):
     assert len(client.get("/api/search", params={"q": " "}).json()) == 2  # empty search lists everything
 
 
+def test_successful_gets_are_cdn_cacheable_but_errors_are_not(client):
+    for url in ("/api/videos", "/api/videos/1", "/api/search?q=tape"):
+        assert "s-maxage" in client.get(url).headers.get("cache-control", "")
+    assert "s-maxage" not in client.get("/api/videos/9").headers.get("cache-control", "")
+
+
 def test_search_is_rate_limited(client):
     for _ in range(5):
         assert client.get("/api/search", params={"q": "tape"}).status_code == 200

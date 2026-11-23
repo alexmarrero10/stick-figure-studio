@@ -23,7 +23,7 @@ import traceback
 from pathlib import Path
 from typing import Any, Iterator
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -61,6 +61,9 @@ OFF_TOPIC_TEXT = ("I can only answer questions about this video's story and the 
 # Research passages sent with each question; topic questions (family, earlier life) are often only in the sources.
 SOURCE_PASSAGES = 5
 NO_ANSWER_TEXT ="I can't help with that one. Try asking about something in the video."
+# Lets the host's CDN answer repeat GETs for 5 min (then serve stale while refreshing). Only set on
+# successful responses; errors and 429s are never cached.
+CDN_CACHE = "public, s-maxage=300, stale-while-revalidate=86400"
 
 app = FastAPI(title="Stick Figure Viewer", docs_url=None, redoc_url=None)
 app.state.reader = None
@@ -121,27 +124,32 @@ async def gemini_error(_: Request, exc: GeminiError) -> JSONResponse:
 # --- videos and search ------------------------------------------------------
 
 @app.get("/api/videos")
-def videos() -> list[dict[str, Any]]:
+def videos(response: Response) -> list[dict[str, Any]]:
+    response.headers["Cache-Control"] = CDN_CACHE
     return [_public(v) for v in reader().list_videos()]
 
 
 @app.get("/api/videos/{video_id}")
-def video(video_id: int) -> dict[str, Any]:
+def video(video_id: int, response: Response) -> dict[str, Any]:
     v = reader().get_video(video_id)
     if not v:
         raise HTTPException(404, "Video not found")
+    response.headers["Cache-Control"] = CDN_CACHE
     return _public(v)
 
 
 @app.get("/api/search")
-def search(q: str, request: Request) -> list[dict[str, Any]]:
+def search(q: str, request: Request, response: Response) -> list[dict[str, Any]]:
     q = q.strip()[:200]
     if not q:
+        response.headers["Cache-Control"] = CDN_CACHE
         return [{**_public(v), "moment": None} for v in reader().list_videos()]
     why = app.state.search_limit.check(visitor(request))
     if why:
         raise HTTPException(429, LIMIT_TEXT[why])
-    return find_videos(q)
+    results = find_videos(q)
+    response.headers["Cache-Control"] = CDN_CACHE
+    return results
 
 
 def find_videos(q: str) -> list[dict[str, Any]]:
